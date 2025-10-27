@@ -39,10 +39,10 @@ export function SlotSelection() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {SLOTS.map((slot) => (
-          <button
+          <div
             key={slot.id}
             onClick={() => setSelectedSlot(slot.id)}
-            className="group relative overflow-hidden rounded-xl border-2 border-neutral-200 bg-white p-8 transition-all hover:border-orange-500 hover:shadow-xl hover:scale-105"
+            className="group relative overflow-hidden rounded-xl border-2 border-neutral-200 bg-white p-8 transition-all hover:border-orange-500 hover:shadow-xl hover:scale-105 cursor-pointer"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative z-10">
@@ -54,7 +54,7 @@ export function SlotSelection() {
                 Select {slot.name}
               </Button>
             </div>
-          </button>
+          </div>
         ))}
       </div>
     </div>
