@@ -20,10 +20,14 @@ export function DateRangeSelection() {
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (!selectedDate || !selectedPlan) return
+    
+    // Set the visible date in the calendar
     setDate(selectedDate)
 
     // Calculate the end date based on plan duration
     const endDate = addDays(selectedDate, selectedPlan.daysCount - 1)
+    
+    // Update selected dates in store
     setSelectedDates({
       startDate: selectedDate,
       endDate: endDate,
@@ -43,15 +47,28 @@ export function DateRangeSelection() {
       minStartDate.getTime() + Math.random() * (maxStartDate.getTime() - minStartDate.getTime())
     )
     
-    handleDateSelect(randomStartDate)
+    // Set the date and update selected dates
+    setDate(randomStartDate)
+    const endDate = addDays(randomStartDate, selectedPlan.daysCount - 1)
+    setSelectedDates({
+      startDate: randomStartDate,
+      endDate: endDate,
+    })
   }
 
   const setDatesConfirmed = useStore((state) => state.setDatesConfirmed)
   
   const handleProceed = () => {
     if (!date || !selectedPlan) return
+
+    // Ensure dates are set before proceeding
+    const endDate = addDays(date, selectedPlan.daysCount - 1)
+    setSelectedDates({
+      startDate: date,
+      endDate: endDate,
+    })
+
     // Set datesConfirmed to true to show the menu
-    console.log(date)
     setDatesConfirmed(true)
   }
 
@@ -116,7 +133,7 @@ export function DateRangeSelection() {
         <Button 
           onClick={handleProceed}
           className="bg-orange-500 hover:bg-orange-600 text-white min-w-[120px]"
-          disabled={!date}
+          disabled={!date || !selectedPlan}
         >
           Proceed to Menu
         </Button>
