@@ -1,123 +1,210 @@
-"use client"
+'use client';
 
-import { useStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import Image from "next/image"
+import { useRouter } from 'next/navigation';
+import { Fragment } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
-export function CartSummary() {
-  const cart = useStore((state) => state.cart)
-  const selectedPlan = useStore((state) => state.selectedPlan)
-  const selectedLocation = useStore((state) => state.selectedLocation)
-  const removeFromCart = useStore((state) => state.removeFromCart)
-  const updateQuantity = useStore((state) => state.updateQuantity)
-  const getTotalPrice = useStore((state) => state.getTotalPrice)
+export interface OrderSummary {
+  plan: {
+    name: string;
+    duration: string;
+    daysCount: number;
+    pricePerDay: number;
+    totalPrice: number;
+    dates: {
+      start: string;
+      end: string;
+    };
+  };
+  vendor: {
+    id: string;
+    name: string;
+    location: string;
+    rating: number;
+    contactInfo: {
+      phone: string;
+      email: string;
+    };
+  };
+  dietPreference: "veg" | "non-veg";
+  weeklyMenu: {
+    [key: string]: {
+      date: string;
+      meals: {
+        breakfast: Array<{ id: string; name: string; isVegetarian: boolean }>;
+        lunch: Array<{ id: string; name: string; isVegetarian: boolean }>;
+        dinner: Array<{ id: string; name: string; isVegetarian: boolean }>;
+      };
+    };
+  };
+  accompaniments: Array<{
+    id: string;
+    name: string;
+    price: number;
+  }>;
+  pricing: {
+    planTotal: number;
+    accompanimentsTotal: number;
+    grandTotal: number;
+  };
+}
+
+interface CartSummaryProps {
+  summary: OrderSummary;
+}
+
+export default function CartSummary({ summary }: CartSummaryProps) {
+  const router = useRouter();
 
   return (
-    <div className="lg:col-span-3">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          {cart.map((item) => (
-            <div
-              key={`${item.menuItem.id}-${item.day}-${item.slot}`}
-              className="flex gap-4 p-4 border border-neutral-200 rounded-lg bg-white"
-            >
-              <div className="relative w-24 h-24 flex-shrink-0 rounded overflow-hidden bg-neutral-100">
-                <Image
-                  src={item.menuItem.image || "/placeholder.svg"}
-                  alt={item.menuItem.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-neutral-900">{item.menuItem.name}</h3>
-                <p className="text-sm text-neutral-600 mb-1">{item.day}</p>
-                <p className="text-sm text-neutral-600 mb-2 capitalize">{item.slot}</p>
-                <p className="text-lg font-bold text-orange-500 mb-3">
-                  ₹{(item.menuItem.price * item.quantity).toLocaleString()}
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.menuItem.id, item.day, item.slot, Math.max(1, item.quantity - 1))
-                    }
-                    className="px-2 py-1 border border-neutral-200 rounded hover:bg-neutral-100 transition"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.menuItem.id, item.day, item.slot, item.quantity + 1)}
-                    className="px-2 py-1 border border-neutral-200 rounded hover:bg-neutral-100 transition"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => removeFromCart(item.menuItem.id, item.day, item.slot)}
-                    className="ml-auto text-sm text-red-600 hover:text-red-700 font-medium"
-                  >
-                    Remove
-                  </button>
+    <div className="grid gap-6 lg:grid-cols-12">
+      {/* Left Column - Plan & Menu Details */}
+      <div className="space-y-6 lg:col-span-8">
+        {/* Plan Details */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Plan Details</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Plan Name</p>
+              <p className="font-medium">{summary.plan.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Duration</p>
+              <p className="font-medium">{summary.plan.duration}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Date Range</p>
+              <p className="font-medium">
+                {summary.plan.dates.start} to {summary.plan.dates.end}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Price per Day</p>
+              <p className="font-medium">₹{summary.plan.pricePerDay.toLocaleString()}</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Vendor Details */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Vendor Details</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Kitchen Name</p>
+              <p className="font-medium">{summary.vendor.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Location</p>
+              <p className="font-medium">{summary.vendor.location}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Contact</p>
+              <p className="font-medium">{summary.vendor.contactInfo.phone}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Rating</p>
+              <p className="font-medium">★ {summary.vendor.rating}</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Menu Selection */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Menu Selection</h2>
+          <ScrollArea className="h-[400px] pr-4">
+            {Object.entries(summary.weeklyMenu).map(([day, data]) => (
+              <Fragment key={day}>
+                <div className="mb-6">
+                  <h3 className="font-medium mb-2">{data.date}</h3>
+                  <div className="space-y-4">
+                    {['breakfast', 'lunch', 'dinner'].map((slot) => (
+                      <div key={slot} className="bg-muted/50 p-4 rounded-lg">
+                        <p className="text-sm font-medium capitalize mb-2">{slot}</p>
+                        <div className="space-y-2">
+                          {data.meals[slot as keyof typeof data.meals].map((meal) => (
+                            <div key={meal.id} className="flex items-center">
+                              <span className="text-sm">{meal.name}</span>
+                              {meal.isVegetarian && (
+                                <span className="ml-2 inline-block w-4 h-4 bg-green-500 rounded-full" />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+                <Separator className="my-4" />
+              </Fragment>
+            ))}
+          </ScrollArea>
+        </Card>
+
+        {/* Accompaniments */}
+        {summary.accompaniments.length > 0 && (
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Accompaniments</h2>
+            <div className="space-y-4">
+              {summary.accompaniments.map((item) => (
+                <div key={item.id} className="flex justify-between items-center">
+                  <span>{item.name}</span>
+                  <span className="font-medium">₹{item.price.toLocaleString()}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </Card>
+        )}
+      </div>
 
-        <div className="lg:col-span-1">
-          <div className="sticky top-24 bg-white border border-neutral-200 rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-bold text-neutral-900">Order Summary</h2>
-
-            <div className="bg-orange-50 p-4 rounded-lg space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-neutral-600">Plan:</span>
-                <span className="font-semibold text-neutral-900">{selectedPlan?.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-600">Location:</span>
-                <span className="font-semibold text-neutral-900 capitalize">{selectedLocation}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-600">Duration:</span>
-                <span className="font-semibold text-neutral-900">{selectedPlan?.daysCount} days</span>
-              </div>
-            </div>
-
-            <div className="space-y-2 border-t border-b border-neutral-200 py-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-600">Meal Items</span>
-                <span className="font-medium">₹{getTotalPrice().toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-600">Delivery</span>
-                <span className="font-medium">Free</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-600">Tax (5%)</span>
-                <span className="font-medium">₹{Math.round(getTotalPrice() * 0.05).toLocaleString()}</span>
-              </div>
+      {/* Right Column - Order Summary */}
+      <div className="lg:col-span-4">
+        <Card className="p-6 sticky top-4">
+          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+          <div className="space-y-4">
+            {/* Plan Total */}
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Plan Total</span>
+              <span className="font-medium">₹{summary.pricing.planTotal.toLocaleString()}</span>
             </div>
 
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total</span>
-              <span className="text-orange-500">
-                ₹{Math.round(getTotalPrice() + getTotalPrice() * 0.05).toLocaleString()}
+            {/* Accompaniments Total */}
+            {summary.pricing.accompanimentsTotal > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Accompaniments</span>
+                <span className="font-medium">₹{summary.pricing.accompanimentsTotal.toLocaleString()}</span>
+              </div>
+            )}
+
+            {/* GST */}
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">GST (5%)</span>
+              <span className="font-medium">
+                ₹{Math.round((summary.pricing.planTotal + summary.pricing.accompanimentsTotal) * 0.05).toLocaleString()}
               </span>
             </div>
 
-            <Link href="/checkout" className="block">
-              <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">Proceed to Checkout</Button>
-            </Link>
+            <Separator />
 
-            <Link href="/">
-              <Button variant="outline" className="w-full border-neutral-200 hover:bg-neutral-50 bg-transparent">
-                Continue Shopping
-              </Button>
-            </Link>
+            {/* Grand Total */}
+            <div className="flex justify-between">
+              <span className="font-medium">Grand Total</span>
+              <span className="font-bold text-lg">₹{summary.pricing.grandTotal.toLocaleString()}</span>
+            </div>
+
+            {/* Checkout Button */}
+            <Button 
+              className="w-full" 
+              size="lg"
+              onClick={() => router.push('/checkout')}
+            >
+              Proceed to Checkout
+            </Button>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
-  )
+  );
 }

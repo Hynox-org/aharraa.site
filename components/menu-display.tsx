@@ -1,17 +1,25 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useStore } from "@/lib/store"
 import { VENDOR_MENUS, WEEKLY_MENU_TEMPLATE, type MealType, type MenuItem } from "@/lib/menu-data"
+import { VENDORS } from "@/lib/vendor-data"
 import { VendorInfo } from "@/components/vendor-info"
 
 export function MenuDisplay() {
   const [activeDay, setActiveDay] = useState<string | null>("Monday") // Default to Monday
-  const dietFilter = useStore((state) => state.dietFilter)
-  const setDietFilter = useStore((state) => state.setDietFilter)
-  const selectedVendorId = useStore((state) => state.selectedVendorId)
+  const store = useStore()
+  const {
+    dietFilter,
+    setDietFilter,
+    selectedVendorId,
+    selectedPlan,
+    selectedDates,
+    selectedAccompaniments,
+    cart
+  } = store
 
   // Get menu based on selected vendor and diet preference
   const vendorMenu = VENDOR_MENUS.find(menu => menu.vendorId === selectedVendorId)
@@ -25,8 +33,92 @@ export function MenuDisplay() {
     return weeklyMenuItems.map((index: number) => menu[mealType][index])
   }
 
+  const generateOrderSummary = () => {
+    const selectedVendor = VENDORS.find(v => v.id === selectedVendorId);
+    const weekDates = new Map();
+    
+    if (selectedDates) {
+      let currentDate = new Date(selectedDates.startDate);
+      const endDate = new Date(selectedDates.endDate);
+      
+      while (currentDate <= endDate) {
+        const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+        weekDates.set(dayName, new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+
+    const summary = {
+      plan: {
+        ...selectedPlan,
+        dates: {
+          start: selectedDates?.startDate.toLocaleDateString(),
+          end: selectedDates?.endDate.toLocaleDateString()
+        }
+      },
+      vendor: {
+        id: selectedVendor?.id,
+        name: selectedVendor?.name,
+        location: selectedVendor?.location,
+        rating: selectedVendor?.rating,
+        contactInfo: selectedVendor?.contactInfo
+      },
+      dietPreference: dietFilter,
+      weeklyMenu: Object.fromEntries(
+        [...weekDates].map(([day, date]) => [
+          day,
+          {
+            date: date.toLocaleDateString(),
+            meals: {
+              breakfast: getMealItems(day, "breakfast").map(item => ({
+                id: item.id,
+                name: item.name,
+                isVegetarian: item.isVegetarian
+              })),
+              lunch: getMealItems(day, "lunch").map(item => ({
+                id: item.id,
+                name: item.name,
+                isVegetarian: item.isVegetarian
+              })),
+              dinner: getMealItems(day, "dinner").map(item => ({
+                id: item.id,
+                name: item.name,
+                isVegetarian: item.isVegetarian
+              }))
+            }
+          }
+        ])
+      ),
+      accompaniments: selectedAccompaniments.map(acc => ({
+        id: acc.id,
+        name: acc.name,
+        price: acc.price
+      })),
+      pricing: {
+        planTotal: selectedPlan?.totalPrice || 0,
+        accompanimentsTotal: selectedAccompaniments.reduce((total, acc) => total + acc.price, 0),
+        get grandTotal() {
+          return this.planTotal + this.accompanimentsTotal;
+        }
+      }
+    };
+
+    console.log('Complete Order Summary:', JSON.stringify(summary, null, 2));
+    return summary;
+  };
+
   return (
     <div className="space-y-6">
+      {/* Summary Button */}
+      <div className="flex justify-end">
+        <Button
+          onClick={() => generateOrderSummary()}
+          className="bg-green-600 hover:bg-green-700 text-white"
+        >
+          View Complete Summary
+        </Button>
+      </div>
+
       {/* Diet Filter */}
       <div className="flex flex-wrap gap-3 mb-8">
         <span className="text-sm font-semibold text-neutral-700 self-center">Diet Preference:</span>
@@ -151,6 +243,26 @@ export function MenuDisplay() {
           </div>
         </div>
       )}
+
+      {/* CTA Section */}
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 mt-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-baseline gap-2">
+            <span className="text-sm text-neutral-600">Total Amount:</span>
+            <span className="text-2xl font-bold text-orange-600">₹{generateOrderSummary().pricing.grandTotal}</span>
+          </div>
+          <Button
+            onClick={() => {
+              const summary = generateOrderSummary();
+              localStorage.setItem('orderSummary', JSON.stringify(summary));
+              window.location.href = '/cart';
+            }}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2 text-lg"
+          >
+            Proceed to Cart →
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
