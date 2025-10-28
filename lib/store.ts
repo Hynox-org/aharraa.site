@@ -30,12 +30,21 @@ interface DateRange {
   endDate: Date
 }
 
+interface Accompaniment {
+  id: string
+  name: string
+  price: number
+}
+
 interface Store {
   selectedPlan: SubscriptionPlan | null
   setSelectedPlan: (plan: SubscriptionPlan) => void
 
   selectedDates: DateRange | null
   setSelectedDates: (dates: DateRange) => void
+
+  selectedAccompaniments: Accompaniment[]
+  toggleAccompaniment: (accompaniment: Accompaniment) => void
   
   datesConfirmed: boolean
   setDatesConfirmed: (confirmed: boolean) => void
@@ -57,6 +66,17 @@ export const useStore = create<Store>((set, get) => ({
 
   selectedDates: null,
   setSelectedDates: (dates: DateRange) => set({ selectedDates: dates }),
+
+  selectedAccompaniments: [],
+  toggleAccompaniment: (accompaniment: Accompaniment) =>
+    set((state) => {
+      const exists = state.selectedAccompaniments.some((item) => item.id === accompaniment.id);
+      return {
+        selectedAccompaniments: exists
+          ? state.selectedAccompaniments.filter((item) => item.id !== accompaniment.id)
+          : [...state.selectedAccompaniments, accompaniment],
+      };
+    }),
 
   datesConfirmed: false,
   setDatesConfirmed: (confirmed: boolean) => set({ datesConfirmed: confirmed }),

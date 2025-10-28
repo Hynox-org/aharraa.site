@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useStore } from "@/lib/store"
@@ -114,12 +114,32 @@ export function MenuDisplay() {
       <div className="mt-8 p-6 bg-orange-50 rounded-lg">
         <h3 className="text-xl font-semibold text-neutral-900 mb-4">Accompaniments</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {MENU_DATA.accompaniments.indian.map((item) => (
-            <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm">
-              <h5 className="font-medium text-neutral-900">{item.name}</h5>
-              <p className="text-orange-600 font-semibold mt-1">₹{item.price}</p>
-            </div>
-          ))}
+          {MENU_DATA.accompaniments.indian.map((item) => {
+            const isSelected = useStore(
+              (state) => state.selectedAccompaniments.some((acc) => acc.id === item.id)
+            );
+            const toggleAccompaniment = useStore((state) => state.toggleAccompaniment);
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => toggleAccompaniment(item)}
+                className={`bg-white p-4 rounded-lg shadow-sm transition border-2 text-left ${
+                  isSelected
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-transparent hover:border-orange-200"
+                }`}
+              >
+                <h5 className="font-medium text-neutral-900">{item.name}</h5>
+                <p className="text-orange-600 font-semibold mt-1">₹{item.price}</p>
+                {isSelected && (
+                  <span className="text-orange-500 text-sm mt-2 block">
+                    ✓ Selected
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
