@@ -51,6 +51,7 @@ export function DateRangeSelection() {
   const handleProceed = () => {
     if (!date || !selectedPlan) return
     // Set datesConfirmed to true to show the menu
+    console.log(date)
     setDatesConfirmed(true)
   }
 

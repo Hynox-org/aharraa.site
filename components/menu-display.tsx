@@ -1,212 +1,31 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { format, addDays } from "date-fns"
-import { useStore } from "@/lib/store"
+import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { MenuItem as MenuItemComponent } from "@/components/menu-item"
-
-const MENU_DATA: Record<string, any[]> = {
-  breakfast: [
-    {
-      id: "b1",
-      name: "Protein Pancakes",
-      description: "Fluffy pancakes with berries and Greek yogurt",
-      price: 299,
-      image: "/protein-pancakes-breakfast.png",
-      category: "breakfast",
-      isVegetarian: true,
-    },
-    {
-      id: "b2",
-      name: "Avocado Toast",
-      description: "Whole grain toast with fresh avocado and egg",
-      price: 349,
-      image: "/avocado-toast.png",
-      category: "breakfast",
-      isVegetarian: true,
-    },
-    {
-      id: "b3",
-      name: "Smoothie Bowl",
-      description: "Acai bowl with granola, coconut, and fresh fruit",
-      price: 399,
-      image: "/smoothie-bowl-acai.jpg",
-      category: "breakfast",
-      isVegetarian: true,
-    },
-    {
-      id: "b4",
-      name: "Oatmeal Delight",
-      description: "Steel-cut oats with almonds, honey, and banana",
-      price: 279,
-      image: "/oatmeal-breakfast-bowl.jpg",
-      category: "breakfast",
-      isVegetarian: true,
-    },
-  ],
-  lunch: [
-    {
-      id: "l1",
-      name: "Grilled Chicken Bowl",
-      description: "Tender chicken with quinoa, vegetables, and tahini sauce",
-      price: 449,
-      image: "/grilled-chicken-bowl-lunch.jpg",
-      category: "lunch",
-      isVegetarian: false,
-    },
-    {
-      id: "l2",
-      name: "Mediterranean Wrap",
-      description: "Hummus, feta, cucumber, tomato in whole wheat wrap",
-      price: 399,
-      image: "/mediterranean-wrap.png",
-      category: "lunch",
-      isVegetarian: true,
-    },
-    {
-      id: "l3",
-      name: "Salmon Salad",
-      description: "Fresh salmon with mixed greens and lemon dressing",
-      price: 499,
-      image: "/salmon-salad-lunch.jpg",
-      category: "lunch",
-      isVegetarian: false,
-    },
-    {
-      id: "l4",
-      name: "Veggie Stir Fry",
-      description: "Seasonal vegetables with brown rice and ginger sauce",
-      price: 379,
-      image: "/vegetable-stir-fry.png",
-      category: "lunch",
-      isVegetarian: true,
-    },
-  ],
-  dinner: [
-    {
-      id: "d1",
-      name: "Herb Roasted Salmon",
-      description: "Wild salmon with roasted vegetables and lemon butter",
-      price: 599,
-      image: "/herb-roasted-salmon-dinner.jpg",
-      category: "dinner",
-      isVegetarian: false,
-    },
-    {
-      id: "d2",
-      name: "Grass-Fed Steak",
-      description: "Premium steak with sweet potato and green beans",
-      price: 699,
-      image: "/grass-fed-steak-dinner.jpg",
-      category: "dinner",
-      isVegetarian: false,
-    },
-    {
-      id: "d3",
-      name: "Pasta Primavera",
-      description: "Whole wheat pasta with seasonal vegetables and pesto",
-      price: 449,
-      image: "/pasta-primavera-dinner.jpg",
-      category: "dinner",
-      isVegetarian: true,
-    },
-    {
-      id: "d4",
-      name: "Chicken Teriyaki",
-      description: "Glazed chicken with jasmine rice and broccoli",
-      price: 499,
-      image: "/chicken-teriyaki-dinner.jpg",
-      category: "dinner",
-      isVegetarian: false,
-    },
-  ],
-}
+import { useStore } from "@/lib/store"
+import { MENU_DATA, WEEKLY_MENU, type MealType } from "@/lib/menu-data"
 
 export function MenuDisplay() {
-  const selectedPlan = useStore((state) => state.selectedPlan)
-  const selectedDates = useStore((state) => state.selectedDates)
+  const [activeDay, setActiveDay] = useState<string | null>("Monday") // Default to Monday
   const dietFilter = useStore((state) => state.dietFilter)
   const setDietFilter = useStore((state) => state.setDietFilter)
-  const [selectedDay, setSelectedDay] = useState<number>(0)
-  const [showDaySelector, setShowDaySelector] = useState(false)
 
-  const days = useMemo(() => {
-    if (!selectedDates) return []
-    const daysList = []
-    for (let i = 0; i < selectedPlan!.daysCount; i++) {
-      const currentDate = addDays(selectedDates.startDate, i)
-      daysList.push(format(currentDate, "EEEE, MMM d"))
-    }
-    return daysList
-  }, [selectedDates, selectedPlan])
+  // Get menu based on diet preference
+  const menu = dietFilter === "veg" ? MENU_DATA.veg : MENU_DATA.nonVeg
+  const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+  const mealTypes: MealType[] = ["breakfast", "lunch", "dinner"]
 
-  const formattedDays = useMemo(() => {
-    if (!selectedDates) return []
-    const daysList = []
-    for (let i = 0; i < selectedPlan!.daysCount; i++) {
-      const currentDate = addDays(selectedDates.startDate, i)
-      daysList.push(format(currentDate, "EEEE, MMM d"))
-    }
-    return daysList
-  }, [selectedDates, selectedPlan])
-
-  const menu = [...(MENU_DATA.breakfast || []), ...(MENU_DATA.lunch || []), ...(MENU_DATA.dinner || [])]
-
-  const filteredMenu = menu.filter((item) => {
-    if (dietFilter === "all") return true
-    if (dietFilter === "veg") return item.isVegetarian
-    if (dietFilter === "non-veg") return !item.isVegetarian
-    return true
-  })
+  const getMealItems = (day: string, mealType: MealType) => {
+    const weeklyMenuItems = WEEKLY_MENU[day as keyof typeof WEEKLY_MENU][mealType]
+    return weeklyMenuItems.map((index: number) => menu[mealType][index])
+  }
 
   return (
-    <div>
-      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-2 text-balance">
-            Select Your Meals
-          </h1>
-          <p className="text-neutral-600">Select meals for {formattedDays[selectedDay]}</p>
-        </div>
-        <div className="relative">
-          <Button
-            onClick={() => setShowDaySelector(!showDaySelector)}
-            className="bg-orange-500 hover:bg-orange-600 text-white"
-          >
-            {formattedDays[selectedDay]}
-          </Button>
-          {showDaySelector && (
-            <div className="absolute top-full right-0 mt-2 bg-white border border-neutral-200 rounded-lg shadow-lg z-10 min-w-40 max-h-64 overflow-y-auto">
-              {formattedDays.map((day, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setSelectedDay(index)
-                    setShowDaySelector(false)
-                  }}
-                  className={`w-full text-left px-4 py-2 hover:bg-orange-50 transition ${
-                    selectedDay === index ? "bg-orange-100 text-orange-600 font-semibold" : ""
-                  }`}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mb-8 flex flex-wrap gap-3">
-        <span className="text-sm font-semibold text-neutral-700 self-center">Filter by:</span>
-        <button
-          onClick={() => setDietFilter("all")}
-          className={`px-4 py-2 rounded-full font-medium transition ${
-            dietFilter === "all" ? "bg-orange-500 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-          }`}
-        >
-          All
-        </button>
+    <div className="space-y-6">
+      {/* Diet Filter */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        <span className="text-sm font-semibold text-neutral-700 self-center">Diet Preference:</span>
         <button
           onClick={() => setDietFilter("veg")}
           className={`px-4 py-2 rounded-full font-medium transition flex items-center gap-2 ${
@@ -225,29 +44,83 @@ export function MenuDisplay() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {filteredMenu.map((item) => (
-          <MenuItemComponent
-            key={item.id}
-            item={item}
-            selectedDay={formattedDays[selectedDay]}
-          />
-        ))}
+      {/* Weekly Menu Display */}
+      <div className="grid grid-cols-12 gap-6 border rounded-lg bg-white">
+        {/* Left Column - Days */}
+        <div className="col-span-3 border-r">
+          {weekDays.map((day) => (
+            <button
+              key={day}
+              onClick={() => setActiveDay(activeDay === day ? null : day)}
+              className={`w-full px-6 py-4 text-left hover:bg-neutral-50 transition border-b last:border-b-0 ${
+                activeDay === day ? "bg-orange-50 border-r-2 border-r-orange-500" : ""
+              }`}
+            >
+              <h3 className="text-lg font-medium text-neutral-900">{day}</h3>
+            </button>
+          ))}
+        </div>
+
+        {/* Right Column - Menu Items */}
+        <div className="col-span-9 p-6">
+          {activeDay ? (
+            <div className="space-y-8">
+              {mealTypes.map((mealType) => (
+                <div key={mealType} className="space-y-4">
+                  <h4 className="text-xl font-semibold capitalize text-neutral-800 border-b pb-2">
+                    {mealType}
+                  </h4>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {getMealItems(activeDay, mealType).map((item) => (
+                      <div key={item.id} className="flex gap-4 p-4 border rounded-lg hover:bg-neutral-50 transition">
+                        <div className="relative w-24 h-24 flex-shrink-0">
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            className="object-cover rounded-lg"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start gap-2 mb-1">
+                            <h5 className="font-semibold text-neutral-900 truncate">{item.name}</h5>
+                            <span className={`px-2 py-0.5 rounded-full text-sm font-medium flex-shrink-0 ${
+                              dietFilter === "veg" 
+                                ? "bg-green-100 text-green-700" 
+                                : "bg-red-100 text-red-700"
+                            }`}>
+                              {dietFilter === "veg" ? "Veg" : "Non-Veg"}
+                            </span>
+                          </div>
+                          <p className="text-sm text-neutral-600 line-clamp-2">{item.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              
+
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full text-neutral-500">
+              Select a day to view menu
+            </div>
+          )}
+        </div>
       </div>
 
-      {filteredMenu.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-neutral-600 text-lg">No items available for the selected filter</p>
+      {/* Accompaniments Section */}
+      <div className="mt-8 p-6 bg-orange-50 rounded-lg">
+        <h3 className="text-xl font-semibold text-neutral-900 mb-4">Accompaniments</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {MENU_DATA.accompaniments.indian.map((item) => (
+            <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm">
+              <h5 className="font-medium text-neutral-900">{item.name}</h5>
+              <p className="text-orange-600 font-semibold mt-1">₹{item.price}</p>
+            </div>
+          ))}
         </div>
-      )}
-
-      <div className="flex justify-center">
-        <Button
-          onClick={() => (window.location.href = "/cart")}
-          className="bg-orange-500 hover:bg-orange-600 text-white"
-        >
-          Go to Cart
-        </Button>
       </div>
     </div>
   )
