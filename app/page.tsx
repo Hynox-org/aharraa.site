@@ -4,6 +4,7 @@ import { format } from "date-fns"
 import { Header } from "@/components/header"
 import { PlanSelection } from "@/components/plan-selection"
 import { DateRangeSelection } from "@/components/date-range-selection"
+import { VendorSelection } from "@/components/vendor-selection"
 import { MenuDisplay } from "@/components/menu-display"
 import { useStore } from "@/lib/store"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ export default function Home() {
   const selectedPlan = useStore((state) => state.selectedPlan)
   const selectedDates = useStore((state) => state.selectedDates)
   const datesConfirmed = useStore((state) => state.datesConfirmed)
+  const selectedVendorId = useStore((state) => state.selectedVendorId)
 
   return (
     <main className="min-h-screen bg-white">
@@ -78,13 +80,39 @@ export default function Home() {
             </div>
             <DateRangeSelection />
           </>
+        ) : !selectedVendorId ? (
+          <>
+            <div className="mb-8 flex items-center gap-4">
+              <Button
+                onClick={() => {
+                  useStore.setState({ 
+                    datesConfirmed: false,
+                    selectedDates: null
+                  })
+                }}
+                variant="outline"
+                className="border-neutral-200"
+              >
+                ← Back
+              </Button>
+              <div>
+                <h2 className="text-2xl font-bold text-neutral-900">
+                  {selectedPlan.name} - ₹{selectedPlan.totalPrice}
+                </h2>
+                <p className="text-sm text-neutral-600 mt-1">
+                  {format(selectedDates.startDate, "PPP")} to {format(selectedDates.endDate, "PPP")}
+                </p>
+              </div>
+            </div>
+            <VendorSelection />
+          </>
         ) : (
           <>
             <div className="mb-8 flex items-center gap-4">
               <Button
                 onClick={() => {
                   useStore.setState({ 
-                    datesConfirmed: false 
+                    selectedVendorId: null 
                   })
                 }}
                 variant="outline"

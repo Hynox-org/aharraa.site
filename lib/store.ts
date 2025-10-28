@@ -1,14 +1,5 @@
 import { create } from "zustand"
-
-export interface MenuItem {
-  id: string
-  name: string
-  description: string
-  price: number
-  image: string
-  category: string
-  isVegetarian: boolean
-}
+import { type MenuItem } from "./menu-data"
 
 export interface SubscriptionPlan {
   id: string
@@ -43,14 +34,17 @@ interface Store {
   selectedDates: DateRange | null
   setSelectedDates: (dates: DateRange) => void
 
+  selectedVendorId: string | null
+  setSelectedVendorId: (vendorId: string | null) => void
+
   selectedAccompaniments: Accompaniment[]
   toggleAccompaniment: (accompaniment: Accompaniment) => void
   
+  dietFilter: "veg" | "non-veg"
+  setDietFilter: (filter: "veg" | "non-veg") => void
+  
   datesConfirmed: boolean
   setDatesConfirmed: (confirmed: boolean) => void
-
-  dietFilter: "all" | "veg" | "non-veg"
-  setDietFilter: (filter: "all" | "veg" | "non-veg") => void
 
   cart: CartItem[]
   addToCart: (item: MenuItem, day: string, quantity: number) => void
@@ -67,6 +61,9 @@ export const useStore = create<Store>((set, get) => ({
   selectedDates: null,
   setSelectedDates: (dates: DateRange) => set({ selectedDates: dates }),
 
+  selectedVendorId: null,
+  setSelectedVendorId: (vendorId: string | null) => set({ selectedVendorId: vendorId }),
+
   selectedAccompaniments: [],
   toggleAccompaniment: (accompaniment: Accompaniment) =>
     set((state) => {
@@ -81,8 +78,8 @@ export const useStore = create<Store>((set, get) => ({
   datesConfirmed: false,
   setDatesConfirmed: (confirmed: boolean) => set({ datesConfirmed: confirmed }),
 
-  dietFilter: "all",
-  setDietFilter: (filter: "all" | "veg" | "non-veg") => set({ dietFilter: filter }),
+  dietFilter: "veg",
+  setDietFilter: (filter: "veg" | "non-veg") => set({ dietFilter: filter }),
 
   cart: [],
   addToCart: (item: MenuItem, day: string, quantity: number) =>
@@ -110,6 +107,6 @@ export const useStore = create<Store>((set, get) => ({
   clearCart: () => set({ cart: [] }),
   getTotalPrice: () => {
     const state = get()
-    return state.cart.reduce((total, item) => total + item.menuItem.price * item.quantity, 0)
+    return state.cart.reduce((total, item) => total + (item.menuItem.price || 0) * item.quantity, 0)
   },
 }))

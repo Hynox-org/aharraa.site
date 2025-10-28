@@ -4,20 +4,24 @@ import { useCallback, useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useStore } from "@/lib/store"
-import { MENU_DATA, WEEKLY_MENU, type MealType } from "@/lib/menu-data"
+import { VENDOR_MENUS, WEEKLY_MENU_TEMPLATE, type MealType, type MenuItem } from "@/lib/menu-data"
+import { VendorInfo } from "@/components/vendor-info"
 
 export function MenuDisplay() {
   const [activeDay, setActiveDay] = useState<string | null>("Monday") // Default to Monday
   const dietFilter = useStore((state) => state.dietFilter)
   const setDietFilter = useStore((state) => state.setDietFilter)
+  const selectedVendorId = useStore((state) => state.selectedVendorId)
 
-  // Get menu based on diet preference
-  const menu = dietFilter === "veg" ? MENU_DATA.veg : MENU_DATA.nonVeg
+  // Get menu based on selected vendor and diet preference
+  const vendorMenu = VENDOR_MENUS.find(menu => menu.vendorId === selectedVendorId)
+  const menu = vendorMenu ? (dietFilter === "veg" ? vendorMenu.veg : vendorMenu.nonVeg) : null
   const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
   const mealTypes: MealType[] = ["breakfast", "lunch", "dinner"]
 
   const getMealItems = (day: string, mealType: MealType) => {
-    const weeklyMenuItems = WEEKLY_MENU[day as keyof typeof WEEKLY_MENU][mealType]
+    if (!menu) return []
+    const weeklyMenuItems = WEEKLY_MENU_TEMPLATE[day as keyof typeof WEEKLY_MENU_TEMPLATE][mealType]
     return weeklyMenuItems.map((index: number) => menu[mealType][index])
   }
 
@@ -71,7 +75,7 @@ export function MenuDisplay() {
                     {mealType}
                   </h4>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {getMealItems(activeDay, mealType).map((item) => (
+                    {getMealItems(activeDay, mealType).map((item: MenuItem) => (
                       <div key={item.id} className="flex gap-4 p-4 border rounded-lg hover:bg-neutral-50 transition">
                         <div className="relative w-24 h-24 flex-shrink-0">
                           <Image
@@ -110,38 +114,43 @@ export function MenuDisplay() {
         </div>
       </div>
 
-      {/* Accompaniments Section */}
-      <div className="mt-8 p-6 bg-orange-50 rounded-lg">
-        <h3 className="text-xl font-semibold text-neutral-900 mb-4">Accompaniments</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {MENU_DATA.accompaniments.indian.map((item) => {
-            const isSelected = useStore(
-              (state) => state.selectedAccompaniments.some((acc) => acc.id === item.id)
-            );
-            const toggleAccompaniment = useStore((state) => state.toggleAccompaniment);
+      {/* Vendor Info */}
+      <VendorInfo />
 
-            return (
-              <button
-                key={item.id}
-                onClick={() => toggleAccompaniment(item)}
-                className={`bg-white p-4 rounded-lg shadow-sm transition border-2 text-left ${
-                  isSelected
-                    ? "border-orange-500 bg-orange-50"
-                    : "border-transparent hover:border-orange-200"
-                }`}
-              >
-                <h5 className="font-medium text-neutral-900">{item.name}</h5>
-                <p className="text-orange-600 font-semibold mt-1">₹{item.price}</p>
-                {isSelected && (
-                  <span className="text-orange-500 text-sm mt-2 block">
-                    ✓ Selected
-                  </span>
-                )}
-              </button>
-            );
-          })}
+      {/* Accompaniments Section */}
+      {vendorMenu && (
+        <div className="mt-8 p-6 bg-orange-50 rounded-lg">
+          <h3 className="text-xl font-semibold text-neutral-900 mb-4">Accompaniments</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {vendorMenu.accompaniments.indian.map((item) => {
+              const isSelected = useStore(
+                (state) => state.selectedAccompaniments.some((acc) => acc.id === item.id)
+              );
+              const toggleAccompaniment = useStore((state) => state.toggleAccompaniment);
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => toggleAccompaniment(item)}
+                  className={`bg-white p-4 rounded-lg shadow-sm transition border-2 text-left ${
+                    isSelected
+                      ? "border-orange-500 bg-orange-50"
+                      : "border-transparent hover:border-orange-200"
+                  }`}
+                >
+                  <h5 className="font-medium text-neutral-900">{item.name}</h5>
+                  <p className="text-orange-600 font-semibold mt-1">₹{item.price}</p>
+                  {isSelected && (
+                    <span className="text-orange-500 text-sm mt-2 block">
+                      ✓ Selected
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

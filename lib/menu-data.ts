@@ -1,182 +1,562 @@
 export type PlanType = "veg" | "non-veg";
+export type MealType = "breakfast" | "lunch" | "dinner";
+export type DietType = "veg" | "nonVeg";
 
-export const MENU_DATA = {
+export interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  category: MealType;
+  isVegetarian: boolean;
+  price?: number;
+}
+
+export interface VendorMenu {
+  vendorId: string;
   veg: {
-    breakfast: [
-      {
-        id: "vb1",
-        name: "Masala Dosa",
-        description: "Crispy rice crepe served with potato curry and chutneys",
-        image: "/defaults/default-meal.jpg",
-        category: "breakfast",
-        isVegetarian: true,
-      },
-      {
-        id: "vb2",
-        name: "Poha",
-        description: "Flattened rice with peanuts, onions, and herbs",
-        image: "/defaults/default-meal.jpg",
-        category: "breakfast",
-        isVegetarian: true,
-      },
-      {
-        id: "vb3",
-        name: "Upma",
-        description: "Savory semolina porridge with vegetables",
-        image: "/defaults/default-meal.jpg",
-        category: "breakfast",
-        isVegetarian: true,
-      },
-    ],
-    lunch: [
-      {
-        id: "vl1",
-        name: "Paneer Tikka Masala",
-        description: "Cottage cheese in rich tomato gravy with Indian spices",
-        image: "/defaults/default-meal.jpg",
-        category: "lunch",
-        isVegetarian: true,
-      },
-      {
-        id: "vl2",
-        name: "Dal Makhani",
-        description: "Creamy black lentils simmered overnight",
-        image: "/defaults/default-meal.jpg",
-        category: "lunch",
-        isVegetarian: true,
-      },
-      {
-        id: "vl3",
-        name: "Veg Biryani",
-        description: "Fragrant rice with mixed vegetables and saffron",
-        image: "/defaults/default-meal.jpg",
-        category: "lunch",
-        isVegetarian: true,
-      },
-    ],
-    dinner: [
-      {
-        id: "vd1",
-        name: "Mix Veg Curry",
-        description: "Seasonal vegetables in a mild curry sauce",
-        image: "/defaults/default-meal.jpg",
-        category: "dinner",
-        isVegetarian: true,
-      },
-      {
-        id: "vd2",
-        name: "Palak Paneer",
-        description: "Cottage cheese in spinach gravy",
-        image: "/defaults/default-meal.jpg",
-        category: "dinner",
-        isVegetarian: true,
-      },
-      {
-        id: "vd3",
-        name: "Chole Bhature",
-        description: "Spiced chickpea curry with fried bread",
-        image: "/defaults/default-meal.jpg",
-        category: "dinner",
-        isVegetarian: true,
-      },
-    ],
-  },
+    breakfast: MenuItem[];
+    lunch: MenuItem[];
+    dinner: MenuItem[];
+  };
   nonVeg: {
-    breakfast: [
-      {
-        id: "nvb1",
-        name: "Chicken Keema Paratha",
-        description: "Flatbread stuffed with minced chicken",
-        image: "/defaults/default-meal.jpg",
-        category: "breakfast",
-        isVegetarian: false,
-      },
-      {
-        id: "nvb2",
-        name: "Egg Bhurji",
-        description: "Scrambled eggs with Indian spices",
-        image: "/defaults/default-meal.jpg",
-        category: "breakfast",
-        isVegetarian: false,
-      },
-      {
-        id: "nvb3",
-        name: "Chicken Sandwich",
-        description: "Grilled chicken with fresh vegetables",
-        image: "/defaults/default-meal.jpg",
-        category: "breakfast",
-        isVegetarian: false,
-      },
-    ],
-    lunch: [
-      {
-        id: "nvl1",
-        name: "Butter Chicken",
-        description: "Tender chicken in rich tomato gravy",
-        image: "/defaults/default-meal.jpg",
-        category: "lunch",
-        isVegetarian: false,
-      },
-      {
-        id: "nvl2",
-        name: "Chicken Biryani",
-        description: "Fragrant rice with tender chicken and saffron",
-        image: "/defaults/default-meal.jpg",
-        category: "lunch",
-        isVegetarian: false,
-      },
-      {
-        id: "nvl3",
-        name: "Fish Curry",
-        description: "Fresh fish in coconut curry sauce",
-        image: "/defaults/default-meal.jpg",
-        category: "lunch",
-        isVegetarian: false,
-      },
-    ],
-    dinner: [
-      {
-        id: "nvd1",
-        name: "Mutton Rogan Josh",
-        description: "Tender mutton in Kashmiri spices",
-        image: "/defaults/default-meal.jpg",
-        category: "dinner",
-        isVegetarian: false,
-      },
-      {
-        id: "nvd2",
-        name: "Chicken Tikka",
-        description: "Grilled marinated chicken with mint chutney",
-        image: "/defaults/default-meal.jpg",
-        category: "dinner",
-        isVegetarian: false,
-      },
-      {
-        id: "nvd3",
-        name: "Fish Masala",
-        description: "Spiced fish curry with coconut",
-        image: "/defaults/default-meal.jpg",
-        category: "dinner",
-        isVegetarian: false,
-      },
-    ],
-  },
+    breakfast: MenuItem[];
+    lunch: MenuItem[];
+    dinner: MenuItem[];
+  };
   accompaniments: {
-    indian: [
-      { id: "acc1", name: "Jeera Rice", price: 149 },
-      { id: "acc2", name: "Roti", price: 49 },
-      { id: "acc3", name: "Naan", price: 69 },
-      { id: "acc4", name: "Raita", price: 79 },
-      { id: "acc5", name: "Papad", price: 29 },
-    ],
+    indian: {
+      id: string;
+      name: string;
+      price: number;
+    }[];
+  };
+}
+
+export const VENDOR_MENUS: VendorMenu[] = [
+  {
+    vendorId: "v1",
+    veg: {
+      breakfast: [
+        {
+          id: "v1-vb1",
+          name: "Masala Dosa",
+          description:
+            "Crispy rice crepe served with potato curry and chutneys",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+        {
+          id: "v1-vb2",
+          name: "Poha",
+          description: "Flattened rice with peanuts, onions, and herbs",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+        {
+          id: "v1-vb3",
+          name: "Upma",
+          description: "Savory semolina porridge with vegetables",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+      ],
+      lunch: [
+        {
+          id: "v1-vl1",
+          name: "Paneer Tikka Masala",
+          description: "Cottage cheese in rich tomato gravy with Indian spices",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+        {
+          id: "v1-vl2",
+          name: "Dal Makhani",
+          description: "Creamy black lentils simmered overnight",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+        {
+          id: "v1-vl3",
+          name: "Veg Biryani",
+          description: "Fragrant rice with mixed vegetables and saffron",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+      ],
+      dinner: [
+        {
+          id: "v1-vd1",
+          name: "Mix Veg Curry",
+          description: "Seasonal vegetables in a mild curry sauce",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+        {
+          id: "v1-vd2",
+          name: "Palak Paneer",
+          description: "Cottage cheese in spinach gravy",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+        {
+          id: "v1-vd3",
+          name: "Chole Bhature",
+          description: "Spiced chickpea curry with fried bread",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+      ],
+    },
+    nonVeg: {
+      breakfast: [
+        {
+          id: "v1-nvb1",
+          name: "Chicken Keema Paratha",
+          description: "Flatbread stuffed with minced chicken",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+        {
+          id: "v1-nvb2",
+          name: "Egg Bhurji",
+          description: "Scrambled eggs with Indian spices",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+        {
+          id: "v1-nvb3",
+          name: "Chicken Sandwich",
+          description: "Grilled chicken with fresh vegetables",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+      ],
+      lunch: [
+        {
+          id: "v1-nvl1",
+          name: "Butter Chicken",
+          description: "Tender chicken in rich tomato gravy",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+        {
+          id: "v1-nvl2",
+          name: "Chicken Biryani",
+          description: "Fragrant rice with tender chicken and saffron",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+        {
+          id: "v1-nvl3",
+          name: "Fish Curry",
+          description: "Fresh fish in coconut curry sauce",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+      ],
+      dinner: [
+        {
+          id: "v1-nvd1",
+          name: "Mutton Rogan Josh",
+          description: "Tender mutton in Kashmiri spices",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+        {
+          id: "v1-nvd2",
+          name: "Chicken Tikka",
+          description: "Grilled marinated chicken with mint chutney",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+        {
+          id: "v1-nvd3",
+          name: "Fish Masala",
+          description: "Spiced fish curry with coconut",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+      ],
+    },
+    accompaniments: {
+      indian: [
+        { id: "v1-acc1", name: "Jeera Rice", price: 149 },
+        { id: "v1-acc2", name: "Roti", price: 49 },
+        { id: "v1-acc3", name: "Naan", price: 69 },
+        { id: "v1-acc4", name: "Raita", price: 79 },
+        { id: "v1-acc5", name: "Papad", price: 29 },
+      ],
+    },
   },
-} as const
+  {
+    vendorId: "v2",
+    veg: {
+      breakfast: [
+        {
+          id: "v2-vb1",
+          name: "Masala Dosa",
+          description:
+            "Crispy rice crepe served with potato curry and chutneys",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+        {
+          id: "v2-vb2",
+          name: "Poha",
+          description: "Flattened rice with peanuts, onions, and herbs",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+        {
+          id: "v2-vb3",
+          name: "Upma",
+          description: "Savory semolina porridge with vegetables",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+      ],
+      lunch: [
+        {
+          id: "v2-vl1",
+          name: "Paneer Tikka Masala",
+          description: "Cottage cheese in rich tomato gravy with Indian spices",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+        {
+          id: "v2-vl2",
+          name: "Dal Makhani",
+          description: "Creamy black lentils simmered overnight",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+        {
+          id: "v2-vl3",
+          name: "Veg Biryani",
+          description: "Fragrant rice with mixed vegetables and saffron",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+      ],
+      dinner: [
+        {
+          id: "v2-vd1",
+          name: "Mix Veg Curry",
+          description: "Seasonal vegetables in a mild curry sauce",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+        {
+          id: "v2-vd2",
+          name: "Palak Paneer",
+          description: "Cottage cheese in spinach gravy",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+        {
+          id: "v2-vd3",
+          name: "Chole Bhature",
+          description: "Spiced chickpea curry with fried bread",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+      ],
+    },
+    nonVeg: {
+      breakfast: [
+        {
+          id: "v2-nvb1",
+          name: "Chicken Keema Paratha",
+          description: "Flatbread stuffed with minced chicken",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+        {
+          id: "v2-nvb2",
+          name: "Egg Bhurji",
+          description: "Scrambled eggs with Indian spices",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+        {
+          id: "v2-nvb3",
+          name: "Chicken Sandwich",
+          description: "Grilled chicken with fresh vegetables",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+      ],
+      lunch: [
+        {
+          id: "v2-nvl1",
+          name: "Butter Chicken",
+          description: "Tender chicken in rich tomato gravy",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+        {
+          id: "v2-nvl2",
+          name: "Chicken Biryani",
+          description: "Fragrant rice with tender chicken and saffron",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+        {
+          id: "v2-nvl3",
+          name: "Fish Curry",
+          description: "Fresh fish in coconut curry sauce",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+      ],
+      dinner: [
+        {
+          id: "v2-nvd1",
+          name: "Mutton Rogan Josh",
+          description: "Tender mutton in Kashmiri spices",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+        {
+          id: "v2-nvd2",
+          name: "Chicken Tikka",
+          description: "Grilled marinated chicken with mint chutney",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+        {
+          id: "v2-nvd3",
+          name: "Fish Masala",
+          description: "Spiced fish curry with coconut",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+      ],
+    },
+    accompaniments: {
+      indian: [
+        { id: "v2-acc1", name: "Jeera Rice", price: 149 },
+        { id: "v2-acc2", name: "Roti", price: 49 },
+        { id: "v2-acc3", name: "Naan", price: 69 },
+        { id: "v2-acc4", name: "Raita", price: 79 },
+        { id: "v2-acc5", name: "Papad", price: 29 },
+      ],
+    },
+  },
+  {
+    vendorId: "v3",
+    veg: {
+      breakfast: [
+        {
+          id: "v3-vb1",
+          name: "Masala Dosa",
+          description:
+            "Crispy rice crepe served with potato curry and chutneys",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+        {
+          id: "v3-vb2",
+          name: "Poha",
+          description: "Flattened rice with peanuts, onions, and herbs",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+        {
+          id: "v3-vb3",
+          name: "Upma",
+          description: "Savory semolina porridge with vegetables",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: true,
+        },
+      ],
+      lunch: [
+        {
+          id: "v3-vl1",
+          name: "Paneer Tikka Masala",
+          description: "Cottage cheese in rich tomato gravy with Indian spices",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+        {
+          id: "v3-vl2",
+          name: "Dal Makhani",
+          description: "Creamy black lentils simmered overnight",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+        {
+          id: "v3-vl3",
+          name: "Veg Biryani",
+          description: "Fragrant rice with mixed vegetables and saffron",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: true,
+        },
+      ],
+      dinner: [
+        {
+          id: "v3-vd1",
+          name: "Mix Veg Curry",
+          description: "Seasonal vegetables in a mild curry sauce",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+        {
+          id: "v3-vd2",
+          name: "Palak Paneer",
+          description: "Cottage cheese in spinach gravy",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+        {
+          id: "v3-vd3",
+          name: "Chole Bhature",
+          description: "Spiced chickpea curry with fried bread",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: true,
+        },
+      ],
+    },
+    nonVeg: {
+      breakfast: [
+        {
+          id: "v3-nvb1",
+          name: "Chicken Keema Paratha",
+          description: "Flatbread stuffed with minced chicken",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+        {
+          id: "v3-nvb2",
+          name: "Egg Bhurji",
+          description: "Scrambled eggs with Indian spices",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+        {
+          id: "v3-nvb3",
+          name: "Chicken Sandwich",
+          description: "Grilled chicken with fresh vegetables",
+          image: "/defaults/default-meal.jpg",
+          category: "breakfast",
+          isVegetarian: false,
+        },
+      ],
+      lunch: [
+        {
+          id: "v3-nvl1",
+          name: "Butter Chicken",
+          description: "Tender chicken in rich tomato gravy",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+        {
+          id: "v3-nvl2",
+          name: "Chicken Biryani",
+          description: "Fragrant rice with tender chicken and saffron",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+        {
+          id: "v3-nvl3",
+          name: "Fish Curry",
+          description: "Fresh fish in coconut curry sauce",
+          image: "/defaults/default-meal.jpg",
+          category: "lunch",
+          isVegetarian: false,
+        },
+      ],
+      dinner: [
+        {
+          id: "v3-nvd1",
+          name: "Mutton Rogan Josh",
+          description: "Tender mutton in Kashmiri spices",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+        {
+          id: "v3-nvd2",
+          name: "Chicken Tikka",
+          description: "Grilled marinated chicken with mint chutney",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+        {
+          id: "v3-nvd3",
+          name: "Fish Masala",
+          description: "Spiced fish curry with coconut",
+          image: "/defaults/default-meal.jpg",
+          category: "dinner",
+          isVegetarian: false,
+        },
+      ],
+    },
+    accompaniments: {
+      indian: [
+        { id: "v3-acc1", name: "Jeera Rice", price: 149 },
+        { id: "v3-acc2", name: "Roti", price: 49 },
+        { id: "v3-acc3", name: "Naan", price: 69 },
+        { id: "v3-acc4", name: "Raita", price: 79 },
+        { id: "v3-acc5", name: "Papad", price: 29 },
+      ],
+    },
+  },
+];
 
-export type MealType = "breakfast" | "lunch" | "dinner"
-export type DietType = "veg" | "nonVeg"
-
-// Fixed weekly menu rotation
-export const WEEKLY_MENU = {
+// Fixed weekly menu rotation template
+export const WEEKLY_MENU_TEMPLATE = {
   Monday: {
     breakfast: [0, 1], // Indexes from the menu arrays
     lunch: [0, 2],
@@ -212,4 +592,4 @@ export const WEEKLY_MENU = {
     lunch: [0, 2],
     dinner: [1, 0],
   },
-}
+};

@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { useStore } from "@/lib/store"
 import { Button } from "@/components/ui/button"
-import type { MenuItem as MenuItemType } from "@/lib/store"
+import type { MenuItem as MenuItemType } from "@/lib/menu-data"
 
 interface MenuItemProps {
   item: MenuItemType
@@ -43,7 +43,9 @@ export function MenuItem({ item, selectedDay }: MenuItemProps) {
         <h3 className="font-semibold text-neutral-900 mb-1 line-clamp-2">{item.name}</h3>
         <p className="text-sm text-neutral-600 mb-3 line-clamp-2">{item.description}</p>
         <div className="flex items-center justify-between mb-4">
-          <span className="text-lg font-bold text-orange-500">₹{item.price}</span>
+          <span className="text-lg font-bold text-orange-500">
+            {item.price ? `₹${item.price}` : 'Price included'}
+          </span>
         </div>
         <div className="flex items-center gap-2 mb-3">
           <button
