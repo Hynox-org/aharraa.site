@@ -41,6 +41,18 @@ export function Header() {
             </Link>
           ))}
           <Link
+            href="/auth"
+            className="text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/auth"
+            className="text-sm font-medium text-white bg-orange-500 px-4 py-2 rounded-md hover:bg-orange-600 transition"
+          >
+            Sign Up
+          </Link>
+          <Link
             href="/cart"
             className="relative flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
           >
@@ -55,6 +67,12 @@ export function Header() {
 
         {/* Mobile Menu Button and Cart */}
         <div className="md:hidden flex items-center gap-4">
+          <Link
+            href="/auth"
+            className="text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
+          >
+            Sign In
+          </Link>
           <Link
             href="/cart"
             className="relative flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
@@ -90,6 +108,13 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/auth"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition rounded-lg"
+            >
+              Sign Up
+            </Link>
           </nav>
         </div>
       )}
