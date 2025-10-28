@@ -9,15 +9,14 @@ import type { MenuItem as MenuItemType } from "@/lib/store"
 interface MenuItemProps {
   item: MenuItemType
   selectedDay: string
-  selectedSlot: string
 }
 
-export function MenuItem({ item, selectedDay, selectedSlot }: MenuItemProps) {
+export function MenuItem({ item, selectedDay }: MenuItemProps) {
   const [quantity, setQuantity] = useState(1)
   const addToCart = useStore((state) => state.addToCart)
 
   const handleAddToCart = () => {
-    addToCart(item, selectedDay, selectedSlot, quantity)
+    addToCart(item, selectedDay, quantity)
     setQuantity(1)
   }
 

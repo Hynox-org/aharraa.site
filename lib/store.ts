@@ -22,27 +22,31 @@ export interface SubscriptionPlan {
 export interface CartItem {
   menuItem: MenuItem
   day: string
-  slot: string
   quantity: number
+}
+
+interface DateRange {
+  startDate: Date
+  endDate: Date
 }
 
 interface Store {
   selectedPlan: SubscriptionPlan | null
   setSelectedPlan: (plan: SubscriptionPlan) => void
 
-  selectedLocation: string | null
-  setSelectedLocation: (location: string) => void
-
-  selectedSlot: string | null
-  setSelectedSlot: (slot: string) => void
+  selectedDates: DateRange | null
+  setSelectedDates: (dates: DateRange) => void
+  
+  datesConfirmed: boolean
+  setDatesConfirmed: (confirmed: boolean) => void
 
   dietFilter: "all" | "veg" | "non-veg"
   setDietFilter: (filter: "all" | "veg" | "non-veg") => void
 
   cart: CartItem[]
-  addToCart: (item: MenuItem, day: string, slot: string, quantity: number) => void
-  removeFromCart: (id: string, day: string, slot: string) => void
-  updateQuantity: (id: string, day: string, slot: string, quantity: number) => void
+  addToCart: (item: MenuItem, day: string, quantity: number) => void
+  removeFromCart: (id: string, day: string) => void
+  updateQuantity: (id: string, day: string, quantity: number) => void
   clearCart: () => void
   getTotalPrice: () => number
 }
@@ -51,37 +55,37 @@ export const useStore = create<Store>((set, get) => ({
   selectedPlan: null,
   setSelectedPlan: (plan: SubscriptionPlan) => set({ selectedPlan: plan }),
 
-  selectedLocation: null,
-  setSelectedLocation: (location: string) => set({ selectedLocation: location }),
+  selectedDates: null,
+  setSelectedDates: (dates: DateRange) => set({ selectedDates: dates }),
 
-  selectedSlot: null,
-  setSelectedSlot: (slot: string) => set({ selectedSlot: slot }),
+  datesConfirmed: false,
+  setDatesConfirmed: (confirmed: boolean) => set({ datesConfirmed: confirmed }),
 
   dietFilter: "all",
   setDietFilter: (filter: "all" | "veg" | "non-veg") => set({ dietFilter: filter }),
 
   cart: [],
-  addToCart: (item: MenuItem, day: string, slot: string, quantity: number) =>
+  addToCart: (item: MenuItem, day: string, quantity: number) =>
     set((state) => {
-      const existing = state.cart.find((c) => c.menuItem.id === item.id && c.day === day && c.slot === slot)
+      const existing = state.cart.find((c) => c.menuItem.id === item.id && c.day === day)
       if (existing) {
         return {
           cart: state.cart.map((c) =>
-            c.menuItem.id === item.id && c.day === day && c.slot === slot
+            c.menuItem.id === item.id && c.day === day
               ? { ...c, quantity: c.quantity + quantity }
               : c,
           ),
         }
       }
-      return { cart: [...state.cart, { menuItem: item, day, slot, quantity }] }
+      return { cart: [...state.cart, { menuItem: item, day, quantity }] }
     }),
-  removeFromCart: (id: string, day: string, slot: string) =>
+  removeFromCart: (id: string, day: string) =>
     set((state) => ({
-      cart: state.cart.filter((c) => !(c.menuItem.id === id && c.day === day && c.slot === slot)),
+      cart: state.cart.filter((c) => !(c.menuItem.id === id && c.day === day)),
     })),
-  updateQuantity: (id: string, day: string, slot: string, quantity: number) =>
+  updateQuantity: (id: string, day: string, quantity: number) =>
     set((state) => ({
-      cart: state.cart.map((c) => (c.menuItem.id === id && c.day === day && c.slot === slot ? { ...c, quantity } : c)),
+      cart: state.cart.map((c) => (c.menuItem.id === id && c.day === day ? { ...c, quantity } : c)),
     })),
   clearCart: () => set({ cart: [] }),
   getTotalPrice: () => {

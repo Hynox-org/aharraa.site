@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { format, addDays } from "date-fns"
 import { useStore } from "@/lib/store"
 import { Button } from "@/components/ui/button"
 import { MenuItem as MenuItemComponent } from "@/components/menu-item"
@@ -123,20 +124,34 @@ const MENU_DATA: Record<string, any[]> = {
 }
 
 export function MenuDisplay() {
-  const selectedSlot = useStore((state) => state.selectedSlot)
   const selectedPlan = useStore((state) => state.selectedPlan)
+  const selectedDates = useStore((state) => state.selectedDates)
   const dietFilter = useStore((state) => state.dietFilter)
   const setDietFilter = useStore((state) => state.setDietFilter)
   const [selectedDay, setSelectedDay] = useState<number>(0)
   const [showDaySelector, setShowDaySelector] = useState(false)
 
-  const days = Array.from({ length: selectedPlan?.daysCount || 1 }, (_, i) => {
-    const date = new Date()
-    date.setDate(date.getDate() + i)
-    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-  })
+  const days = useMemo(() => {
+    if (!selectedDates) return []
+    const daysList = []
+    for (let i = 0; i < selectedPlan!.daysCount; i++) {
+      const currentDate = addDays(selectedDates.startDate, i)
+      daysList.push(format(currentDate, "EEEE, MMM d"))
+    }
+    return daysList
+  }, [selectedDates, selectedPlan])
 
-  const menu = MENU_DATA[selectedSlot || "breakfast"] || []
+  const formattedDays = useMemo(() => {
+    if (!selectedDates) return []
+    const daysList = []
+    for (let i = 0; i < selectedPlan!.daysCount; i++) {
+      const currentDate = addDays(selectedDates.startDate, i)
+      daysList.push(format(currentDate, "EEEE, MMM d"))
+    }
+    return daysList
+  }, [selectedDates, selectedPlan])
+
+  const menu = [...(MENU_DATA.breakfast || []), ...(MENU_DATA.lunch || []), ...(MENU_DATA.dinner || [])]
 
   const filteredMenu = menu.filter((item) => {
     if (dietFilter === "all") return true
@@ -150,21 +165,20 @@ export function MenuDisplay() {
       <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-2 text-balance">
-            {selectedSlot?.charAt(0).toUpperCase()}
-            {selectedSlot?.slice(1)} Menu
+            Select Your Meals
           </h1>
-          <p className="text-neutral-600">Select meals for {days[selectedDay]}</p>
+          <p className="text-neutral-600">Select meals for {formattedDays[selectedDay]}</p>
         </div>
         <div className="relative">
           <Button
             onClick={() => setShowDaySelector(!showDaySelector)}
             className="bg-orange-500 hover:bg-orange-600 text-white"
           >
-            {days[selectedDay]}
+            {formattedDays[selectedDay]}
           </Button>
           {showDaySelector && (
             <div className="absolute top-full right-0 mt-2 bg-white border border-neutral-200 rounded-lg shadow-lg z-10 min-w-40 max-h-64 overflow-y-auto">
-              {days.map((day, index) => (
+              {formattedDays.map((day, index) => (
                 <button
                   key={index}
                   onClick={() => {
@@ -216,8 +230,7 @@ export function MenuDisplay() {
           <MenuItemComponent
             key={item.id}
             item={item}
-            selectedDay={days[selectedDay]}
-            selectedSlot={selectedSlot || "breakfast"}
+            selectedDay={formattedDays[selectedDay]}
           />
         ))}
       </div>
@@ -228,14 +241,7 @@ export function MenuDisplay() {
         </div>
       )}
 
-      <div className="flex gap-4 justify-center">
-        <Button
-          onClick={() => useStore.setState({ selectedSlot: null })}
-          variant="outline"
-          className="border-neutral-200"
-        >
-          Back to Slots
-        </Button>
+      <div className="flex justify-center">
         <Button
           onClick={() => (window.location.href = "/cart")}
           className="bg-orange-500 hover:bg-orange-600 text-white"

@@ -1,9 +1,9 @@
 "use client"
 
+import { format } from "date-fns"
 import { Header } from "@/components/header"
 import { PlanSelection } from "@/components/plan-selection"
-import { LocationSelection } from "@/components/location-selection"
-import { SlotSelection } from "@/components/slot-selection"
+import { DateRangeSelection } from "@/components/date-range-selection"
 import { MenuDisplay } from "@/components/menu-display"
 import { useStore } from "@/lib/store"
 import { Button } from "@/components/ui/button"
@@ -14,8 +14,8 @@ import { Footer } from "@/components/footer"
 
 export default function Home() {
   const selectedPlan = useStore((state) => state.selectedPlan)
-  const selectedLocation = useStore((state) => state.selectedLocation)
-  const selectedSlot = useStore((state) => state.selectedSlot)
+  const selectedDates = useStore((state) => state.selectedDates)
+  const datesConfirmed = useStore((state) => state.datesConfirmed)
 
   return (
     <main className="min-h-screen bg-white">
@@ -54,11 +54,17 @@ export default function Home() {
             <ReviewsSection />
             <FaqSection />
           </>
-        ) : !selectedLocation ? (
+        ) : !selectedDates || !datesConfirmed ? (
           <>
             <div className="mb-8 flex items-center gap-4">
               <Button
-                onClick={() => useStore.setState({ selectedPlan: null })}
+                onClick={() => {
+                  useStore.setState({ 
+                    selectedPlan: null,
+                    selectedDates: null,
+                    datesConfirmed: false 
+                  })
+                }}
                 variant="outline"
                 className="border-neutral-200"
               >
@@ -70,31 +76,17 @@ export default function Home() {
                 </h2>
               </div>
             </div>
-            <LocationSelection />
-          </>
-        ) : !selectedSlot ? (
-          <>
-            <div className="mb-8 flex items-center gap-4">
-              <Button
-                onClick={() => useStore.setState({ selectedLocation: null })}
-                variant="outline"
-                className="border-neutral-200"
-              >
-                ← Back
-              </Button>
-              <div>
-                <h2 className="text-2xl font-bold text-neutral-900">
-                  {selectedPlan.name} - {selectedLocation}
-                </h2>
-              </div>
-            </div>
-            <SlotSelection />
+            <DateRangeSelection />
           </>
         ) : (
           <>
             <div className="mb-8 flex items-center gap-4">
               <Button
-                onClick={() => useStore.setState({ selectedSlot: null })}
+                onClick={() => {
+                  useStore.setState({ 
+                    datesConfirmed: false 
+                  })
+                }}
                 variant="outline"
                 className="border-neutral-200"
               >
@@ -102,8 +94,11 @@ export default function Home() {
               </Button>
               <div>
                 <h2 className="text-2xl font-bold text-neutral-900">
-                  {selectedPlan.name} - {selectedSlot.charAt(0).toUpperCase() + selectedSlot.slice(1)}
+                  {selectedPlan.name} - ₹{selectedPlan.totalPrice}
                 </h2>
+                <p className="text-sm text-neutral-600 mt-1">
+                  {format(selectedDates.startDate, "PPP")} to {format(selectedDates.endDate, "PPP")}
+                </p>
               </div>
             </div>
             <MenuDisplay />
