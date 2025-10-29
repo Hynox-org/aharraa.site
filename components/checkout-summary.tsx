@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { Fragment } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { useRouter } from "next/navigation";
+import { Fragment } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { MenuSelectionTimeline } from "./menu-selection-timeline";
 
 export interface OrderSummary {
   plan: {
@@ -60,98 +61,86 @@ export default function CheckoutSummary({ summary }: CartSummaryProps) {
   const router = useRouter();
 
   return (
-    <div className="grid gap-6 lg:grid-cols-12">
-      {/* Left Column - Plan & Menu Details */}
-      <div className="space-y-6 lg:col-span-8">
+    <div className="grid gap-8 lg:grid-cols-12 px-6 py-8 bg-gray-50 min-h-screen">
+      {/* Left Column - Plan & Vendor */}
+      <div className="space-y-8 lg:col-span-8">
         {/* Plan Details */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Plan Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-6 rounded-lg border border-gray-300 shadow-sm bg-white">
+          <h2 className="text-lg font-semibold mb-4 text-gray-900">
+            Plan Details
+          </h2>
+          <div className="grid grid-cols-2 gap-4 text-gray-700">
             <div>
-              <p className="text-sm text-muted-foreground">Plan Name</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                Plan Name
+              </p>
               <p className="font-medium">{summary.plan.name}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Duration</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                Duration
+              </p>
               <p className="font-medium">{summary.plan.duration}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Date Range</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                Date Range
+              </p>
               <p className="font-medium">
                 {summary.plan.dates.start} to {summary.plan.dates.end}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Price per Day</p>
-              <p className="font-medium">₹{summary.plan.pricePerDay.toLocaleString()}</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                Price per Day
+              </p>
+              <p className="font-medium">
+                ₹{summary.plan.pricePerDay.toLocaleString()}
+              </p>
             </div>
           </div>
         </Card>
 
         {/* Vendor Details */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Vendor Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-6 rounded-lg border border-gray-300 shadow-sm bg-white">
+          <h2 className="text-lg font-semibold mb-4 text-gray-900">
+            Vendor Details
+          </h2>
+          <div className="grid grid-cols-2 gap-4 text-gray-700">
             <div>
-              <p className="text-sm text-muted-foreground">Kitchen Name</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                Kitchen Name
+              </p>
               <p className="font-medium">{summary.vendor.name}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Location</p>
-              <p className="font-medium">{summary.vendor.location}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Contact</p>
-              <p className="font-medium">{summary.vendor.contactInfo.phone}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Rating</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                Rating
+              </p>
               <p className="font-medium">★ {summary.vendor.rating}</p>
             </div>
           </div>
         </Card>
 
-        {/* Menu Selection */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Menu Selection</h2>
-          <ScrollArea className="h-[400px] pr-4">
-            {Object.entries(summary.weeklyMenu).map(([day, data]) => (
-              <Fragment key={day}>
-                <div className="mb-6">
-                  <h3 className="font-medium mb-2">{data.date}</h3>
-                  <div className="space-y-4">
-                    {['breakfast', 'lunch', 'dinner'].map((slot) => (
-                      <div key={slot} className="bg-muted/50 p-4 rounded-lg">
-                        <p className="text-sm font-medium capitalize mb-2">{slot}</p>
-                        <div className="space-y-2">
-                          {(data.meals[slot as keyof typeof data.meals] ?? []).map((meal) => (
-                            <div key={meal.id} className="flex items-center">
-                              <span className="text-sm">{meal.name}</span>
-                              {meal.isVegetarian && (
-                                <span className="ml-2 inline-block w-4 h-4 bg-green-500 rounded-full" />
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <Separator className="my-4" />
-              </Fragment>
-            ))}
-          </ScrollArea>
+        {/* Menu Selection - Contained */}
+        <Card className="p-6 rounded-lg border border-gray-300 bg-white max-h-[360px] overflow-auto">
+          <MenuSelectionTimeline weeklyMenu={summary.weeklyMenu} />
         </Card>
 
         {/* Accompaniments */}
         {summary.accompaniments.length > 0 && (
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Accompaniments</h2>
-            <div className="space-y-4">
+          <Card className="p-6 rounded-lg border border-gray-300 shadow-sm bg-white">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900">
+              Accompaniments
+            </h2>
+            <div className="space-y-3">
               {summary.accompaniments.map((item) => (
-                <div key={item.id} className="flex justify-between items-center">
+                <div
+                  key={item.id}
+                  className="flex justify-between text-gray-700 font-medium"
+                >
                   <span>{item.name}</span>
-                  <span className="font-medium">₹{item.price.toLocaleString()}</span>
+                  <span>₹{item.price.toLocaleString()}</span>
                 </div>
               ))}
             </div>
@@ -161,44 +150,46 @@ export default function CheckoutSummary({ summary }: CartSummaryProps) {
 
       {/* Right Column - Order Summary */}
       <div className="lg:col-span-4">
-        <Card className="p-6 sticky top-4">
-          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+        <Card className="p-6 rounded-lg border border-gray-300 shadow-md bg-white sticky top-6">
+          <h2 className="text-lg font-semibold mb-5 text-gray-900">
+            Order Summary
+          </h2>
           <div className="space-y-4">
-            {/* Plan Total */}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Plan Total</span>
-              <span className="font-medium">₹{summary.pricing.planTotal.toLocaleString()}</span>
-            </div>
-
-            {/* Accompaniments Total */}
-            {summary.pricing.accompanimentsTotal > 0 && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Accompaniments</span>
-                <span className="font-medium">₹{summary.pricing.accompanimentsTotal.toLocaleString()}</span>
-              </div>
-            )}
-
-            {/* GST */}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">GST (5%)</span>
-              <span className="font-medium">
-                ₹{Math.round((summary.pricing.planTotal + summary.pricing.accompanimentsTotal) * 0.05).toLocaleString()}
+            <div className="flex justify-between text-gray-600">
+              <span>Plan Total</span>
+              <span className="font-semibold">
+                ₹{summary.pricing.planTotal.toLocaleString()}
               </span>
             </div>
-
-            <Separator />
-
-            {/* Grand Total */}
-            <div className="flex justify-between">
-              <span className="font-medium">Grand Total</span>
-              <span className="font-bold text-lg">₹{summary.pricing.grandTotal.toLocaleString()}</span>
+            {summary.pricing.accompanimentsTotal > 0 && (
+              <div className="flex justify-between text-gray-600">
+                <span>Accompaniments</span>
+                <span className="font-semibold">
+                  ₹{summary.pricing.accompanimentsTotal.toLocaleString()}
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between text-gray-600">
+              <span>GST (5%)</span>
+              <span className="font-semibold">
+                ₹
+                {Math.round(
+                  (summary.pricing.planTotal +
+                    summary.pricing.accompanimentsTotal) *
+                    0.05
+                ).toLocaleString()}
+              </span>
             </div>
-
-            {/* Checkout Button */}
-            <Button 
-              className="w-full" 
+            <Separator />
+            <div className="flex justify-between font-semibold text-lg text-indigo-700">
+              <span>Grand Total</span>
+              <span>₹{summary.pricing.grandTotal.toLocaleString()}</span>
+            </div>
+            <Button
+              className="w-full mt-6"
               size="lg"
-              onClick={() => router.push('/checkout')}
+              onClick={() => router.push("/checkout")}
+              aria-label="Proceed to checkout"
             >
               Proceed to Checkout
             </Button>
