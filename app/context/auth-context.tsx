@@ -45,9 +45,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const response = await api.post("/auth/verify", { access_token: accessToken });
+      const access_token = response.headers["x-access-token"] || response.headers["X-Access-Token"];
+      const userId = response.headers["x-user-id"] || response.headers["X-User-Id"];
       if (response.status === 200) {
         setIsAuthenticated(true);
         setUser(response.data.user); // Assuming the verify endpoint returns user data
+        Cookies.set("x-access-token", access_token, { expires: 7 });
+        Cookies.set("x-user-id", userId, { expires: 7 });
       } else {
         setIsAuthenticated(false);
         setUser(null);
