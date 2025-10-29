@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation"; // Import useSearchParams
 import { Mail, Lock, User } from "lucide-react";
 import Image from "next/image";
@@ -21,7 +21,7 @@ import { AuthApiResponse } from "@/lib/types";
 import { useStore } from "@/lib/store";
 
 
-export default function AuthPage() {
+function AuthPageContent() {
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [signUpEmail, setSignUpEmail] = useState("");
@@ -390,5 +390,13 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div>Loading authentication...</div>}>
+      <AuthPageContent />
+    </Suspense>
   );
 }

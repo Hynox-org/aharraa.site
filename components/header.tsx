@@ -26,7 +26,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-3 flex-shrink-0">
           <Image src="/logo.png" alt="Aharraa" width={45} height={45} className="rounded" unoptimized />
           <div className="hidden sm:block">
-            <span className="text-2xl font-bold text-orange-500">Aharraa</span>
+            <span className="text-2xl font-bold text-green-900">Aharraa</span>
             <p className="text-xs text-neutral-600">Fresh Home-Cooked Meals</p>
           </div>
         </Link>
