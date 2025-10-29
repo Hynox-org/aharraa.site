@@ -124,7 +124,7 @@ export default function CheckoutSummary({ summary }: CartSummaryProps) {
                       <div key={slot} className="bg-muted/50 p-4 rounded-lg">
                         <p className="text-sm font-medium capitalize mb-2">{slot}</p>
                         <div className="space-y-2">
-                          {data.meals[slot as keyof typeof data.meals].map((meal) => (
+                          {(data.meals[slot as keyof typeof data.meals] ?? []).map((meal) => (
                             <div key={meal.id} className="flex items-center">
                               <span className="text-sm">{meal.name}</span>
                               {meal.isVegetarian && (

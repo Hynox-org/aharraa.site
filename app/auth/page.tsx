@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation"; // Import useSearchParams
 import { Mail, Lock, User } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/app/context/auth-context"; // Import useAuth
@@ -29,20 +29,21 @@ export default function AuthPage() {
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams(); // Initialize useSearchParams
   const { isAuthenticated, loading, login } = useAuth(); // Get signIn, isAuthenticated, and isLoading from AuthContext
+  const returnUrl = searchParams.get("returnUrl") || "/"; // Get returnUrl from query params, default to /
 
-  useEffect(() => {
-    if (!loading && isAuthenticated) {
-      router.push("/");
-    }
-  }, [isAuthenticated, loading, router]);
+  // Removed useEffect for redirection, as login function in AuthContext handles it.
+  // This prevents potential race conditions or double redirections.
 
   if (loading) {
     return <div>Loading...</div>; // Or a more sophisticated loading spinner
   }
 
   if (isAuthenticated) {
-    return null; // Don't render anything if authenticated and not loading, as we are redirecting
+    // If authenticated, the login function in AuthContext should have already redirected.
+    // This component should not render anything further if already authenticated.
+    return null;
   }
 
   const handleLogin = async () => {
@@ -52,7 +53,7 @@ export default function AuthPage() {
         password: signInPassword,
       });
       if (data.accessToken) {
-        await login(data.accessToken); // Await the login function from AuthContext
+        await login(data.accessToken, returnUrl); // Pass returnUrl to login function
       }
       toast.success("Sign in successful!");
     } catch (error: any) {
@@ -68,11 +69,12 @@ export default function AuthPage() {
       });
 
       if (data.accessToken) {
-        await login(data.accessToken); // Await the login function from AuthContext
+        await login(data.accessToken, returnUrl); // Pass returnUrl to login function
       }
 
       toast.success("Signup successful!");
-      router.push("/");
+      // The login function now handles redirection, so no need to push here
+      // router.push("/");
     } catch (error: any) {
       alert(error.response?.data?.error || "An error occurred during sign up.");
     }

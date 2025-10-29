@@ -9,7 +9,8 @@ import { VENDORS } from "@/lib/vendor-data"
 import { VendorInfo } from "@/components/vendor-info"
 
 export function MenuDisplay() {
-  const [activeDay, setActiveDay] = useState<string | null>("Monday") // Default to Monday
+  const [activeDay, setActiveDay] = useState<string | null>("Sunday") // Default to Monday
+  const [selectedMealTypes, setSelectedMealTypes] = useState<Set<MealType>>(new Set());
   const store = useStore()
   const {
     dietFilter,
@@ -21,14 +22,34 @@ export function MenuDisplay() {
     cart
   } = store
 
-  // Get menu based on selected vendor and diet preference
-  const vendorMenu = VENDOR_MENUS.find(menu => menu.vendorId === selectedVendorId)
-  const menu = vendorMenu ? (dietFilter === "veg" ? vendorMenu.veg : vendorMenu.nonVeg) : null
   const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
   const mealTypes: MealType[] = ["breakfast", "lunch", "dinner"]
 
+  useEffect(() => {
+    // Initialize selectedMealTypes with all meal types selected
+    setSelectedMealTypes(new Set<MealType>(mealTypes));
+  }, []);
+
+  // Get menu based on selected vendor and diet preference
+  const vendorMenu = VENDOR_MENUS.find(menu => menu.vendorId === selectedVendorId)
+  const menu = vendorMenu ? (dietFilter === "veg" ? vendorMenu.veg : vendorMenu.nonVeg) : null
+
+  const toggleMealType = (mealType: MealType) => {
+    setSelectedMealTypes(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(mealType)) {
+        if (newSelected.size > 1) { // Ensure at least one meal type is selected
+          newSelected.delete(mealType);
+        }
+      } else {
+        newSelected.add(mealType);
+      }
+      return newSelected;
+    });
+  };
+
   const getMealItems = (day: string, mealType: MealType) => {
-    if (!menu) return []
+    if (!menu || !selectedMealTypes.has(mealType)) return []
     const weeklyMenuItems = WEEKLY_MENU_TEMPLATE[day as keyof typeof WEEKLY_MENU_TEMPLATE][mealType]
     return weeklyMenuItems.map((index: number) => menu[mealType][index])
   }
@@ -69,23 +90,18 @@ export function MenuDisplay() {
           day,
           {
             date: date.toLocaleDateString(),
-            meals: {
-              breakfast: getMealItems(day, "breakfast").map(item => ({
-                id: item.id,
-                name: item.name,
-                isVegetarian: item.isVegetarian
-              })),
-              lunch: getMealItems(day, "lunch").map(item => ({
-                id: item.id,
-                name: item.name,
-                isVegetarian: item.isVegetarian
-              })),
-              dinner: getMealItems(day, "dinner").map(item => ({
-                id: item.id,
-                name: item.name,
-                isVegetarian: item.isVegetarian
-              }))
-            }
+            meals: Object.fromEntries(
+              selectedMealTypes.size > 0
+                ? Array.from(selectedMealTypes).map(mealType => [
+                    mealType,
+                    getMealItems(day, mealType).map(item => ({
+                      id: item.id,
+                      name: item.name,
+                      isVegetarian: item.isVegetarian
+                    }))
+                  ])
+                : []
+            )
           }
         ])
       ),
@@ -97,9 +113,7 @@ export function MenuDisplay() {
       pricing: {
         planTotal: selectedPlan?.totalPrice || 0,
         accompanimentsTotal: selectedAccompaniments.reduce((total, acc) => total + acc.price, 0),
-        get grandTotal() {
-          return this.planTotal + this.accompanimentsTotal;
-        }
+        grandTotal: (selectedPlan?.totalPrice || 0) + selectedAccompaniments.reduce((total, acc) => total + acc.price, 0)
       }
     };
 
@@ -131,6 +145,24 @@ export function MenuDisplay() {
         </button>
       </div>
 
+      {/* Global Meal Type Selection */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        <span className="text-sm font-semibold text-neutral-700 self-center">Select Meal Types for Order:</span>
+        {mealTypes.map((mealType) => (
+          <button
+            key={mealType}
+            onClick={() => toggleMealType(mealType)}
+            className={`px-4 py-2 rounded-full font-medium transition flex items-center gap-2 ${
+              selectedMealTypes.has(mealType)
+                ? "bg-blue-500 text-white"
+                : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+            }`}
+          >
+            {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+          </button>
+        ))}
+      </div>
+
       {/* Weekly Menu Display */}
       <div className="grid grid-cols-12 gap-6 border rounded-lg bg-white">
         {/* Left Column - Days */}
@@ -153,41 +185,41 @@ export function MenuDisplay() {
           {activeDay ? (
             <div className="space-y-8">
               {mealTypes.map((mealType) => (
-                <div key={mealType} className="space-y-4">
-                  <h4 className="text-xl font-semibold capitalize text-neutral-800 border-b pb-2">
-                    {mealType}
-                  </h4>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {getMealItems(activeDay, mealType).map((item: MenuItem) => (
-                      <div key={item.id} className="flex gap-4 p-4 border rounded-lg hover:bg-neutral-50 transition">
-                        <div className="relative w-24 h-24 flex-shrink-0">
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fill
-                            className="object-cover rounded-lg"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start gap-2 mb-1">
-                            <h5 className="font-semibold text-neutral-900 truncate">{item.name}</h5>
-                            <span className={`px-2 py-0.5 rounded-full text-sm font-medium flex-shrink-0 ${
-                              dietFilter === "veg" 
-                                ? "bg-green-100 text-green-700" 
-                                : "bg-red-100 text-red-700"
-                            }`}>
-                              {dietFilter === "veg" ? "Veg" : "Non-Veg"}
-                            </span>
+                selectedMealTypes.has(mealType) && (
+                  <div key={mealType} className="space-y-4">
+                    <h4 className="text-xl font-semibold capitalize text-neutral-800 border-b pb-2">
+                      {mealType}
+                    </h4>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {getMealItems(activeDay, mealType).map((item: MenuItem) => (
+                        <div key={item.id} className="flex gap-4 p-4 border rounded-lg hover:bg-neutral-50 transition">
+                          <div className="relative w-24 h-24 flex-shrink-0">
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              fill
+                              className="object-cover rounded-lg"
+                            />
                           </div>
-                          <p className="text-sm text-neutral-600 line-clamp-2">{item.description}</p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-start gap-2 mb-1">
+                              <h5 className="font-semibold text-neutral-900 truncate">{item.name}</h5>
+                              <span className={`px-2 py-0.5 rounded-full text-sm font-medium flex-shrink-0 ${
+                                dietFilter === "veg"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}>
+                                {dietFilter === "veg" ? "Veg" : "Non-Veg"}
+                              </span>
+                            </div>
+                            <p className="text-sm text-neutral-600 line-clamp-2">{item.description}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )
               ))}
-              
-
             </div>
           ) : (
             <div className="flex items-center justify-center h-full text-neutral-500">

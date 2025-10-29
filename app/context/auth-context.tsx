@@ -7,6 +7,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { useRouter, usePathname } from "next/navigation"; // Import useRouter and usePathname
 import { validateToken } from "@/lib/api";
 
 interface User {
@@ -18,7 +19,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (token: string) => void;
+  login: (token: string, returnUrl?: string) => void; // Update login function signature
   logout: () => void;
 }
 
@@ -28,6 +29,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false); // New state to track active login process
+  const router = useRouter(); // Initialize useRouter
+  const pathname = usePathname(); // Initialize usePathname
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -49,20 +53,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkAuth();
   }, []);
 
-  const login = async (token: string) => { // Make login function async
+  useEffect(() => {
+    // Only redirect if authenticated, on /auth, and not currently in a login process
+    if (isAuthenticated && pathname === "/auth" && !isLoggingIn) {
+      router.push("/"); // If already authenticated and on /auth, redirect to home page
+    }
+  }, [isAuthenticated, pathname, router, isLoggingIn]);
+
+  const login = async (token: string, returnUrl?: string) => { // Make login function async and accept returnUrl
     localStorage.setItem("aharraa-u-token", token);
     setLoading(true);
+    setIsLoggingIn(true); // Set isLoggingIn to true at the start of login
     try {
       const response = await validateToken(token);
       setUser(response.user);
       setIsAuthenticated(true);
+      setLoading(false); // Set loading to false before redirection
+      if (returnUrl) {
+        router.push(returnUrl);
+      } else {
+        router.push("/"); // Default redirect to home page
+      }
     } catch (error) {
       console.error("Login failed:", error);
       localStorage.removeItem("aharraa-u-token");
       setUser(null);
       setIsAuthenticated(false);
+      setLoading(false); // Also set loading to false on error
     } finally {
-      setLoading(false);
+      setIsLoggingIn(false); // Always set isLoggingIn to false at the end
     }
   };
 
