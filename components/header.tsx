@@ -3,10 +3,12 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useStore } from "@/lib/store"
-import { ShoppingCart, Menu, X } from "lucide-react"
+import { ShoppingCart, Menu, X, UserCircle } from "lucide-react"
 import { useState } from "react"
+import { useAuth } from "@/app/context/auth-context"
 
 export function Header() {
+  const { isAuthenticated, user, signOut } = useAuth()
   const cart = useStore((state) => state.cart)
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -40,18 +42,38 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/auth"
-            className="text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/auth"
-            className="text-sm font-medium text-white bg-orange-500 px-4 py-2 rounded-md hover:bg-orange-600 transition"
-          >
-            Sign Up
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
+              >
+                <UserCircle size={20} />
+                {user?.name || "Profile"}
+              </Link>
+              <button
+                onClick={signOut}
+                className="text-sm font-medium text-white bg-red-500 px-4 py-2 rounded-md hover:bg-red-600 transition"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth"
+                className="text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth"
+                className="text-sm font-medium text-white bg-orange-500 px-4 py-2 rounded-md hover:bg-orange-600 transition"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
           <Link
             href="/cart"
             className="relative flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
@@ -67,12 +89,21 @@ export function Header() {
 
         {/* Mobile Menu Button and Cart */}
         <div className="md:hidden flex items-center gap-4">
-          <Link
-            href="/auth"
-            className="text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
-          >
-            Sign In
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
+            >
+              <UserCircle size={20} />
+            </Link>
+          ) : (
+            <Link
+              href="/auth"
+              className="text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
+            >
+              Sign In
+            </Link>
+          )}
           <Link
             href="/cart"
             className="relative flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
@@ -108,13 +139,34 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/auth"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition rounded-lg"
-            >
-              Sign Up
-            </Link>
+            {isAuthenticated ? (
+              <button
+                onClick={() => {
+                  signOut()
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left px-4 py-3 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition rounded-lg"
+              >
+                Sign Out
+              </button>
+            ) : (
+              <>
+                <Link
+                  href="/auth"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-orange-50 hover:text-orange-500 transition rounded-lg"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition rounded-lg"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}

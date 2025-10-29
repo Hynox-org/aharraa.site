@@ -1,23 +1,53 @@
-"use client"
+"use client";
 
-import { format } from "date-fns"
-import { Header } from "@/components/header"
-import { PlanSelection } from "@/components/plan-selection"
-import { DateRangeSelection } from "@/components/date-range-selection"
-import { VendorSelection } from "@/components/vendor-selection"
-import { MenuDisplay } from "@/components/menu-display"
-import { useStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { ReviewsSection } from "@/components/reviews-section"
-import { FaqSection } from "@/components/faq-section"
-import { FoodShowcase } from "@/components/food-showcase"
-import { Footer } from "@/components/footer"
+import { format } from "date-fns";
+import { Header } from "@/components/header";
+import { PlanSelection } from "@/components/plan-selection";
+import { DateRangeSelection } from "@/components/date-range-selection";
+import { VendorSelection } from "@/components/vendor-selection";
+import { MenuDisplay } from "@/components/menu-display";
+import { useStore } from "@/lib/store";
+import { Button } from "@/components/ui/button";
+import { ReviewsSection } from "@/components/reviews-section";
+import { FaqSection } from "@/components/faq-section";
+import { FoodShowcase } from "@/components/food-showcase";
+import { Footer } from "@/components/footer";
+import { useRouter } from "next/navigation";
+import { useAuth } from "./context/auth-context";
+import { useEffect } from "react";
 
 export default function Home() {
-  const selectedPlan = useStore((state) => state.selectedPlan)
-  const selectedDates = useStore((state) => state.selectedDates)
-  const datesConfirmed = useStore((state) => state.datesConfirmed)
-  const selectedVendorId = useStore((state) => state.selectedVendorId)
+  const selectedPlan = useStore((state) => state.selectedPlan);
+  const selectedDates = useStore((state) => state.selectedDates);
+  const datesConfirmed = useStore((state) => state.datesConfirmed);
+  const selectedVendorId = useStore((state) => state.selectedVendorId);
+
+  const router = useRouter();
+  const { verifySession, isLoading } = useAuth();
+
+  useEffect(() => {
+    const handleOAuthRedirect = async () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const params = new URLSearchParams(hash.substring(1)); // Remove '#'
+        const accessToken = params.get("access_token");
+
+        if (accessToken) {
+          await verifySession(accessToken);
+          // Clean up the URL hash
+          window.history.replaceState(
+            null,
+            "",
+            window.location.pathname + window.location.search
+          );
+          router.push("/");
+        }
+      }
+    };
+    if (isLoading === false) {
+      handleOAuthRedirect();
+    }
+  }, [router, isLoading]);
 
   return (
     <main className="min-h-screen bg-white">
@@ -32,10 +62,13 @@ export default function Home() {
                 <h1 className="text-5xl md:text-6xl font-bold text-neutral-900 mb-4 text-balance">
                   Fresh, Home-Cooked Meals
                 </h1>
-                <p className="text-xl text-orange-600 font-semibold mb-4">Delivered to Your Door</p>
+                <p className="text-xl text-orange-600 font-semibold mb-4">
+                  Delivered to Your Door
+                </p>
                 <p className="text-neutral-600 mb-8 text-balance">
-                  Our talented home chefs prepare delicious meals made with locally-sourced ingredients, so you can
-                  enjoy home style food in the comfort of your own home.
+                  Our talented home chefs prepare delicious meals made with
+                  locally-sourced ingredients, so you can enjoy home style food
+                  in the comfort of your own home.
                 </p>
               </div>
               <div className="flex justify-center animate-slide-in-right">
@@ -61,11 +94,11 @@ export default function Home() {
             <div className="mb-8 flex items-center gap-4">
               <Button
                 onClick={() => {
-                  useStore.setState({ 
+                  useStore.setState({
                     selectedPlan: null,
                     selectedDates: null,
-                    datesConfirmed: false 
-                  })
+                    datesConfirmed: false,
+                  });
                 }}
                 variant="outline"
                 className="border-neutral-200"
@@ -85,10 +118,10 @@ export default function Home() {
             <div className="mb-8 flex items-center gap-4">
               <Button
                 onClick={() => {
-                  useStore.setState({ 
+                  useStore.setState({
                     datesConfirmed: false,
-                    selectedDates: null
-                  })
+                    selectedDates: null,
+                  });
                 }}
                 variant="outline"
                 className="border-neutral-200"
@@ -100,7 +133,8 @@ export default function Home() {
                   {selectedPlan.name} - ₹{selectedPlan.totalPrice}
                 </h2>
                 <p className="text-sm text-neutral-600 mt-1">
-                  {format(selectedDates.startDate, "PPP")} to {format(selectedDates.endDate, "PPP")}
+                  {format(selectedDates.startDate, "PPP")} to{" "}
+                  {format(selectedDates.endDate, "PPP")}
                 </p>
               </div>
             </div>
@@ -111,9 +145,9 @@ export default function Home() {
             <div className="mb-8 flex items-center gap-4">
               <Button
                 onClick={() => {
-                  useStore.setState({ 
-                    selectedVendorId: null 
-                  })
+                  useStore.setState({
+                    selectedVendorId: null,
+                  });
                 }}
                 variant="outline"
                 className="border-neutral-200"
@@ -125,7 +159,8 @@ export default function Home() {
                   {selectedPlan.name} - ₹{selectedPlan.totalPrice}
                 </h2>
                 <p className="text-sm text-neutral-600 mt-1">
-                  {format(selectedDates.startDate, "PPP")} to {format(selectedDates.endDate, "PPP")}
+                  {format(selectedDates.startDate, "PPP")} to{" "}
+                  {format(selectedDates.endDate, "PPP")}
                 </p>
               </div>
             </div>
@@ -136,5 +171,5 @@ export default function Home() {
 
       <Footer />
     </main>
-  )
+  );
 }

@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,10 +10,67 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Mail, Lock, User } from "lucide-react";
 import Image from "next/image";
+import { signup, googleOAuth } from "@/lib/auth"; // Keep signup if it's not handled by AuthContext yet
+import { useAuth } from "@/app/context/auth-context"; // Import useAuth
+import { toast } from "sonner";
 
 export default function AuthPage() {
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInPassword, setSignInPassword] = useState("");
+  const [signUpEmail, setSignUpEmail] = useState("");
+  const [signUpPassword, setSignUpPassword] = useState("");
+  const router = useRouter();
+  const { signIn, isAuthenticated, isLoading } = useAuth(); // Get signIn, isAuthenticated, and isLoading from AuthContext
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Or a more sophisticated loading spinner
+  }
+
+  if (isAuthenticated) {
+    return null; // Don't render anything if authenticated and not loading, as we are redirecting
+  }
+
+  const handleSignIn = async () => {
+    try {
+      await signIn(signInEmail, signInPassword); // Use signIn from AuthContext
+      toast.success("Sign in successful!");
+    } catch (error: any) {
+      alert(error.response?.data?.error || "An error occurred during sign in.");
+    }
+  };
+
+  const handleSignUp = async () => {
+    try {
+      await signup(signUpEmail, signUpPassword); // Use signup from lib/auth
+      toast.success("Sign up successful! Signing you in...");
+      await signIn(signUpEmail, signUpPassword); // Sign in after successful signup to update AuthContext
+    } catch (error: any) {
+      alert(error.response?.data?.error || "An error occurred during sign up.");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const redirectUrl = window.location.origin + "/auth/callback";
+      const response = await googleOAuth(redirectUrl);
+      console.log(response)
+      router.push(response.url)
+      // window.location.href = response; // Redirect to Google OAuth
+    } catch (error: any) {
+      alert(error.response?.data?.error || "An error occurred during Google sign in.");
+    }
+  };
+
   return (
     <div className="flex min-h-screen h-screen overflow-hidden">
       {/* Left Side - Branding & Image */}
@@ -21,8 +79,7 @@ export default function AuthPage() {
         <div
           className="absolute inset-0 opacity-30"
           style={{
-            backgroundImage:
-              "/auth-bg.jpeg",
+            backgroundImage: "url('/auth-bg.jpeg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -108,6 +165,8 @@ export default function AuthPage() {
                         type="email"
                         placeholder="you@example.com"
                         className="pl-10 h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        value={signInEmail}
+                        onChange={(e) => setSignInEmail(e.target.value)}
                       />
                     </div>
                   </div>
@@ -133,11 +192,16 @@ export default function AuthPage() {
                         type="password"
                         placeholder="Enter your password"
                         className="pl-10 h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        value={signInPassword}
+                        onChange={(e) => setSignInPassword(e.target.value)}
                       />
                     </div>
                   </div>
 
-                  <Button className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base mt-6">
+                  <Button
+                    className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base mt-6"
+                    onClick={handleSignIn}
+                  >
                     Sign In
                   </Button>
 
@@ -155,6 +219,7 @@ export default function AuthPage() {
                   <Button
                     variant="outline"
                     className="w-full h-12 border-2 hover:bg-gray-50 font-medium"
+                    onClick={handleGoogleSignIn}
                   >
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                       <path
@@ -205,6 +270,8 @@ export default function AuthPage() {
                         type="email"
                         placeholder="you@example.com"
                         className="pl-10 h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        value={signUpEmail}
+                        onChange={(e) => setSignUpEmail(e.target.value)}
                       />
                     </div>
                   </div>
@@ -222,6 +289,8 @@ export default function AuthPage() {
                         type="password"
                         placeholder="Create a strong password"
                         className="pl-10 h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        value={signUpPassword}
+                        onChange={(e) => setSignUpPassword(e.target.value)}
                       />
                     </div>
                   </div>
@@ -250,7 +319,10 @@ export default function AuthPage() {
                     </label>
                   </div>
 
-                  <Button className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base mt-6">
+                  <Button
+                    className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base mt-6"
+                    onClick={handleSignUp}
+                  >
                     Create Account
                   </Button>
 
@@ -268,6 +340,7 @@ export default function AuthPage() {
                   <Button
                     variant="outline"
                     className="w-full h-12 border-2 hover:bg-gray-50 font-medium"
+                    onClick={handleGoogleSignIn}
                   >
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                       <path
@@ -287,7 +360,7 @@ export default function AuthPage() {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                       />
                     </svg>
-                    Sign up with Google
+                    Sign in with Google
                   </Button>
                 </CardContent>
               </Card>
