@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { MenuSelectionTimeline } from "./menu-selection-timeline";
+import { DeliveryAddress } from "@/lib/store";
 
 export interface OrderSummary {
   plan: {
@@ -51,14 +52,56 @@ export interface OrderSummary {
     accompanimentsTotal: number;
     grandTotal: number;
   };
+  deliveryAddresses: {
+    breakfast: DeliveryAddress | null;
+    lunch: DeliveryAddress | null;
+    dinner: DeliveryAddress | null;
+  };
 }
 
 interface CartSummaryProps {
   summary: OrderSummary;
+  onProceedToPayment: () => void;
+  deliveryAddresses: {
+    breakfast: DeliveryAddress | null;
+    lunch: DeliveryAddress | null;
+    dinner: DeliveryAddress | null;
+  };
 }
 
-export default function CheckoutSummary({ summary }: CartSummaryProps) {
+export default function CheckoutSummary({ summary, onProceedToPayment, deliveryAddresses }: CartSummaryProps) {
   const router = useRouter();
+
+  const hasBreakfastMeals = Object.values(summary.weeklyMenu).some(
+    (dayMenu) => dayMenu.meals.breakfast && dayMenu.meals.breakfast.length > 0
+  );
+  const hasLunchMeals = Object.values(summary.weeklyMenu).some(
+    (dayMenu) => dayMenu.meals.lunch && dayMenu.meals.lunch.length > 0
+  );
+  const hasDinnerMeals = Object.values(summary.weeklyMenu).some(
+    (dayMenu) => dayMenu.meals.dinner && dayMenu.meals.dinner.length > 0
+  );
+
+  const shouldShowDeliveryAddresses =
+    (hasBreakfastMeals && deliveryAddresses.breakfast) ||
+    (hasLunchMeals && deliveryAddresses.lunch) ||
+    (hasDinnerMeals && deliveryAddresses.dinner);
+
+  const isBreakfastAddressMissing = hasBreakfastMeals && !deliveryAddresses.breakfast?.formattedAddress;
+  const isLunchAddressMissing = hasLunchMeals && !deliveryAddresses.lunch?.formattedAddress;
+  const isDinnerAddressMissing = hasDinnerMeals && !deliveryAddresses.dinner?.formattedAddress;
+
+  const areAllRequiredAddressesFilled = !(isBreakfastAddressMissing || isLunchAddressMissing || isDinnerAddressMissing);
+
+  const handleProceedToPayment = () => {
+    if (!areAllRequiredAddressesFilled) {
+      onProceedToPayment(); // Open modal
+    } else {
+      // Proceed to actual payment page
+      console.log("Proceeding to payment with summary:", summary);
+      // router.push('/payment'); // Uncomment this line when actual payment page is ready
+    }
+  };
 
   return (
     <div className="grid gap-8 lg:grid-cols-12 px-6 py-8 bg-gray-50 min-h-screen">
@@ -127,6 +170,35 @@ export default function CheckoutSummary({ summary }: CartSummaryProps) {
           <MenuSelectionTimeline weeklyMenu={summary.weeklyMenu} />
         </Card>
 
+        {/* Delivery Addresses */}
+        {shouldShowDeliveryAddresses && (
+          <Card className="p-6 rounded-lg border border-gray-300 shadow-sm bg-white">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900">
+              Delivery Addresses
+            </h2>
+            <div className="space-y-3 text-gray-700">
+              {hasBreakfastMeals && summary.deliveryAddresses.breakfast?.formattedAddress && (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Breakfast</p>
+                  <p className="font-medium">{summary.deliveryAddresses.breakfast.formattedAddress}</p>
+                </div>
+              )}
+              {hasLunchMeals && summary.deliveryAddresses.lunch?.formattedAddress && (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Lunch</p>
+                  <p className="font-medium">{summary.deliveryAddresses.lunch.formattedAddress}</p>
+                </div>
+              )}
+              {hasDinnerMeals && summary.deliveryAddresses.dinner?.formattedAddress && (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Dinner</p>
+                  <p className="font-medium">{summary.deliveryAddresses.dinner.formattedAddress}</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
         {/* Accompaniments */}
         {summary.accompaniments.length > 0 && (
           <Card className="p-6 rounded-lg border border-gray-300 shadow-sm bg-white">
@@ -188,10 +260,10 @@ export default function CheckoutSummary({ summary }: CartSummaryProps) {
             <Button
               className="w-full mt-6"
               size="lg"
-              onClick={() => router.push("/checkout")}
+              onClick={handleProceedToPayment}
               aria-label="Proceed to checkout"
             >
-              Proceed to Checkout
+              Proceed to Payment
             </Button>
           </div>
         </Card>

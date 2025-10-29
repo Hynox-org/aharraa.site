@@ -1,12 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Header } from "@/components/header"
-import { useStore } from "@/lib/store"
+import { useStore, DeliveryAddress } from "@/lib/store"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import CheckoutSummary from "@/components/checkout-summary"
+import { LocationSelection } from "@/components/location-selection"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { shallow } from "zustand/shallow"
 
 interface OrderSummary {
   plan: {
@@ -51,18 +54,43 @@ interface OrderSummary {
     accompanimentsTotal: number
     grandTotal: number
   }
+  deliveryAddresses: {
+    breakfast: DeliveryAddress | null,
+    lunch: DeliveryAddress | null,
+    dinner: DeliveryAddress | null,
+  }
 }
 
 export default function CheckoutPage() {
   const router = useRouter()
   const [summary, setSummary] = useState<OrderSummary | null>(null)
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const deliveryAddresses = useStore((state) => state.deliveryAddresses);
 
   useEffect(() => {
     const savedSummary = localStorage.getItem('orderSummary')
     if (savedSummary) {
-      setSummary(JSON.parse(savedSummary))
+      const parsedSummary = JSON.parse(savedSummary);
+      setSummary({ ...parsedSummary, deliveryAddresses });
     }
-  }, [])
+  }, [JSON.stringify(deliveryAddresses)]) // Re-run effect if deliveryAddresses change
+
+  const { hasBreakfastMeals, hasLunchMeals, hasDinnerMeals } = useMemo(() => {
+    if (!summary?.weeklyMenu) {
+      return { hasBreakfastMeals: false, hasLunchMeals: false, hasDinnerMeals: false };
+    }
+
+    const hasBreakfast = Object.values(summary.weeklyMenu).some(
+      (dayMenu) => dayMenu.meals.breakfast && dayMenu.meals.breakfast.length > 0
+    );
+    const hasLunch = Object.values(summary.weeklyMenu).some(
+      (dayMenu) => dayMenu.meals.lunch && dayMenu.meals.lunch.length > 0
+    );
+    const hasDinner = Object.values(summary.weeklyMenu).some(
+      (dayMenu) => dayMenu.meals.dinner && dayMenu.meals.dinner.length > 0
+    );
+    return { hasBreakfastMeals: hasBreakfast, hasLunchMeals: hasLunch, hasDinnerMeals: hasDinner };
+  }, [summary?.weeklyMenu]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
@@ -78,7 +106,31 @@ export default function CheckoutPage() {
             </Link>
           </div>
         ) : (
-          <CheckoutSummary summary={summary} />
+          <>
+            <CheckoutSummary
+              summary={summary}
+              onProceedToPayment={() => setIsLocationModalOpen(true)}
+              deliveryAddresses={deliveryAddresses}
+            />
+
+            <Dialog open={isLocationModalOpen} onOpenChange={setIsLocationModalOpen}>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Confirm Delivery Addresses</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  {hasBreakfastMeals && <LocationSelection mealType="breakfast" />}
+                  {hasLunchMeals && <LocationSelection mealType="lunch" />}
+                  {hasDinnerMeals && <LocationSelection mealType="dinner" />}
+                </div>
+                <DialogFooter>
+                  <Button type="button" onClick={() => setIsLocationModalOpen(false)}>
+                    Done
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
         )}
       </div>
     </main>

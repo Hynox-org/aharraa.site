@@ -52,10 +52,40 @@ interface Store {
   updateQuantity: (id: string, day: string, quantity: number) => void
   clearCart: () => void
   getTotalPrice: () => number
+
+  deliveryAddresses: {
+    breakfast: DeliveryAddress | null,
+    lunch: DeliveryAddress | null,
+    dinner: DeliveryAddress | null,
+  },
+  setDeliveryAddress: (mealType: "breakfast" | "lunch" | "dinner", address: DeliveryAddress) => void,
+}
+
+export interface DeliveryAddress {
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  latitude?: number;
+  longitude?: number;
+  formattedAddress?: string;
 }
 
 export const useStore = create<Store>((set, get) => ({
   selectedPlan: null,
+  deliveryAddresses: {
+    breakfast: null,
+    lunch: null,
+    dinner: null,
+  },
+  setDeliveryAddress: (mealType, address) =>
+    set((state) => ({
+      deliveryAddresses: {
+        ...state.deliveryAddresses,
+        [mealType]: address,
+      },
+    })),
   setSelectedPlan: (plan: SubscriptionPlan) => set({ selectedPlan: plan }),
 
   selectedDates: null,
