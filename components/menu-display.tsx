@@ -109,15 +109,6 @@ export function MenuDisplay() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Button */}
-      <div className="flex justify-end">
-        <Button
-          onClick={() => generateOrderSummary()}
-          className="bg-green-600 hover:bg-green-700 text-white"
-        >
-          View Complete Summary
-        </Button>
-      </div>
 
       {/* Diet Filter */}
       <div className="flex flex-wrap gap-3 mb-8">

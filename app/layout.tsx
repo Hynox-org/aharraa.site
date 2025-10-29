@@ -65,7 +65,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${geistSans.className}`}>
-      <body>
+      <body suppressHydrationWarning>
         <AuthProvider>
           <div className="bg-background text-foreground">{children}</div>
         </AuthProvider>

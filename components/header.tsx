@@ -24,7 +24,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-          <Image src="/logo.png" alt="Aharraa" width={45} height={45} className="rounded" />
+          <Image src="/logo.png" alt="Aharraa" width={45} height={45} className="rounded" unoptimized />
           <div className="hidden sm:block">
             <span className="text-2xl font-bold text-orange-500">Aharraa</span>
             <p className="text-xs text-neutral-600">Fresh Home-Cooked Meals</p>
