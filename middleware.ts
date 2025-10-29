@@ -1,10 +1,15 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const accessToken = request.cookies.get('x-access-token')?.value; // Assuming token is in cookies for middleware
+  const accessToken = request.cookies.get("x-access-token")?.value; // Assuming token is in cookies for middleware
 
-  const publicPaths = ['/auth', '/']; // Define public paths
+  const publicPaths = [
+    "/auth",
+    "/",
+    "/privacy-policy",
+    "/terms-and-conditions",
+  ]; // Define public paths
 
   if (publicPaths.includes(request.nextUrl.pathname)) {
     return NextResponse.next();
@@ -13,7 +18,7 @@ export async function middleware(request: NextRequest) {
   if (!accessToken) {
     // Redirect to login page if no access token
     const url = request.nextUrl.clone();
-    url.pathname = '/auth';
+    url.pathname = "/auth";
     return NextResponse.redirect(url);
   }
 
@@ -26,6 +31,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|logo.png|robots.txt|sitemap.xml|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.webp|.*\\.svg|.*\\.gif).*)',
+    "/((?!api|_next/static|_next/image|favicon.ico|logo.png|robots.txt|sitemap.xml|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.webp|.*\\.svg|.*\\.gif).*)",
   ],
 };

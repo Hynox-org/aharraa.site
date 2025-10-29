@@ -50,12 +50,12 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-orange-500 transition-colors">
+                <a href="/privacy-policy" className="hover:text-orange-500 transition-colors">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-orange-500 transition-colors">
+                <a href="/terms-and-conditions" className="hover:text-orange-500 transition-colors">
                   Terms & Conditions
                 </a>
               </li>
