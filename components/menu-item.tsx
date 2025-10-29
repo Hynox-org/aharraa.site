@@ -4,12 +4,8 @@ import { useState } from "react"
 import Image from "next/image"
 import { useStore } from "@/lib/store"
 import { Button } from "@/components/ui/button"
-import type { MenuItem as MenuItemType } from "@/lib/menu-data"
+import { MenuItemProps } from "@/lib/types"
 
-interface MenuItemProps {
-  item: MenuItemType
-  selectedDay: string
-}
 
 export function MenuItem({ item, selectedDay }: MenuItemProps) {
   const [quantity, setQuantity] = useState(1)

@@ -9,19 +9,9 @@ import React, {
 } from "react";
 import { useRouter, usePathname } from "next/navigation"; // Import useRouter and usePathname
 import { validateToken } from "@/lib/api";
+import { AuthContextType, User } from "@/lib/types";
 
-interface User {
-  id: string;
-  role: string;
-}
 
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  login: (token: string, returnUrl?: string) => void; // Update login function signature
-  logout: () => void;
-}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

@@ -17,11 +17,8 @@ import Image from "next/image";
 import { useAuth } from "@/app/context/auth-context"; // Import useAuth
 import { toast } from "sonner";
 import { apiRequest, oauthLogin } from "@/lib/api";
+import { AuthApiResponse } from "@/lib/types";
 
-interface AuthApiResponse {
-  accessToken?: string;
-  message?: string;
-}
 
 export default function AuthPage() {
   const [signInEmail, setSignInEmail] = useState("");

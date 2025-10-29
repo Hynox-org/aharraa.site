@@ -15,12 +15,16 @@ import { Footer } from "@/components/footer";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/auth-context";
 import { useEffect } from "react";
+import { VENDORS } from "@/lib/vendor-data";
 
 export default function Home() {
   const selectedPlan = useStore((state) => state.selectedPlan);
   const selectedDates = useStore((state) => state.selectedDates);
   const datesConfirmed = useStore((state) => state.datesConfirmed);
   const selectedVendorId = useStore((state) => state.selectedVendorId);
+  const selectedVendor = selectedVendorId
+    ? VENDORS.find((vendor) => vendor.id === selectedVendorId)
+    : null;
 
   const router = useRouter();
   const { login } = useAuth();
@@ -77,6 +81,7 @@ export default function Home() {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
         {!selectedPlan ? (
           <>
             <PlanSelection />

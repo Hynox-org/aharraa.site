@@ -1,15 +1,7 @@
 "use client"
 
+import { Review } from "@/lib/types"
 import { Star } from "lucide-react"
-
-interface Review {
-  id: number
-  name: string
-  role: string
-  content: string
-  rating: number
-  avatar: string
-}
 
 const reviews: Review[] = [
   {

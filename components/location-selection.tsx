@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useStore, DeliveryAddress } from "@/lib/store"
+import { useStore } from "@/lib/store"
 import { MapPin, LocateFixed, Loader2, Check } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
+import { DeliveryAddress, LocationSelectionProps } from "@/lib/types"
 
 const predefinedLocations: DeliveryAddress[] = [
   {
@@ -37,9 +38,6 @@ const predefinedLocations: DeliveryAddress[] = [
   },
 ]
 
-interface LocationSelectionProps {
-  mealType: "breakfast" | "lunch" | "dinner";
-}
 
 export function LocationSelection({ mealType }: LocationSelectionProps) {
   const deliveryAddresses = useStore((state) => state.deliveryAddresses);

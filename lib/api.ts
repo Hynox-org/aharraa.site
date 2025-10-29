@@ -1,14 +1,6 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-interface User {
-  id: string;
-  role: string;
-}
-
-interface ValidateTokenResponse {
-  message: string;
-  user: User;
-}
+import { User, ValidateTokenResponse } from "./types";
 
 export async function apiRequest<T>(
   endpoint: string,

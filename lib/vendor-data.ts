@@ -1,17 +1,4 @@
-export interface Vendor {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  rating: number;
-  specialties: string[];
-  location: string;
-  deliveryAreas: string[];
-  contactInfo: {
-    phone: string;
-    email: string;
-  };
-}
+import { Vendor } from "./types";
 
 export const VENDORS: Vendor[] = [
   {

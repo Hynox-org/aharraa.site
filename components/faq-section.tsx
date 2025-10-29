@@ -2,12 +2,7 @@
 
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
-
-interface FaqItem {
-  id: number
-  question: string
-  answer: string
-}
+import { FaqItem } from "@/lib/types"
 
 const faqs: FaqItem[] = [
   {

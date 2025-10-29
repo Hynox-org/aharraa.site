@@ -1,10 +1,6 @@
 "use client"
 
-interface Highlight {
-  icon: string
-  title: string
-  description: string
-}
+import { Highlight } from "@/lib/types"
 
 const highlights: Highlight[] = [
   {

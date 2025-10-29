@@ -2,11 +2,8 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Leaf } from 'lucide-react';
-import { OrderSummary } from './checkout-summary';
+import { MenuSelectionProps } from '@/lib/types';
 
-interface MenuSelectionProps {
-  weeklyMenu: OrderSummary['weeklyMenu'];
-}
 
 export function MenuSelectionTimeline({ weeklyMenu }: MenuSelectionProps) {
   const [expandedDay, setExpandedDay] = useState<string | null>(null);

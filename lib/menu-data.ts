@@ -1,37 +1,4 @@
-export type PlanType = "veg" | "non-veg";
-export type MealType = "breakfast" | "lunch" | "dinner";
-export type DietType = "veg" | "nonVeg";
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  category: MealType;
-  isVegetarian: boolean;
-  price?: number;
-}
-
-export interface VendorMenu {
-  vendorId: string;
-  veg: {
-    breakfast: MenuItem[];
-    lunch: MenuItem[];
-    dinner: MenuItem[];
-  };
-  nonVeg: {
-    breakfast: MenuItem[];
-    lunch: MenuItem[];
-    dinner: MenuItem[];
-  };
-  accompaniments: {
-    indian: {
-      id: string;
-      name: string;
-      price: number;
-    }[];
-  };
-}
+import { PlanType, MealType, DietType, MenuItem, VendorMenu, Accompaniment } from "./types";
 
 export const VENDOR_MENUS: VendorMenu[] = [
   {
