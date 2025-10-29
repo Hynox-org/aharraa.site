@@ -68,4 +68,7 @@ export const useStore = create<Store>((set, get) => ({
     const state = get()
     return state.cart.reduce((total, item) => total + (item.menuItem.price || 0) * item.quantity, 0)
   },
+
+  returnUrl: "/",
+  setReturnUrl: (url) => set({ returnUrl: url }),
 }))

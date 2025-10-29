@@ -7,26 +7,24 @@ export async function apiRequest<T>(
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body: Record<string, unknown> | null = null,
   token: string | null = null,
-  name: string | null = null
 ): Promise<T> {
   const headers: HeadersInit = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const payload =
-    body && Object.keys(body).length > 0 ? { ...body, name } : { name };
+  const payload = body;
 
   try {
     console.log(" API Request:", {
       url: `${API_URL}${endpoint}`,
       method,
       headers,
-      body: method !== "GET" ? payload : name,
+      body: method !== "GET" ? payload : null,
     });
 
     const res = await fetch(`${API_URL}${endpoint}`, {
       method,
       headers,
-      body: method !== "GET" ? JSON.stringify(payload) : name,
+      body: method !== "GET" ? JSON.stringify(payload) : null,
     });
 
     let data: any = {};

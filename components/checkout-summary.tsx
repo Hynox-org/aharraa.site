@@ -51,7 +51,7 @@ export default function CheckoutSummary({ summary, onProceedToPayment, deliveryA
             </div>
             <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-200">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-semibold text-green-700">Step 2 of 3</span>
+              <span className="text-sm font-semibold text-green-700">Step 3 of 3</span>
             </div>
           </div>
         </div>
@@ -63,8 +63,8 @@ export default function CheckoutSummary({ summary, onProceedToPayment, deliveryA
           {/* Left Column - Weekly Menu Only */}
           <div className="lg:col-span-2">
             <Card className="overflow-hidden rounded-3xl border-2 border-green-100 shadow-lg bg-white">
-              {/* Menu Header with Orange Accent */}
-              <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 px-6 py-5 relative overflow-hidden">
+              {/* Menu Header with purple Accent */}
+              <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-500 px-6 py-5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
                 <div className="relative flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -75,7 +75,7 @@ export default function CheckoutSummary({ summary, onProceedToPayment, deliveryA
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-white">Your Weekly Menu</h2>
-                      <p className="text-orange-100 text-sm">Curated meals for the week</p>
+                      <p className="text-purple-100 text-sm">Curated meals for the week</p>
                     </div>
                   </div>
                   <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
@@ -122,7 +122,7 @@ export default function CheckoutSummary({ summary, onProceedToPayment, deliveryA
                     {summary.pricing.accompanimentsTotal > 0 && (
                       <div className="flex justify-between items-center py-3 border-b border-green-100">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                           <span className="text-neutral-600 font-medium">Add-ons</span>
                         </div>
                         <span className="text-xl font-bold text-neutral-900">₹{summary.pricing.accompanimentsTotal.toLocaleString()}</span>
@@ -138,13 +138,13 @@ export default function CheckoutSummary({ summary, onProceedToPayment, deliveryA
                   </div>
 
                   {/* Grand Total Card */}
-                  <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 rounded-2xl p-6 mb-6 shadow-lg relative overflow-hidden">
+                  <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-red-500 rounded-2xl p-6 mb-6 shadow-lg relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12"></div>
                     <div className="relative">
-                      <p className="text-orange-100 text-sm font-semibold uppercase tracking-wide mb-1">Total Amount</p>
+                      <p className="text-purple-100 text-sm font-semibold uppercase tracking-wide mb-1">Total Amount</p>
                       <div className="flex items-baseline gap-2">
                         <span className="text-white font-bold text-4xl">₹{summary.pricing.grandTotal.toLocaleString()}</span>
-                        <span className="text-orange-100 text-sm">incl. taxes</span>
+                        <span className="text-purple-100 text-sm">incl. taxes</span>
                       </div>
                     </div>
                   </div>
@@ -175,8 +175,8 @@ export default function CheckoutSummary({ summary, onProceedToPayment, deliveryA
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
-                          <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+                          <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
                           </svg>
                         </div>

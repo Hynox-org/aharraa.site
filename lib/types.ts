@@ -212,6 +212,9 @@ export interface Store {
     mealType: "breakfast" | "lunch" | "dinner",
     address: DeliveryAddress
   ) => void;
+
+  returnUrl: string;
+  setReturnUrl: (url: string) => void;
 }
 
 export interface DeliveryAddress {

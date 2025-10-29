@@ -8,7 +8,7 @@ import { useState } from "react"
 import { useAuth } from "@/app/context/auth-context"
 
 export function Header() {
-  const { isAuthenticated, user, signOut } = useAuth()
+  const { isAuthenticated, user, logout } = useAuth()
   const cart = useStore((state) => state.cart)
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -52,7 +52,7 @@ export function Header() {
                 {user?.name || "Profile"}
               </Link>
               <button
-                onClick={signOut}
+                onClick={logout}
                 className="text-sm font-medium text-white bg-red-500 px-4 py-2 rounded-md hover:bg-red-600 transition"
               >
                 Sign Out
@@ -142,7 +142,7 @@ export function Header() {
             {isAuthenticated ? (
               <button
                 onClick={() => {
-                  signOut()
+                  logout()
                   setMobileMenuOpen(false)
                 }}
                 className="w-full text-left px-4 py-3 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition rounded-lg"

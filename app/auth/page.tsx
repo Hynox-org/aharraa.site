@@ -18,6 +18,7 @@ import { useAuth } from "@/app/context/auth-context"; // Import useAuth
 import { toast } from "sonner";
 import { apiRequest, oauthLogin } from "@/lib/api";
 import { AuthApiResponse } from "@/lib/types";
+import { useStore } from "@/lib/store";
 
 
 export default function AuthPage() {
@@ -28,10 +29,14 @@ export default function AuthPage() {
   const router = useRouter();
   const searchParams = useSearchParams(); // Initialize useSearchParams
   const { isAuthenticated, loading, login } = useAuth(); // Get signIn, isAuthenticated, and isLoading from AuthContext
-  const returnUrl = searchParams.get("returnUrl") || "/"; // Get returnUrl from query params, default to /
+  const { returnUrl: storedReturnUrl, setReturnUrl } = useStore(); // Get returnUrl from Zustand store
 
-  // Removed useEffect for redirection, as login function in AuthContext handles it.
-  // This prevents potential race conditions or double redirections.
+  useEffect(() => {
+    const urlReturnUrl = searchParams.get("returnUrl");
+    if (urlReturnUrl && urlReturnUrl !== storedReturnUrl) {
+      setReturnUrl(urlReturnUrl);
+    }
+  }, [searchParams, setReturnUrl, storedReturnUrl]);
 
   if (loading) {
     return <div>Loading...</div>; // Or a more sophisticated loading spinner
@@ -50,7 +55,7 @@ export default function AuthPage() {
         password: signInPassword,
       });
       if (data.accessToken) {
-        await login(data.accessToken, returnUrl); // Pass returnUrl to login function
+        await login(data.accessToken, storedReturnUrl); // Pass storedReturnUrl to login function
       }
       toast.success("Sign in successful!");
     } catch (error: any) {
@@ -66,7 +71,7 @@ export default function AuthPage() {
       });
 
       if (data.accessToken) {
-        await login(data.accessToken, returnUrl); // Pass returnUrl to login function
+        await login(data.accessToken, storedReturnUrl); // Pass storedReturnUrl to login function
       }
 
       toast.success("Signup successful!");
