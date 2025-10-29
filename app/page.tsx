@@ -23,7 +23,7 @@ export default function Home() {
   const selectedVendorId = useStore((state) => state.selectedVendorId);
 
   const router = useRouter();
-  const { verifySession, isLoading } = useAuth();
+  const { login } = useAuth();
 
   useEffect(() => {
     const handleOAuthRedirect = async () => {
@@ -33,21 +33,16 @@ export default function Home() {
         const accessToken = params.get("access_token");
 
         if (accessToken) {
-          await verifySession(accessToken);
+          await login(accessToken);
           // Clean up the URL hash
-          window.history.replaceState(
-            null,
-            "",
-            window.location.pathname + window.location.search
-          );
+          window.history.replaceState(null, "", window.location.pathname + window.location.search);
           router.push("/");
         }
       }
     };
-    if (isLoading === false) {
-      handleOAuthRedirect();
-    }
-  }, [router, isLoading]);
+
+    handleOAuthRedirect();
+  }, [router, login]);
 
   return (
     <main className="min-h-screen bg-white">

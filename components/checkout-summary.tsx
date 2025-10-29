@@ -56,7 +56,7 @@ interface CartSummaryProps {
   summary: OrderSummary;
 }
 
-export default function CartSummary({ summary }: CartSummaryProps) {
+export default function CheckoutSummary({ summary }: CartSummaryProps) {
   const router = useRouter();
 
   return (

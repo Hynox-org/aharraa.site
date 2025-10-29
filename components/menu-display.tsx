@@ -246,11 +246,11 @@ export function MenuDisplay() {
             onClick={() => {
               const summary = generateOrderSummary();
               localStorage.setItem('orderSummary', JSON.stringify(summary));
-              window.location.href = '/cart';
+              window.location.href = '/checkout';
             }}
             className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2 text-lg"
           >
-            Proceed to Cart →
+            Proceed to Checkout →
           </Button>
         </div>
       </div>

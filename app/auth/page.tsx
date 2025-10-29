@@ -14,9 +14,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, User } from "lucide-react";
 import Image from "next/image";
-import { signup, googleOAuth } from "@/lib/auth"; // Keep signup if it's not handled by AuthContext yet
 import { useAuth } from "@/app/context/auth-context"; // Import useAuth
 import { toast } from "sonner";
+import { apiRequest, oauthLogin } from "@/lib/api";
+
+interface AuthApiResponse {
+  accessToken?: string;
+  message?: string;
+}
 
 export default function AuthPage() {
   const [signInEmail, setSignInEmail] = useState("");
@@ -24,15 +29,15 @@ export default function AuthPage() {
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const router = useRouter();
-  const { signIn, isAuthenticated, isLoading } = useAuth(); // Get signIn, isAuthenticated, and isLoading from AuthContext
+  const { isAuthenticated, loading, login } = useAuth(); // Get signIn, isAuthenticated, and isLoading from AuthContext
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!loading && isAuthenticated) {
       router.push("/");
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, loading, router]);
 
-  if (isLoading) {
+  if (loading) {
     return <div>Loading...</div>; // Or a more sophisticated loading spinner
   }
 
@@ -40,34 +45,46 @@ export default function AuthPage() {
     return null; // Don't render anything if authenticated and not loading, as we are redirecting
   }
 
-  const handleSignIn = async () => {
+  const handleLogin = async () => {
     try {
-      await signIn(signInEmail, signInPassword); // Use signIn from AuthContext
+      const data = await apiRequest<AuthApiResponse>("/auth/signin", "POST", {
+        email: signInEmail,
+        password: signInPassword,
+      });
+      if (data.accessToken) {
+        await login(data.accessToken); // Await the login function from AuthContext
+      }
       toast.success("Sign in successful!");
     } catch (error: any) {
       alert(error.response?.data?.error || "An error occurred during sign in.");
     }
   };
 
-  const handleSignUp = async () => {
+  const handleSignup = async () => {
     try {
-      await signup(signUpEmail, signUpPassword); // Use signup from lib/auth
-      toast.success("Sign up successful! Signing you in...");
-      await signIn(signUpEmail, signUpPassword); // Sign in after successful signup to update AuthContext
+      const data = await apiRequest<AuthApiResponse>("/auth/signup", "POST", {
+        email: signUpEmail,
+        password: signUpPassword,
+      });
+
+      if (data.accessToken) {
+        await login(data.accessToken); // Await the login function from AuthContext
+      }
+
+      toast.success("Signup successful!");
+      router.push("/");
     } catch (error: any) {
       alert(error.response?.data?.error || "An error occurred during sign up.");
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleLogin = async () => {
     try {
-      const redirectUrl = window.location.origin + "/auth/callback";
-      const response = await googleOAuth(redirectUrl);
-      console.log(response)
-      router.push(response.url)
-      // window.location.href = response; // Redirect to Google OAuth
-    } catch (error: any) {
-      alert(error.response?.data?.error || "An error occurred during Google sign in.");
+      const data = await oauthLogin("google");
+      router.push(data.url);
+    } catch (err: unknown) {
+      console.error("Google login error:", err);
+      toast.error((err as Error).message || "Google login failed");
     }
   };
 
@@ -200,7 +217,7 @@ export default function AuthPage() {
 
                   <Button
                     className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base mt-6"
-                    onClick={handleSignIn}
+                    onClick={handleLogin}
                   >
                     Sign In
                   </Button>
@@ -219,7 +236,7 @@ export default function AuthPage() {
                   <Button
                     variant="outline"
                     className="w-full h-12 border-2 hover:bg-gray-50 font-medium"
-                    onClick={handleGoogleSignIn}
+                    onClick={handleGoogleLogin}
                   >
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                       <path
@@ -321,7 +338,7 @@ export default function AuthPage() {
 
                   <Button
                     className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base mt-6"
-                    onClick={handleSignUp}
+                    onClick={handleSignup}
                   >
                     Create Account
                   </Button>
@@ -340,7 +357,7 @@ export default function AuthPage() {
                   <Button
                     variant="outline"
                     className="w-full h-12 border-2 hover:bg-gray-50 font-medium"
-                    onClick={handleGoogleSignIn}
+                    onClick={handleGoogleLogin}
                   >
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                       <path
