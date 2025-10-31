@@ -67,6 +67,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.className}`}>
       <body suppressHydrationWarning>
+        <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
         <AuthProvider>
           <div className="bg-background text-foreground">{children}</div>
           <Toaster />

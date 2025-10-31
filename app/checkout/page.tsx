@@ -17,6 +17,7 @@ import Link from "next/link";
 import { DeliveryAddress, CheckoutData, CheckoutItem, MealCategory, CreateOrderPayload, Vendor } from "@/lib/types";
 import { DUMMY_VENDORS } from "@/lib/data";
 import { createOrder, sendOrderConfirmationEmail } from "@/lib/api";
+import { load } from "@cashfreepayments/cashfree-js";
 
 export default function CheckoutPage() {
   const { isAuthenticated, loading, user } = useAuth();
@@ -29,6 +30,11 @@ export default function CheckoutPage() {
     Partial<Record<MealCategory, DeliveryAddress>>
   >({});
 
+  const initializeSDK = async () => {
+  const cashfree = await load({ mode: "sandbox" }); // Use "production" for live environment
+  return cashfree;
+};
+
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/auth?returnUrl=/checkout");
@@ -37,6 +43,7 @@ export default function CheckoutPage() {
 
   // Initialize delivery addresses based on cart items
   useEffect(() => {
+    initializeSDK()
     const userCartItems = cart?.items.filter(item => item.userId === user?.id) || [];
     if (userCartItems.length > 0) {
       const initialAddresses: Partial<Record<MealCategory, DeliveryAddress>> = {};
@@ -138,6 +145,21 @@ export default function CheckoutPage() {
     }
   };
 
+  const handlePayment = async (paymentSessionId: string) => {
+  const cashfree = await initializeSDK();
+  const checkoutOptions = {
+    paymentSessionId: paymentSessionId, // Replace with the actual session ID from the backend
+    redirectTarget: "_self", // Options: "_self", "_blank", "_modal", or a DOM element
+  };
+  cashfree.checkout(checkoutOptions).then((result:any) => {
+    if (result.error) {
+      console.error("Payment error:", result.error);
+    } else if (result.paymentDetails) {
+      console.log("Payment completed:", result.paymentDetails);
+    }
+  });
+};
+
   const handleProceedToPayment = async () => {
     if (!user?.id) {
       toast.error("User not authenticated.");
@@ -204,7 +226,7 @@ export default function CheckoutPage() {
       shippingAddress: shippingAddress,
       billingAddress: shippingAddress, // Assuming billing is same as shipping for now
       deliveryAddresses: finalizedCheckoutData.deliveryAddresses, // Include all delivery addresses
-      paymentMethod: "COD", // Hardcoded for now, can be dynamic
+      paymentMethod: "UPI", // Hardcoded for now, can be dynamic
       totalAmount: totalPrice,
       currency: "INR", // Hardcoded for now
     };
@@ -219,8 +241,10 @@ export default function CheckoutPage() {
 
     try {
       const order = await createOrder(orderPayload, token);
-      toast.success(`Order created successfully! Order ID: ${order._id}`);
-      clearCart(); // Clear the cart after successful order creation
+      console.log(order.paymentSessionId)
+      await handlePayment(order.paymentSessionId);
+      // toast.success(`Order created successfully! Order ID: ${order._id}`);
+      // clearCart(); // Clear the cart after successful order creation
 
       // Send confirmation email
       // if (user?.email) {
@@ -235,7 +259,7 @@ export default function CheckoutPage() {
       //   console.warn("User email not available, skipping confirmation email.");
       // }
 
-      router.push(`/order-confirmation/${order._id}`); // Navigate to order confirmation page
+      // router.push(`/order-status/${order._id}`); // Navigate to order confirmation page
     } catch (error: any) {
       console.error("Error creating order:", error);
       toast.error(`Failed to create order: ${error.message || "Unknown error"}`);

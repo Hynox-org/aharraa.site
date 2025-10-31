@@ -103,6 +103,7 @@ export interface Order {
   };
   paymentMethod: string;
   totalAmount: number;
+  paymentSessionId: string;
   currency: string; // e.g., "INR"
   orderDate: string; // ISO date string (timestamp of order creation)
   status: "pending" | "completed" | "cancelled" | "processing"; // Order status

@@ -12,7 +12,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-export default function OrderConfirmationPage({ params }: { params: { orderId: string } | Promise<{ orderId: string }> }) {
+export default function OrderStatusPage({ params }: { params: { orderId: string } | Promise<{ orderId: string }> }) {
   const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
 
@@ -119,7 +119,7 @@ export default function OrderConfirmationPage({ params }: { params: { orderId: s
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
             <div className="text-left space-y-2">
-              <p className="text-xl font-bold" style={{ color: "#0B132B" }}>Order ID: <span className="font-normal text-neutral-700">{order.id}</span></p>
+              <p className="text-xl font-bold" style={{ color: "#0B132B" }}>Order ID: <span className="font-normal text-neutral-700">{order._id}</span></p>
               <p className="text-xl font-bold" style={{ color: "#0B132B" }}>Total Amount: <span className="font-normal text-neutral-700">₹{order.totalAmount.toFixed(2)}</span></p>
               <p className="text-xl font-bold" style={{ color: "#0B132B" }}>Order Date: <span className="font-normal text-neutral-700">{new Date(order.orderDate).toLocaleDateString()}</span></p>
             </div>
