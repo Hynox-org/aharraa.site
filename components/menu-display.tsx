@@ -23,6 +23,7 @@ export function MenuDisplay() {
 
   const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
   const mealTypes: MealType[] = ["breakfast", "lunch", "dinner"]
+  const vendorMenu = VENDOR_MENUS.find(menu => menu.vendorId === selectedVendorId);
 
   useEffect(() => {
     // Initialize selectedMealPreferences with all meal types selected and a default diet preference
@@ -33,7 +34,6 @@ export function MenuDisplay() {
 
   // Get menu based on selected vendor and diet preference for a specific meal type
   const getMealItems = (day: string, mealType: MealType, dietPreference: "veg" | "non-veg") => {
-    const vendorMenu = VENDOR_MENUS.find(menu => menu.vendorId === selectedVendorId);
     if (!vendorMenu) return [];
 
     const menu = dietPreference === "veg" ? vendorMenu.veg : vendorMenu.nonVeg;
@@ -80,9 +80,28 @@ export function MenuDisplay() {
       }
     }
 
+    let mealPlanTotal = 0;
+    if (selectedDates && vendorMenu) {
+      const numDays = Math.ceil(
+        (selectedDates.endDate.getTime() - selectedDates.startDate.getTime()) /
+          (1000 * 60 * 60 * 24)
+      ) + 1; // +1 to include the end date
+
+      for (let i = 0; i < numDays; i++) {
+        Array.from(selectedMealPreferences.entries()).forEach(([mealType, dietPreference]) => {
+          const price = vendorMenu.mealTypePricing[mealType][dietPreference === "veg" ? "veg" : "nonVeg"];
+          mealPlanTotal += price;
+        });
+      }
+    }
+
+    const accompanimentsTotal = selectedAccompaniments.reduce((total, acc) => total + acc.price, 0);
+    const grandTotal = mealPlanTotal + accompanimentsTotal;
+
     const summary = {
       plan: {
         ...selectedPlan,
+        selectedBasePrice: selectedPlan?.selectedBasePrice || 0, // Ensure selectedBasePrice is included
         dates: {
           start: selectedDates?.startDate.toLocaleDateString(),
           end: selectedDates?.endDate.toLocaleDateString()
@@ -105,6 +124,7 @@ export function MenuDisplay() {
                 mealType,
                 {
                   dietPreference: dietPreference,
+                  mealPrice: vendorMenu?.mealTypePricing[mealType][dietPreference === "veg" ? "veg" : "nonVeg"] || 0,
                   items: getMealItems(day, mealType, dietPreference).map(item => ({
                     id: item.id,
                     name: item.name,
@@ -122,9 +142,9 @@ export function MenuDisplay() {
         price: acc.price
       })),
       pricing: {
-        planTotal: selectedPlan?.totalPrice || 0,
-        accompanimentsTotal: selectedAccompaniments.reduce((total, acc) => total + acc.price, 0),
-        grandTotal: (selectedPlan?.totalPrice || 0) + selectedAccompaniments.reduce((total, acc) => total + acc.price, 0)
+        planTotal: mealPlanTotal,
+        accompanimentsTotal: accompanimentsTotal,
+        grandTotal: grandTotal
       }
     };
 
@@ -158,6 +178,7 @@ export function MenuDisplay() {
               {mealTypes.map((mealType) => {
                 const currentDietPreference = selectedMealPreferences.get(mealType);
                 const isMealTypeSelected = selectedMealPreferences.has(mealType);
+                const mealPrice = vendorMenu?.mealTypePricing[mealType][currentDietPreference === "veg" ? "veg" : "nonVeg"] || 0;
 
                 return (
                   <div key={mealType} className="space-y-4">
@@ -166,6 +187,13 @@ export function MenuDisplay() {
                         {mealType}
                       </h4>
                       <div className="flex gap-2">
+                        <span className={`px-4 py-0.5 rounded-full text-sm font-medium flex-shrink-0 flex items-center ${
+                                  currentDietPreference === "veg"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
+                                }`}>
+                                  {currentDietPreference === "veg" ? "Veg" : "Non-Veg"} (₹{mealPrice})
+                                </span>
                         <Button
                           onClick={() => toggleMealTypeSelection(mealType)}
                           className={`px-4 py-2 rounded-full font-medium transition ${
@@ -218,13 +246,6 @@ export function MenuDisplay() {
                             <div className="flex-1 min-w-0">
                               <div className="flex justify-between items-start gap-2 mb-1">
                                 <h5 className="font-semibold text-neutral-900 truncate">{item.name}</h5>
-                                <span className={`px-2 py-0.5 rounded-full text-sm font-medium flex-shrink-0 ${
-                                  currentDietPreference === "veg"
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-700"
-                                }`}>
-                                  {currentDietPreference === "veg" ? "Veg" : "Non-Veg"}
-                                </span>
                               </div>
                               <p className="text-sm text-neutral-600 line-clamp-2">{item.description}</p>
                             </div>

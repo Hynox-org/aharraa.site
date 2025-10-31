@@ -32,7 +32,7 @@ function AuthPageContent() {
   const { returnUrl: storedReturnUrl, setReturnUrl } = useStore(); // Get returnUrl from Zustand store
 
   useEffect(() => {
-    const urlReturnUrl = searchParams.get("returnUrl");
+    const urlReturnUrl = searchParams.get("returnUrl"); /// /login?returnUrl=/checkout
     if (urlReturnUrl && urlReturnUrl !== storedReturnUrl) {
       setReturnUrl(urlReturnUrl);
     }

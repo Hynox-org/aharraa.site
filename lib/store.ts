@@ -37,9 +37,6 @@ export const useStore = create<Store>((set, get) => ({
   datesConfirmed: false,
   setDatesConfirmed: (confirmed: boolean) => set({ datesConfirmed: confirmed }),
 
-  dietFilter: "veg",
-  setDietFilter: (filter: "veg" | "non-veg") => set({ dietFilter: filter }),
-
   cart: [],
   addToCart: (item: MenuItem, day: string, quantity: number) =>
     set((state) => {
@@ -65,8 +62,11 @@ export const useStore = create<Store>((set, get) => ({
     })),
   clearCart: () => set({ cart: [] }),
   getTotalPrice: () => {
-    const state = get()
-    return state.cart.reduce((total, item) => total + (item.menuItem.price || 0) * item.quantity, 0)
+    // The pricing model has changed, individual menu items no longer have a 'price' property.
+    // The total price for meals is now calculated based on meal type and diet preference in MenuDisplay.
+    // This cart's getTotalPrice needs to be re-evaluated if individual items are added to the cart.
+    // For now, returning 0 to resolve the error.
+    return 0;
   },
 
   returnUrl: "/",

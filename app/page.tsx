@@ -107,7 +107,7 @@ export default function Home() {
               </Button>
               <div>
                 <h2 className="text-2xl font-bold text-neutral-900">
-                  {selectedPlan.name} - ₹{selectedPlan.totalPrice}
+                  {selectedPlan.name} - ₹{selectedPlan.vegTotalPrice}
                 </h2>
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function Home() {
               </Button>
               <div>
                 <h2 className="text-2xl font-bold text-neutral-900">
-                  {selectedPlan.name} - ₹{selectedPlan.totalPrice}
+                  {selectedPlan.name} - ₹{selectedPlan.vegTotalPrice}
                 </h2>
                 <p className="text-sm text-neutral-600 mt-1">
                   {format(selectedDates.startDate, "PPP")} to{" "}
@@ -156,7 +156,7 @@ export default function Home() {
               </Button>
               <div>
                 <h2 className="text-2xl font-bold text-neutral-900">
-                  {selectedPlan.name} - ₹{selectedPlan.totalPrice}
+                  {selectedPlan.name} - ₹{selectedPlan.vegTotalPrice}
                 </h2>
                 <p className="text-sm text-neutral-600 mt-1">
                   {format(selectedDates.startDate, "PPP")} to{" "}

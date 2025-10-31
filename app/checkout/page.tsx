@@ -49,8 +49,10 @@ export default function CheckoutPage() {
           duration: parsedSummary.plan.duration,
           daysCount: parsedSummary.plan.daysCount,
           pricePerDay: parsedSummary.plan.pricePerDay,
-          totalPrice: parsedSummary.plan.totalPrice,
-          planType: parsedSummary.dietPreference, // Assuming dietPreference maps to planType
+          vegTotalPrice: parsedSummary.plan.vegTotalPrice || 0, // Ensure these are loaded
+          nonVegTotalPrice: parsedSummary.plan.nonVegTotalPrice || 0, // Ensure these are loaded
+          selectedBasePrice: parsedSummary.plan.selectedBasePrice || parsedSummary.plan.totalPrice || 0, // Use selectedBasePrice, fallback to totalPrice
+          planType: parsedSummary.plan.planType || "veg", // Fallback to "veg" if not present
         });
       }
       if (parsedSummary.plan.dates) {
@@ -75,13 +77,13 @@ export default function CheckoutPage() {
     }
 
     const hasBreakfast = Object.values(summary.weeklyMenu).some(
-      (dayMenu) => dayMenu.meals.breakfast && dayMenu.meals.breakfast.length > 0
+      (dayMenu) => dayMenu.meals.breakfast?.items?.length > 0
     );
     const hasLunch = Object.values(summary.weeklyMenu).some(
-      (dayMenu) => dayMenu.meals.lunch && dayMenu.meals.lunch.length > 0
+      (dayMenu) => dayMenu.meals.lunch?.items?.length > 0
     );
     const hasDinner = Object.values(summary.weeklyMenu).some(
-      (dayMenu) => dayMenu.meals.dinner && dayMenu.meals.dinner.length > 0
+      (dayMenu) => dayMenu.meals.dinner?.items?.length > 0
     );
     return { hasBreakfastMeals: hasBreakfast, hasLunchMeals: hasLunch, hasDinnerMeals: hasDinner };
   }, [summary?.weeklyMenu]);
@@ -90,8 +92,6 @@ export default function CheckoutPage() {
     <main className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Review Your Order</h1>
-
         {summary?.plan && (
           <div className="mb-8 relative">
             {/* Main Card with Layered Design */}
@@ -129,7 +129,7 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <div className="flex items-baseline gap-2 pt-3 border-t border-green-100">
-                      <span className="text-3xl font-bold text-green-600">₹{summary.plan.totalPrice}</span>
+                      <span className="text-3xl font-bold text-green-600">₹{summary.plan.selectedBasePrice}</span>
                       <span className="text-sm text-neutral-500">total</span>
                     </div>
                   </div>

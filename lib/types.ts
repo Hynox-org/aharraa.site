@@ -43,7 +43,7 @@ export interface OrderSummary {
     duration: string;
     daysCount: number;
     pricePerDay: number;
-    totalPrice: number;
+    selectedBasePrice: number; // The default price of the plan, either veg or non-veg
     dates: {
       start: string;
       end: string;
@@ -59,14 +59,15 @@ export interface OrderSummary {
       email: string;
     };
   };
-  dietPreference: "veg" | "non-veg";
   weeklyMenu: {
     [key: string]: {
       date: string;
       meals: {
-        breakfast: Array<{ id: string; name: string; isVegetarian: boolean }>;
-        lunch: Array<{ id: string; name: string; isVegetarian: boolean }>;
-        dinner: Array<{ id: string; name: string; isVegetarian: boolean }>;
+        [mealType: string]: {
+          dietPreference: "veg" | "non-veg";
+          mealPrice: number; // Price for this meal type and diet preference
+          items: Array<{ id: string; name: string; isVegetarian: boolean }>;
+        };
       };
     };
   };
@@ -130,7 +131,11 @@ export interface MenuItem {
   image: string;
   category: MealType;
   isVegetarian: boolean;
-  price?: number;
+}
+
+export interface MealTypePrices {
+  veg: number;
+  nonVeg: number;
 }
 
 export interface VendorMenu {
@@ -145,6 +150,9 @@ export interface VendorMenu {
     lunch: MenuItem[];
     dinner: MenuItem[];
   };
+  mealTypePricing: {
+    [key in MealType]: MealTypePrices;
+  };
   accompaniments: {
     indian: Accompaniment[];
   };
@@ -156,8 +164,10 @@ export interface SubscriptionPlan {
   duration: "daily" | "weekly" | "monthly";
   daysCount: number;
   pricePerDay: number;
-  totalPrice: number;
-  planType: PlanType;
+  vegTotalPrice: number;
+  nonVegTotalPrice: number;
+  selectedBasePrice: number; // The default price of the plan, either veg or non-veg
+  planType: PlanType; // This might become less relevant if diet is per meal, but keeping for now.
 }
 
 export interface CartItem {
@@ -189,9 +199,6 @@ export interface Store {
 
   selectedAccompaniments: Accompaniment[];
   toggleAccompaniment: (accompaniment: Accompaniment) => void;
-
-  dietFilter: "veg" | "non-veg";
-  setDietFilter: (filter: "veg" | "non-veg") => void;
 
   datesConfirmed: boolean;
   setDatesConfirmed: (confirmed: boolean) => void;

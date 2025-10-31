@@ -164,6 +164,11 @@ export const VENDOR_MENUS: VendorMenu[] = [
         },
       ],
     },
+    mealTypePricing: {
+      breakfast: { veg: 75, nonVeg: 80 },
+      lunch: { veg: 85, nonVeg: 90 },
+      dinner: { veg: 95, nonVeg: 100 },
+    },
     accompaniments: {
       indian: [
         { id: "v1-acc1", name: "Jeera Rice", price: 149 },
@@ -337,6 +342,11 @@ export const VENDOR_MENUS: VendorMenu[] = [
         },
       ],
     },
+    mealTypePricing: {
+      breakfast: { veg: 75, nonVeg: 80 },
+      lunch: { veg: 85, nonVeg: 90 },
+      dinner: { veg: 95, nonVeg: 100 },
+    },
     accompaniments: {
       indian: [
         { id: "v2-acc1", name: "Jeera Rice", price: 149 },
@@ -509,6 +519,11 @@ export const VENDOR_MENUS: VendorMenu[] = [
           isVegetarian: false,
         },
       ],
+    },
+    mealTypePricing: {
+      breakfast: { veg: 75, nonVeg: 80 },
+      lunch: { veg: 85, nonVeg: 90 },
+      dinner: { veg: 95, nonVeg: 100 },
     },
     accompaniments: {
       indian: [
