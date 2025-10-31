@@ -5,7 +5,7 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DUMMY_MEALS, DUMMY_PLANS, DUMMY_VENDORS } from "@/lib/data";
-import { Meal, Plan, MealCategory, DietPreference, CartItem, PersonDetails } from "@/lib/types"; // Removed Order, Added CartItem, Added PersonDetails
+import { Meal, Plan, MealCategory, DietPreference, CartItem, PersonDetails, Vendor } from "@/lib/types"; // Removed Order, Added CartItem, Added PersonDetails
 import { format, addDays } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -318,7 +318,7 @@ export default function PricingPage() {
                       )}
                       <div className="absolute bottom-3 left-3 right-3">
                         <h3 className="font-bold text-xl text-white mb-1">{meal.name}</h3>
-                        <p className="text-sm text-white/80">{DUMMY_VENDORS.find(v => v.id === meal.vendorId)?.name}</p>
+                        <p className="text-sm text-white/80">{DUMMY_VENDORS.find((v: Vendor) => v.id === meal.vendorId)?.name}</p>
                       </div>
                     </div>
                     <div className="p-4">
@@ -708,7 +708,7 @@ export default function PricingPage() {
                   </span>
                 </div>
                 <p className="text-white/90 text-sm">
-                  by {DUMMY_VENDORS.find(v => v.id === detailMeal.vendorId)?.name}
+                  by {DUMMY_VENDORS.find((v: Vendor) => v.id === detailMeal.vendorId)?.name}
                 </p>
               </div>
             </div>

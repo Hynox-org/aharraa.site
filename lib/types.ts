@@ -91,15 +91,49 @@ export interface Plan {
 
 export interface Order {
   id: string;
+  _id?: string;
   userId: string;
-  selectedMeal: Meal;
-  vendor: Vendor;
-  plan: Plan;
-  quantity: number; // New field for quantity
-  startDate: string; // ISO date string (e.g., "YYYY-MM-DD")
-  endDate: string; // ISO date string (e.g., "YYYY-MM-DD")
-  totalPrice: number;
+  items: OrderItem[];
+  shippingAddress: DeliveryAddress;
+  billingAddress: DeliveryAddress; // Assuming billing address is same as shipping for now, or can be separate
+  deliveryAddresses: { // Added to store multiple delivery addresses per category
+    Breakfast?: DeliveryAddress;
+    Lunch?: DeliveryAddress;
+    Dinner?: DeliveryAddress;
+  };
+  paymentMethod: string;
+  totalAmount: number;
+  currency: string; // e.g., "INR"
   orderDate: string; // ISO date string (timestamp of order creation)
+  status: "pending" | "completed" | "cancelled" | "processing"; // Order status
+}
+
+export interface OrderItem {
+  productId: string;
+  quantity: number;
+  price: number;
+  mealName: string; // Added for display purposes
+  planName: string; // Added for display purposes
+  vendorName: string; // Added for display purposes
+}
+
+export interface CreateOrderPayload {
+  userId: string;
+  items: {
+    productId: string;
+    quantity: number;
+    price: number;
+  }[];
+  shippingAddress: DeliveryAddress;
+  billingAddress: DeliveryAddress;
+  deliveryAddresses: { // Added to send multiple delivery addresses per category
+    Breakfast?: DeliveryAddress;
+    Lunch?: DeliveryAddress;
+    Dinner?: DeliveryAddress;
+  };
+  paymentMethod: string;
+  totalAmount: number;
+  currency: string;
 }
 
 export interface CartItem {

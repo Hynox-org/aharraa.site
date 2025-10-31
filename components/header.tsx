@@ -44,13 +44,6 @@ export function Header() {
           ))}
           {isAuthenticated ? (
             <>
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
-              >
-                <UserCircle size={20} />
-                {user?.name || "Profile"}
-              </Link>
               <button
                 onClick={logout}
                 className="text-sm font-medium text-white bg-red-500 px-4 py-2 rounded-md hover:bg-red-600 transition"
@@ -90,12 +83,12 @@ export function Header() {
         {/* Mobile Menu Button and Cart */}
         <div className="md:hidden flex items-center gap-4">
           {isAuthenticated ? (
-            <Link
-              href="/profile"
-              className="flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-orange-500 transition"
-            >
-              <UserCircle size={20} />
-            </Link>
+            <button
+                onClick={logout}
+                className="text-sm font-medium text-white bg-red-500 px-4 py-2 rounded-md hover:bg-red-600 transition"
+              >
+                Sign Out
+              </button>
           ) : (
             <Link
               href="/auth"

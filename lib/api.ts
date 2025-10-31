@@ -1,6 +1,6 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-import { User, ValidateTokenResponse } from "./types";
+import { User, ValidateTokenResponse, CreateOrderPayload, Order } from "./types";
 
 export async function apiRequest<T>(
   endpoint: string,
@@ -76,5 +76,51 @@ export async function oauthLogin(
     "GET",
     null,
     null
+  );
+}
+
+export async function createOrder(
+  payload: CreateOrderPayload,
+  token: string
+): Promise<Order> {
+  const response = await apiRequest<any>(
+    "/api/orders",
+    "POST",
+    payload as unknown as Record<string, unknown>,
+    token
+  );
+  // Assuming the backend returns the order object directly or nested under an 'order' key
+  if (response && response.order) {
+    return response.order as Order;
+  }
+  return response as Order;
+}
+
+export async function getOrderDetails(
+  orderId: string,
+  token: string
+): Promise<Order> {
+  const response = await apiRequest<any>(
+    `/api/orders/details/${orderId}`,
+    "GET",
+    null,
+    token
+  );
+  if (response && response.order) {
+    return response.order as Order;
+  }
+  return response as Order;
+}
+
+export async function sendOrderConfirmationEmail(
+  orderId: string,
+  userEmail: string,
+  token: string
+): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(
+    "/api/email/send-order-confirmation",
+    "POST",
+    { orderId, userEmail },
+    token
   );
 }

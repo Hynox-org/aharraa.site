@@ -14,8 +14,9 @@ import { ShoppingCart, MapPin, ArrowRight, AlertCircle, Locate } from "lucide-re
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
-import { DeliveryAddress, CheckoutData, CheckoutItem, MealCategory } from "@/lib/types";
+import { DeliveryAddress, CheckoutData, CheckoutItem, MealCategory, CreateOrderPayload, Vendor } from "@/lib/types";
 import { DUMMY_VENDORS } from "@/lib/data";
+import { createOrder, sendOrderConfirmationEmail } from "@/lib/api";
 
 export default function CheckoutPage() {
   const { isAuthenticated, loading, user } = useAuth();
@@ -137,7 +138,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = async () => {
     if (!user?.id) {
       toast.error("User not authenticated.");
       return;
@@ -153,8 +154,8 @@ export default function CheckoutPage() {
       // Add more specific zip code validation for Coimbatore here if needed
     }
 
-    const checkoutItems: CheckoutItem[] = userCartItems.map(cartItem => {
-      const vendor = DUMMY_VENDORS.find(v => v.id === cartItem.meal.vendorId);
+    const checkoutItems: CheckoutItem[] = userCartItems.map((cartItem) => {
+      const vendor = DUMMY_VENDORS.find((v: Vendor) => v.id === cartItem.meal.vendorId);
       return {
         id: cartItem.id,
         meal: cartItem.meal,
@@ -179,11 +180,66 @@ export default function CheckoutPage() {
 
     console.log("Finalized Checkout Data:", finalizedCheckoutData);
     setCheckoutData(finalizedCheckoutData); // Save to store
-    clearCart(); // Clear the cart after proceeding to payment (or move to a pending order state)
 
-    // For now, just console log and clear cart. In a real app, this would go to a payment gateway.
-    toast.success("Checkout data finalized and logged to console. Cart cleared.");
-    router.push("/"); // Redirect to home or an order confirmation page
+    // Prepare payload for backend API
+    const orderItems = userCartItems.map(item => ({
+      productId: item.meal.id,
+      quantity: item.quantity,
+      price: item.itemTotalPrice,
+    }));
+
+    // Assuming a single shipping address for simplicity, or you can derive it per category
+    // For now, taking the first available address. You might need a more robust logic here.
+    const firstCategory = uniqueMealCategories[0];
+    const shippingAddress = deliveryAddresses[firstCategory];
+
+    if (!shippingAddress) {
+      toast.error("Shipping address not found.");
+      return;
+    }
+
+    const orderPayload: CreateOrderPayload = {
+      userId: user.id,
+      items: orderItems,
+      shippingAddress: shippingAddress,
+      billingAddress: shippingAddress, // Assuming billing is same as shipping for now
+      deliveryAddresses: finalizedCheckoutData.deliveryAddresses, // Include all delivery addresses
+      paymentMethod: "COD", // Hardcoded for now, can be dynamic
+      totalAmount: totalPrice,
+      currency: "INR", // Hardcoded for now
+    };
+
+    const token = localStorage.getItem("aharraa-u-token"); // Retrieve token from local storage
+
+    if (!token) {
+      toast.error("Authentication token not found. Please log in again.");
+      router.push("/auth?returnUrl=/checkout");
+      return;
+    }
+
+    try {
+      const order = await createOrder(orderPayload, token);
+      toast.success(`Order created successfully! Order ID: ${order._id}`);
+      clearCart(); // Clear the cart after successful order creation
+
+      // Send confirmation email
+      // if (user?.email) {
+      //   try {
+      //     await sendOrderConfirmationEmail(order.id, user.email, token);
+      //     toast.success("Order confirmation email sent!");
+      //   } catch (emailError: any) {
+      //     console.error("Error sending confirmation email:", emailError);
+      //     toast.error(`Failed to send confirmation email: ${emailError.message || "Unknown error"}`);
+      //   }
+      // } else {
+      //   console.warn("User email not available, skipping confirmation email.");
+      // }
+
+      router.push(`/order-confirmation/${order._id}`); // Navigate to order confirmation page
+    } catch (error: any) {
+      console.error("Error creating order:", error);
+      toast.error(`Failed to create order: ${error.message || "Unknown error"}`);
+    }
   };
 
   return (
