@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { ShoppingCart, MapPin, ArrowRight, AlertCircle, Locate } from "lucide-react";
+import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
 import { DeliveryAddress, CheckoutData, CheckoutItem, MealCategory } from "@/lib/types";
@@ -124,21 +125,21 @@ export default function CheckoutPage() {
               zip: dummyZip,
             } as DeliveryAddress,
           }));
-          alert(`Location fetched for ${category}: ${dummyStreet}, Coimbatore ${dummyZip}`);
+          toast.success(`Location fetched for ${category}: ${dummyStreet}, Coimbatore ${dummyZip}`);
         },
         (error) => {
           console.error("Geolocation error:", error);
-          alert(`Could not fetch location for ${category}. Please enter manually. Error: ${error.message}`);
+          toast.error(`Could not fetch location for ${category}. Please enter manually. Error: ${error.message}`);
         }
       );
     } else {
-      alert("Geolocation is not supported by your browser.");
+      toast.error("Geolocation is not supported by your browser.");
     }
   };
 
   const handleProceedToPayment = () => {
     if (!user?.id) {
-      alert("User not authenticated.");
+      toast.error("User not authenticated.");
       return;
     }
 
@@ -146,7 +147,7 @@ export default function CheckoutPage() {
     for (const category of uniqueMealCategories) {
       const address = deliveryAddresses[category];
       if (!address || !address.street || !address.zip || address.city !== "Coimbatore") {
-        alert(`Please fill in all delivery details for ${category} and ensure city is Coimbatore.`);
+        toast.error(`Please fill in all delivery details for ${category} and ensure city is Coimbatore.`);
         return;
       }
       // Add more specific zip code validation for Coimbatore here if needed
@@ -181,7 +182,7 @@ export default function CheckoutPage() {
     clearCart(); // Clear the cart after proceeding to payment (or move to a pending order state)
 
     // For now, just console log and clear cart. In a real app, this would go to a payment gateway.
-    alert("Checkout data finalized and logged to console. Cart cleared.");
+    toast.success("Checkout data finalized and logged to console. Cart cleared.");
     router.push("/"); // Redirect to home or an order confirmation page
   };
 
