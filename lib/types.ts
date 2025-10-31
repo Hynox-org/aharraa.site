@@ -170,4 +170,32 @@ export interface Store {
 
   returnUrl: string;
   setReturnUrl: (url: string) => void;
+
+  checkoutData: CheckoutData | null;
+  setCheckoutData: (data: CheckoutData | null) => void;
+  clearCheckoutData: () => void;
+}
+
+export interface CheckoutItem {
+  id: string; // Unique ID for the checkout item (from CartItem)
+  meal: Meal;
+  plan: Plan;
+  quantity: number;
+  startDate: string;
+  endDate: string;
+  itemTotalPrice: number;
+  vendor: Vendor; // Include vendor details directly
+}
+
+export interface CheckoutData {
+  id: string; // Unique ID for the checkout session/order
+  userId: string;
+  items: CheckoutItem[];
+  deliveryAddresses: { // Changed to an object keyed by MealCategory
+    Breakfast?: DeliveryAddress;
+    Lunch?: DeliveryAddress;
+    Dinner?: DeliveryAddress;
+  };
+  totalPrice: number;
+  checkoutDate: string; // Timestamp of when checkout data was finalized
 }

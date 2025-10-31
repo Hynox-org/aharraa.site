@@ -137,9 +137,11 @@ export default function CartPage() {
                     <span className="text-xl font-bold" style={{ color: "#EAFFF9" }}>Order Total</span>
                     <span className="text-2xl font-bold" style={{ color: "#EAFFF9" }}>₹{totalPrice.toFixed(2)}</span>
                   </div>
-                  <Button className="w-full py-6 text-base font-black rounded-xl transition-all hover:scale-105 shadow-lg" style={{ backgroundColor: "#034C3C", color: "#EAFFF9" }}>
-                    Proceed to Checkout
-                    <ArrowRight className="ml-2 w-5 h-5" />
+                  <Button asChild className="w-full py-6 text-base font-black rounded-xl transition-all hover:scale-105 shadow-lg" style={{ backgroundColor: "#034C3C", color: "#EAFFF9" }}>
+                    <Link href="/checkout">
+                      Proceed to Checkout
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>

@@ -160,4 +160,8 @@ export const useStore = create<Store>((set, get) => ({
 
   returnUrl: "/",
   setReturnUrl: (url) => set({ returnUrl: url }),
+
+  checkoutData: null,
+  setCheckoutData: (data) => set({ checkoutData: data }),
+  clearCheckoutData: () => set({ checkoutData: null }),
 }));
