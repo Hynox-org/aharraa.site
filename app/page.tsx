@@ -20,7 +20,7 @@ export default function Home() {
       const hash = window.location.hash;
       if (hash) {
         const params = new URLSearchParams(hash.substring(1)); // Remove '#'
-        const accessToken = params.get("access");
+        const accessToken = params.get("access_token");
 
         if (accessToken) {
           await login(accessToken);
