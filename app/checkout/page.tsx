@@ -159,6 +159,7 @@ export default function CheckoutPage() {
         meal: cartItem.meal,
         plan: cartItem.plan,
         quantity: cartItem.quantity,
+        personDetails: cartItem.personDetails, // Include person details
         startDate: cartItem.startDate,
         endDate: cartItem.endDate,
         itemTotalPrice: cartItem.itemTotalPrice,
@@ -281,6 +282,17 @@ export default function CheckoutPage() {
                       <p className="font-bold text-lg" style={{ color: "#0B132B" }}>{item.meal.name}</p>
                       <p className="text-sm text-neutral-600">{item.plan.name} ({item.plan.durationDays} days)</p>
                       <p className="text-xs text-neutral-500">Qty: {item.quantity}</p>
+                      {item.quantity > 1 && item.personDetails && item.personDetails.length > 0 && (
+                        <div className="mt-2 text-xs text-neutral-700 space-y-1">
+                          <p className="font-semibold">Person Details:</p>
+                          {item.personDetails.map((person, idx) => (
+                            <div key={idx} className="flex justify-between">
+                              <span>{person.name || `Person ${idx + 1}`}</span>
+                              <span>{person.phoneNumber}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <span className="font-bold text-lg" style={{ color: "#034C3C" }}>₹{item.itemTotalPrice.toFixed(2)}</span>
                   </div>

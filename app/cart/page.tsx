@@ -4,13 +4,16 @@ import { Header } from "@/components/header";
 import { useStore } from "@/lib/store";
 import { useAuth } from "@/app/context/auth-context";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
-import { ShoppingCart, Trash2, MinusCircle, PlusCircle, ArrowRight } from "lucide-react";
+import { ShoppingCart, Trash2, MinusCircle, PlusCircle, ArrowRight, Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { PersonDetails } from "@/lib/types";
 
 export default function CartPage() {
   const { isAuthenticated, loading, user } = useAuth();
@@ -20,12 +23,41 @@ export default function CartPage() {
   const updateCartItemQuantity = useStore((state) => state.updateCartItemQuantity);
   const getCartTotalPrice = useStore((state) => state.getCartTotalPrice);
   const getCartTotalItems = useStore((state) => state.getCartTotalItems);
+  const updateCartItemPersonDetails = useStore((state) => state.updateCartItemPersonDetails); // New store action
+
+  const [isEditingPersonDetails, setIsEditingPersonDetails] = useState(false);
+  const [currentEditingCartItemId, setCurrentEditingCartItemId] = useState<string | null>(null);
+  const [editingPersonDetails, setEditingPersonDetails] = useState<PersonDetails[]>([]);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/auth?returnUrl=/cart");
     }
   }, [isAuthenticated, loading, router]);
+
+  const handleEditPersonDetails = (itemId: string, details: PersonDetails[] | undefined) => {
+    setCurrentEditingCartItemId(itemId);
+    setEditingPersonDetails(details ? [...details] : []);
+    setIsEditingPersonDetails(true);
+  };
+
+  const handleSavePersonDetails = () => {
+    if (currentEditingCartItemId) {
+      updateCartItemPersonDetails(currentEditingCartItemId, editingPersonDetails);
+      setIsEditingPersonDetails(false);
+      setCurrentEditingCartItemId(null);
+      setEditingPersonDetails([]);
+    }
+  };
+
+  const handlePersonDetailChange = (index: number, field: keyof PersonDetails, value: string) => {
+    const updatedDetails = [...editingPersonDetails];
+    if (!updatedDetails[index]) {
+      updatedDetails[index] = { name: "", phoneNumber: "" };
+    }
+    updatedDetails[index][field] = value;
+    setEditingPersonDetails(updatedDetails);
+  };
 
   if (loading) {
     return (
@@ -68,45 +100,46 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               {userCartItems.map((item) => (
-                <Card key={item.id} className="flex items-center p-4 shadow-md" style={{ border: "none", backgroundColor: "#ffffff" }}>
-                  <Image
-                    src={item.meal.image}
-                    alt={item.meal.name}
-                    width={100}
-                    height={100}
-                    className="rounded-lg object-cover flex-shrink-0"
-                  />
-                  <div className="ml-4 flex-1">
-                    <h2 className="text-lg font-bold" style={{ color: "#0B132B" }}>{item.meal.name}</h2>
-                    <p className="text-sm text-neutral-600">{item.plan.name} ({item.plan.durationDays} days)</p>
-                    <p className="text-sm text-neutral-600">
-                      {format(new Date(item.startDate), "MMM d")} - {format(new Date(item.endDate), "MMM d, yyyy")}
-                    </p>
-                    <p className="text-md font-semibold mt-1" style={{ color: "#034C3C" }}>
-                      ₹{item.itemTotalPrice.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => updateCartItemQuantity(item.id, Math.max(1, item.quantity - 1))}
-                      disabled={item.quantity <= 1}
-                      className="w-8 h-8 rounded-full"
-                      style={{ borderColor: "#034C3C", color: "#034C3C" }}
-                    >
-                      <MinusCircle className="w-4 h-4" />
-                    </Button>
-                    <span className="font-bold text-lg" style={{ color: "#0B132B" }}>{item.quantity}</span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
-                      className="w-8 h-8 rounded-full"
-                      style={{ borderColor: "#034C3C", color: "#034C3C" }}
-                    >
-                      <PlusCircle className="w-4 h-4" />
-                    </Button>
+                <div key={item.id}> {/* Added a div to act as a single parent element */}
+                  <Card className="flex items-center p-4 shadow-md" style={{ border: "none", backgroundColor: "#ffffff" }}>
+                    <Image
+                      src={item.meal.image}
+                      alt={item.meal.name}
+                      width={100}
+                      height={100}
+                      className="rounded-lg object-cover flex-shrink-0"
+                    />
+                    <div className="ml-4 flex-1">
+                      <h2 className="text-lg font-bold" style={{ color: "#0B132B" }}>{item.meal.name}</h2>
+                      <p className="text-sm text-neutral-600">{item.plan.name} ({item.plan.durationDays} days)</p>
+                      <p className="text-sm text-neutral-600">
+                        {format(new Date(item.startDate), "MMM d")} - {format(new Date(item.endDate), "MMM d, yyyy")}
+                      </p>
+                      <p className="text-md font-semibold mt-1" style={{ color: "#034C3C" }}>
+                        ₹{item.itemTotalPrice.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => updateCartItemQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        disabled={item.quantity <= 1}
+                        className="w-8 h-8 rounded-full"
+                        style={{ borderColor: "#034C3C", color: "#034C3C" }}
+                      >
+                        <MinusCircle className="w-4 h-4" />
+                      </Button>
+                      <span className="font-bold text-lg" style={{ color: "#0B132B" }}>{item.quantity}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                        className="w-8 h-8 rounded-full"
+                        style={{ borderColor: "#034C3C", color: "#034C3C" }}
+                      >
+                        <PlusCircle className="w-4 h-4" />
+                      </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -116,7 +149,34 @@ export default function CartPage() {
                       <Trash2 className="w-5 h-5" />
                     </Button>
                   </div>
+                  {item.personDetails && item.personDetails.length > 0 && ( // Display if person details exist
+                    <div className="mt-4 pt-4 border-t" style={{ borderColor: "#e5e7eb" }}>
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-md font-bold" style={{ color: "#0B132B" }}>Person Details</h3>
+                        {item.quantity > 1 && ( // Only show edit button if quantity > 1
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditPersonDetails(item.id, item.personDetails)}
+                            className="h-8 px-3 rounded-lg"
+                            style={{ borderColor: "#034C3C", color: "#034C3C" }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" /> Edit
+                          </Button>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        {item.personDetails.map((person: PersonDetails, idx: number) => (
+                          <div key={idx} className="flex justify-between text-sm" style={{ color: "#0B132B" }}>
+                            <span>{person.name || `Person ${idx + 1}`}</span>
+                            <span>{person.phoneNumber}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </Card>
+                </div>
               ))}
             </div>
 
@@ -149,6 +209,43 @@ export default function CartPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Person Details Dialog */}
+      <Dialog open={isEditingPersonDetails} onOpenChange={setIsEditingPersonDetails}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Person Details</DialogTitle>
+            <DialogDescription>
+              Make changes to the names and phone numbers for each person.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {editingPersonDetails.map((person, index) => (
+              <div key={index} className="space-y-2">
+                <h4 className="text-md font-semibold">Person {index + 1}</h4>
+                <Input
+                  id={`name-${index}`}
+                  placeholder="Name"
+                  value={person.name}
+                  onChange={(e) => handlePersonDetailChange(index, "name", e.target.value)}
+                  className="col-span-3"
+                />
+                <Input
+                  id={`phone-${index}`}
+                  placeholder="Phone Number"
+                  value={person.phoneNumber}
+                  onChange={(e) => handlePersonDetailChange(index, "phoneNumber", e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditingPersonDetails(false)}>Cancel</Button>
+            <Button onClick={handleSavePersonDetails}>Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

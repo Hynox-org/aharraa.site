@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DUMMY_MEALS, DUMMY_PLANS, DUMMY_VENDORS } from "@/lib/data";
-import { Meal, Plan, MealCategory, DietPreference, CartItem } from "@/lib/types"; // Removed Order, Added CartItem
+import { Meal, Plan, MealCategory, DietPreference, CartItem, PersonDetails } from "@/lib/types"; // Removed Order, Added CartItem, Added PersonDetails
 import { format, addDays } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,6 +29,7 @@ export default function PricingPage() {
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
+  const [personDetails, setPersonDetails] = useState<PersonDetails[]>([]);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   // const [orderConfirmed, setOrderConfirmed] = useState<Order | null>(null); // Removed orderConfirmed state
@@ -69,6 +70,7 @@ export default function PricingPage() {
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);
     setQuantity(1);
+    setPersonDetails([]); // Reset person details when plan changes
     setStartDate(undefined);
     setEndDate(undefined);
     // setOrderConfirmed(null); // Removed
@@ -85,6 +87,27 @@ export default function PricingPage() {
     }
   };
 
+  const handlePersonDetailChange = (index: number, field: keyof PersonDetails, value: string) => {
+    const updatedDetails = [...personDetails];
+    if (!updatedDetails[index]) {
+      updatedDetails[index] = { name: "", phoneNumber: "" };
+    }
+    updatedDetails[index][field] = value;
+    setPersonDetails(updatedDetails);
+  };
+
+  // Effect to update personDetails array when quantity changes
+  useEffect(() => { // Changed to useEffect as it has side effects
+    if (quantity >= 1) {
+      const newPersonDetails = Array.from({ length: quantity }, (_, i) => {
+        return personDetails[i] || { name: "", phoneNumber: "" };
+      });
+      setPersonDetails(newPersonDetails);
+    } else {
+      setPersonDetails([]);
+    }
+  }, [quantity]); // Depend on quantity
+
   const handleAddToCart = () => { // Renamed from handleConfirmOrder
     if (!isAuthenticated) {
       router.push("/auth?returnUrl=/pricing"); // Redirect to pricing after login
@@ -100,6 +123,7 @@ export default function PricingPage() {
         meal: selectedMeal,
         plan: selectedPlan,
         quantity: quantity,
+        personDetails: quantity >= 1 ? personDetails : undefined, // Always add person details if quantity >= 1
         startDate: format(startDate, "yyyy-MM-dd"),
         endDate: format(endDate, "yyyy-MM-dd"),
         itemTotalPrice: itemTotalPrice,
@@ -128,6 +152,7 @@ export default function PricingPage() {
     setSelectedMeal(null);
     setSelectedPlan(null);
     setQuantity(1);
+    setPersonDetails([]); // Reset person details
     setStartDate(undefined);
     setEndDate(undefined);
     // setOrderConfirmed(null); // Removed
@@ -432,6 +457,40 @@ export default function PricingPage() {
                     <p className="text-center text-sm mt-4" style={{ color: "#6b7280" }}>
                       You are ordering {quantity} meal plan(s) for {selectedPlan.durationDays} days.
                     </p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Person Details Section */}
+            {selectedPlan && quantity >= 1 && (
+              <div>
+                <h2 className="text-3xl font-black mb-6" style={{ color: "#0B132B" }}>
+                  Person Details
+                </h2>
+                <Card style={{ border: "none", backgroundColor: "#ffffff" }}>
+                  <CardContent className="p-6 space-y-6">
+                    {Array.from({ length: quantity }).map((_, index) => (
+                      <div key={index} className="space-y-3 p-4 rounded-xl" style={{ border: "2px dashed #e5e7eb" }}>
+                        <h3 className="text-lg font-bold" style={{ color: "#0B132B" }}>Person {index + 1}</h3>
+                        <Input
+                          type="text"
+                          placeholder="Name"
+                          value={personDetails[index]?.name || ""}
+                          onChange={(e) => handlePersonDetailChange(index, "name", e.target.value)}
+                          className="h-12 rounded-xl"
+                          style={{ border: "1px solid #e5e7eb", color: "#0B132B" }}
+                        />
+                        <Input
+                          type="tel"
+                          placeholder="Phone Number"
+                          value={personDetails[index]?.phoneNumber || ""}
+                          onChange={(e) => handlePersonDetailChange(index, "phoneNumber", e.target.value)}
+                          className="h-12 rounded-xl"
+                          style={{ border: "1px solid #e5e7eb", color: "#0B132B" }}
+                        />
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
               </div>

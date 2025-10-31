@@ -46,6 +46,11 @@ export interface Review {
   avatar: string;
 }
 
+export interface PersonDetails {
+  name: string;
+  phoneNumber: string;
+}
+
 // New Schema for Meals, Vendors, Plans, and Orders
 
 export type DietPreference = "All" | "Veg" | "Non-Veg" | "Vegan" | "Custom";
@@ -103,6 +108,7 @@ export interface CartItem {
   meal: Meal;
   plan: Plan;
   quantity: number;
+  personDetails?: PersonDetails[]; // Optional array of person details
   startDate: string; // ISO date string (e.g., "YYYY-MM-DD")
   endDate: string; // ISO date string (e.g., "YYYY-MM-DD")
   itemTotalPrice: number; // Price for this specific cart item (meal * plan duration * quantity)
@@ -164,6 +170,7 @@ export interface Store {
   addToCart: (item: CartItem) => void;
   removeFromCart: (cartItemId: string) => void;
   updateCartItemQuantity: (cartItemId: string, quantity: number) => void;
+  updateCartItemPersonDetails: (cartItemId: string, personDetails: PersonDetails[]) => void;
   clearCart: () => void;
   getCartTotalPrice: () => number;
   getCartTotalItems: () => number;
@@ -181,6 +188,7 @@ export interface CheckoutItem {
   meal: Meal;
   plan: Plan;
   quantity: number;
+  personDetails?: PersonDetails[]; // Optional array of person details
   startDate: string;
   endDate: string;
   itemTotalPrice: number;
