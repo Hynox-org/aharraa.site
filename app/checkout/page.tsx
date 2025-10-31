@@ -29,7 +29,7 @@ import {
   Vendor,
 } from "@/lib/types";
 import { DUMMY_VENDORS } from "@/lib/data";
-import { createOrder, sendOrderConfirmationEmail } from "@/lib/api";
+import { createOrder, sendOrderConfirmationEmail, createPayment } from "@/lib/api";
 import { load } from "@cashfreepayments/cashfree-js";
 
 export default function CheckoutPage() {
@@ -181,24 +181,6 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePayment = async (paymentSessionId: string) => {
-    const cashfree = await initializeSDK();
-    const checkoutOptions = {
-      paymentSessionId: paymentSessionId, // Replace with the actual session ID from the backend
-      redirectTarget: "_self", // Options: "_self", "_blank", "_modal", or a DOM element
-    };
-    cashfree.checkout(checkoutOptions).then((result: any) => {
-      if (result.error) {
-        console.error("Payment error:", result.error);
-      } else if (result.paymentDetails) {
-        console.log("Payment completed:", result.paymentDetails);
-
-        toast.success(`Order created successfully!`);
-        clearCart(); // Clear the cart after successful order creation
-      }
-    });
-  };
-
   const handleProceedToPayment = async () => {
     if (!user?.id) {
       toast.error("User not authenticated.");
@@ -291,9 +273,23 @@ export default function CheckoutPage() {
     }
 
     try {
-      const order = await createOrder(orderPayload, token);
-      console.log(order.paymentSessionId);
-      await handlePayment(order.paymentSessionId);
+      const paymentSessionId = await createPayment(orderPayload, token);
+      console.log(paymentSessionId);
+      const cashfree = await initializeSDK();
+      const checkoutOptions = {
+        paymentSessionId: paymentSessionId, // Replace with the actual session ID from the backend
+        redirectTarget: "_self", // Options: "_self", "_blank", "_modal", or a DOM element
+      };
+      cashfree.checkout(checkoutOptions).then(async (result: any) => {
+        if (result.error) {
+          console.error("Payment error:", result.error);
+        } else if (result.paymentDetails) {
+          console.log("Payment completed:", result.paymentDetails);
+          const order = await createOrder(orderPayload, token);
+          toast.success(`Order created successfully!`);
+          clearCart(); // Clear the cart after successful order creation
+        }
+      });
     } catch (error: any) {
       console.error("Error creating order:", error);
       toast.error(

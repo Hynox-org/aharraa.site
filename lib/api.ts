@@ -96,6 +96,24 @@ export async function createOrder(
   return response as Order;
 }
 
+//createPayment
+export async function createPayment(
+  payload: CreateOrderPayload,
+  token: string
+): Promise<string> {
+  const response = await apiRequest<any>(
+    "/api/orders/payment",
+    "POST",
+    payload as unknown as Record<string, unknown>,
+    token
+  );
+  // Assuming the backend returns the order object directly or nested under an 'order' key
+  if (response && response.paymentSessionId) {
+    return response.paymentSessionId as string;
+  }
+  return response.paymentSessionId as string;
+}
+
 export async function getOrderDetails(
   orderId: string,
   token: string
