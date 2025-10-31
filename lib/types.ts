@@ -96,3 +96,78 @@ export interface Order {
   totalPrice: number;
   orderDate: string; // ISO date string (timestamp of order creation)
 }
+
+export interface CartItem {
+  id: string; // Unique ID for the cart item
+  userId: string;
+  meal: Meal;
+  plan: Plan;
+  quantity: number;
+  startDate: string; // ISO date string (e.g., "YYYY-MM-DD")
+  endDate: string; // ISO date string (e.g., "YYYY-MM-DD")
+  itemTotalPrice: number; // Price for this specific cart item (meal * plan duration * quantity)
+  addedDate: string; // Timestamp when item was added to cart
+}
+
+export interface Cart {
+  id: string; // Unique ID for the cart (could be user ID if one cart per user)
+  userId: string;
+  items: CartItem[];
+  totalItems: number;
+  cartTotalPrice: number;
+  lastUpdated: string; // Timestamp of last update
+}
+
+export type MealType = "breakfast" | "lunch" | "dinner";
+
+export interface DeliveryAddress {
+  street: string;
+  city: string;
+  zip: string;
+  // Add other address fields as needed
+}
+
+export interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
+export interface Accompaniment {
+  id: string;
+  name: string;
+  price: number;
+}
+
+export interface Store {
+  selectedPlan: Plan | null;
+  deliveryAddresses: {
+    breakfast: DeliveryAddress | null;
+    lunch: DeliveryAddress | null;
+    dinner: DeliveryAddress | null;
+  };
+  setDeliveryAddress: (mealType: MealType, address: DeliveryAddress) => void;
+  setSelectedPlan: (plan: Plan) => void;
+
+  selectedDates: DateRange | null;
+  setSelectedDates: (dates: DateRange) => void;
+
+  selectedVendorId: string | null;
+  setSelectedVendorId: (vendorId: string | null) => void;
+
+  selectedAccompaniments: Accompaniment[];
+  toggleAccompaniment: (accompaniment: Accompaniment) => void;
+
+  datesConfirmed: boolean;
+  setDatesConfirmed: (confirmed: boolean) => void;
+
+  cart: Cart | null;
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (cartItemId: string) => void;
+  updateCartItemQuantity: (cartItemId: string, quantity: number) => void;
+  clearCart: () => void;
+  getCartTotalPrice: () => number;
+  getCartTotalItems: () => number;
+
+  returnUrl: string;
+  setReturnUrl: (url: string) => void;
+}

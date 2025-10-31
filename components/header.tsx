@@ -10,7 +10,7 @@ import { useAuth } from "@/app/context/auth-context"
 export function Header() {
   const { isAuthenticated, user, logout } = useAuth()
   const cart = useStore((state) => state.cart)
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const cartCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = [

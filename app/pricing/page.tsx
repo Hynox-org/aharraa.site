@@ -5,7 +5,7 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DUMMY_MEALS, DUMMY_PLANS, DUMMY_VENDORS } from "@/lib/data";
-import { Meal, Plan, Vendor, Order, MealCategory, DietPreference } from "@/lib/types";
+import { Meal, Plan, MealCategory, DietPreference, CartItem } from "@/lib/types"; // Removed Order, Added CartItem
 import { format, addDays } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -15,19 +15,23 @@ import { useAuth } from "@/app/context/auth-context";
 import { useRouter } from "next/navigation";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Input } from "@/components/ui/input";
+import { useStore } from "@/lib/store"; // Added useStore
+import { useToast } from "@/components/ui/use-toast"; // Added useToast
 
 export default function PricingPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
+  const { addToCart } = useStore(); // Get addToCart from store
+  const { toast } = useToast(); // Get toast from useToast
 
   const [selectedCategory, setSelectedCategory] = useState<MealCategory>("Breakfast");
   const [selectedDietPreference, setSelectedDietPreference] = useState<DietPreference>("All");
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [quantity, setQuantity] = useState<number>(1); // New state for quantity
+  const [quantity, setQuantity] = useState<number>(1);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [orderConfirmed, setOrderConfirmed] = useState<Order | null>(null);
+  // const [orderConfirmed, setOrderConfirmed] = useState<Order | null>(null); // Removed orderConfirmed state
   const [mealDetailsOpen, setMealDetailsOpen] = useState(false);
   const [detailMeal, setDetailMeal] = useState<Meal | null>(null);
 
@@ -58,16 +62,16 @@ export default function PricingPage() {
     setSelectedPlan(null);
     setStartDate(undefined);
     setEndDate(undefined);
-    setOrderConfirmed(null);
+    // setOrderConfirmed(null); // Removed
     setMealDetailsOpen(false);
   };
 
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);
-    setQuantity(1); // Reset quantity when plan changes
+    setQuantity(1);
     setStartDate(undefined);
     setEndDate(undefined);
-    setOrderConfirmed(null);
+    // setOrderConfirmed(null); // Removed
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -81,171 +85,55 @@ export default function PricingPage() {
     }
   };
 
-  const handleConfirmOrder = () => {
+  const handleAddToCart = () => { // Renamed from handleConfirmOrder
     if (!isAuthenticated) {
-      router.push("/auth?returnUrl=/checkout");
+      router.push("/auth?returnUrl=/pricing"); // Redirect to pricing after login
       return;
     }
 
     if (selectedMeal && selectedPlan && quantity > 0 && startDate && endDate && user?.id) {
-      const vendor = DUMMY_VENDORS.find(v => v.id === selectedMeal.vendorId);
-      if (!vendor) {
-        console.error("Vendor not found for selected meal.");
-        return;
-      }
+      const itemTotalPrice = selectedMeal.price * selectedPlan.durationDays * quantity;
 
-      const dailyMealPrice = selectedMeal.price;
-      const calculatedTotalPrice = dailyMealPrice * selectedPlan.durationDays * quantity;
-
-      const newOrder: Order = {
-        id: `order-${Date.now()}`,
+      const newCartItem: CartItem = {
+        id: `cart-${Date.now()}-${selectedMeal.id}`, // Unique ID for cart item
         userId: user.id,
-        selectedMeal: selectedMeal,
-        vendor: vendor,
-        plan: { ...selectedPlan, price: calculatedTotalPrice },
-        quantity: quantity, // Include quantity in the order
+        meal: selectedMeal,
+        plan: selectedPlan,
+        quantity: quantity,
         startDate: format(startDate, "yyyy-MM-dd"),
         endDate: format(endDate, "yyyy-MM-dd"),
-        totalPrice: calculatedTotalPrice,
-        orderDate: new Date().toISOString(),
+        itemTotalPrice: itemTotalPrice,
+        addedDate: new Date().toISOString(),
       };
-      setOrderConfirmed(newOrder);
-      console.log("Order Confirmed:", newOrder);
+
+      addToCart(newCartItem); // Add to cart using the store action
+
+      toast({
+        title: "Added to Cart!",
+        description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added to your cart.`,
+      });
+
+      // Optionally reset selection after adding to cart
+      resetSelection();
     } else {
-      alert("Please select a meal, a plan, a valid quantity, and valid dates.");
+      toast({
+        title: "Cannot add to cart",
+        description: "Please select a meal, a plan, a valid quantity, and valid dates.",
+        variant: "destructive",
+      });
     }
   };
 
-  const resetOrder = () => {
+  const resetSelection = () => { // Renamed from resetOrder
     setSelectedMeal(null);
     setSelectedPlan(null);
     setQuantity(1);
     setStartDate(undefined);
     setEndDate(undefined);
-    setOrderConfirmed(null);
+    // setOrderConfirmed(null); // Removed
   };
 
-  if (orderConfirmed) {
-    return (
-      <main className="min-h-screen" style={{ backgroundColor: "#EAFFF9" }}>
-        <Header />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 animate-bounce" style={{ backgroundColor: "#034C3C" }}>
-              <CheckCircle2 className="w-12 h-12" style={{ color: "#EAFFF9" }} />
-            </div>
-            <h1 className="text-5xl font-bold mb-2" style={{ color: "#0B132B" }}>
-              Order Confirmed!
-            </h1>
-            <p className="text-xl" style={{ color: "#034C3C" }}>
-              Thank you, {user?.name || "valued customer"}! Your meal plan is ready.
-            </p>
-          </div>
-
-          <Card className="mb-8 overflow-hidden shadow-2xl" style={{ border: "none", backgroundColor: "#ffffff" }}>
-            <div className="p-8">
-              <div className="flex items-center justify-between mb-8 pb-6 border-b-2" style={{ borderColor: "#EAFFF9" }}>
-                <h2 className="text-3xl font-bold flex items-center gap-3" style={{ color: "#0B132B" }}>
-                  <Package className="w-8 h-8" style={{ color: "#034C3C" }} />
-                  Order Summary
-                </h2>
-                <span className="px-4 py-2 rounded-full text-sm font-bold" style={{ backgroundColor: "#034C3C", color: "#EAFFF9" }}>
-                  ORDER #{orderConfirmed.id.split('-')[1]}
-                </span>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <div className="mb-6">
-                    <p className="text-xs uppercase font-bold mb-3 tracking-wide" style={{ color: "#034C3C" }}>Your Meal</p>
-                    <div className="flex items-center gap-4 p-4 rounded-xl" style={{ backgroundColor: "#EAFFF9" }}>
-                      <img 
-                        src={orderConfirmed.selectedMeal.image} 
-                        alt={orderConfirmed.selectedMeal.name}
-                        className="w-20 h-20 object-cover rounded-xl"
-                      />
-                      <div>
-                        <p className="font-bold text-lg" style={{ color: "#0B132B" }}>{orderConfirmed.selectedMeal.name}</p>
-                        <p className="text-sm" style={{ color: "#034C3C" }}>{orderConfirmed.vendor.name}</p>
-                        <p className="text-xs mt-1" style={{ color: "#034C3C" }}>₹{orderConfirmed.selectedMeal.price} per meal</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs uppercase font-bold mb-3 tracking-wide" style={{ color: "#034C3C" }}>Subscription Plan</p>
-                    <div className="p-4 rounded-xl" style={{ backgroundColor: "#EAFFF9" }}>
-                      <p className="font-bold text-lg mb-1" style={{ color: "#0B132B" }}>{orderConfirmed.plan.name}</p>
-                      <p className="text-sm" style={{ color: "#034C3C" }}>{orderConfirmed.plan.durationDays} days of delivery</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs uppercase font-bold mb-3 tracking-wide" style={{ color: "#034C3C" }}>Quantity</p>
-                    <div className="p-4 rounded-xl" style={{ backgroundColor: "#EAFFF9" }}>
-                      <p className="font-bold text-lg mb-1" style={{ color: "#0B132B" }}>{orderConfirmed.quantity} meal plan(s)</p>
-                      <p className="text-sm" style={{ color: "#034C3C" }}>Total meals: {orderConfirmed.quantity * orderConfirmed.plan.durationDays}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase font-bold mb-3 tracking-wide" style={{ color: "#034C3C" }}>Delivery Schedule</p>
-                  <div className="p-4 rounded-xl space-y-3" style={{ backgroundColor: "#EAFFF9" }}>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5" style={{ color: "#034C3C" }} />
-                      <div>
-                        <p className="text-xs font-medium" style={{ color: "#034C3C" }}>Start Date</p>
-                        <p className="font-semibold" style={{ color: "#0B132B" }}>{format(new Date(orderConfirmed.startDate), "PP")}</p>
-                      </div>
-                    </div>
-                    <div className="h-8 w-0.5 ml-2" style={{ backgroundColor: "#034C3C" }} />
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5" style={{ color: "#034C3C" }} />
-                      <div>
-                        <p className="text-xs font-medium" style={{ color: "#034C3C" }}>End Date</p>
-                        <p className="font-semibold" style={{ color: "#0B132B" }}>{format(new Date(orderConfirmed.endDate), "PP")}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 p-4 rounded-xl" style={{ backgroundColor: "#034C3C" }}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm" style={{ color: "#EAFFF9" }}>Subtotal</span>
-                      <span className="font-medium" style={{ color: "#EAFFF9" }}>₹{orderConfirmed.totalPrice.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-3 border-t" style={{ borderColor: "rgba(234, 255, 249, 0.3)" }}>
-                      <span className="text-xl font-bold" style={{ color: "#EAFFF9" }}>Total</span>
-                      <span className="text-2xl font-bold" style={{ color: "#EAFFF9" }}>₹{orderConfirmed.totalPrice.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          <div className="text-center space-y-6">
-            <div className="p-6 rounded-xl" style={{ backgroundColor: "rgba(3, 76, 60, 0.1)" }}>
-              <p className="text-sm mb-2" style={{ color: "#034C3C" }}>
-                <strong>Confirmation Email Sent!</strong>
-              </p>
-              <p className="text-sm" style={{ color: "#034C3C" }}>
-                Check {user?.email || "your registered email"} for order details and tracking information.
-              </p>
-            </div>
-            <Button
-              onClick={resetOrder}
-              className="px-10 py-6 text-lg font-bold rounded-xl transition-all hover:scale-105 shadow-lg"
-              style={{ backgroundColor: "#0B132B", color: "#EAFFF9" }}
-            >
-              Start New Order
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  // Removed the entire if (orderConfirmed) block
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: "#f8f9fa" }}>
@@ -691,13 +579,13 @@ export default function PricingPage() {
                             <Button
                               className="w-full py-6 text-base font-black rounded-xl transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-xl"
                               style={{ backgroundColor: "#034C3C", color: "#EAFFF9" }}
-                              onClick={handleConfirmOrder}
+                              onClick={handleAddToCart}
                               disabled={!startDate || !endDate || quantity < 1}
                             >
                               {!startDate || !endDate || quantity < 1 ? "Select date and quantity to continue" : (
                                 <span className="flex items-center justify-center gap-2">
-                                  Confirm & Pay
-                                  <ArrowRight className="w-5 h-5" />
+                                  Add to Cart
+                                  <ShoppingBag className="w-5 h-5" />
                                 </span>
                               )}
                             </Button>
