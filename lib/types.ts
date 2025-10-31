@@ -48,7 +48,7 @@ export interface Review {
 
 // New Schema for Meals, Vendors, Plans, and Orders
 
-export type DietPreference = "Veg" | "Non-Veg" | "Vegan" | "Custom";
+export type DietPreference = "All" | "Veg" | "Non-Veg" | "Vegan" | "Custom";
 export type MealCategory = "Breakfast" | "Lunch" | "Dinner";
 
 export interface Meal {
@@ -90,6 +90,7 @@ export interface Order {
   selectedMeal: Meal;
   vendor: Vendor;
   plan: Plan;
+  quantity: number; // New field for quantity
   startDate: string; // ISO date string (e.g., "YYYY-MM-DD")
   endDate: string; // ISO date string (e.g., "YYYY-MM-DD")
   totalPrice: number;
