@@ -103,6 +103,19 @@ export default function CheckoutPage() {
     new Set(userCartItems.map((item) => item.meal.category))
   );
 
+  // Calculate Delivery Cost
+  const deliveryCostPerCategory = 50;
+  const deliveryCost = uniqueMealCategories.length * deliveryCostPerCategory;
+
+  // Calculate Platform Cost (10% of subtotal)
+  const platformCost = totalPrice * 0.10;
+
+  // Calculate GST (5% of subtotal)
+  const gstCost = totalPrice * 0.05;
+
+  // Calculate Grand Total
+  const grandTotal = totalPrice + deliveryCost + platformCost + gstCost;
+
   if (userCartItems.length === 0) {
     return (
       <main className="min-h-screen" style={{ backgroundColor: "#f8f9fa" }}>
@@ -260,7 +273,7 @@ export default function CheckoutPage() {
       billingAddress: shippingAddress, // Assuming billing is same as shipping for now
       deliveryAddresses: finalizedCheckoutData.deliveryAddresses, // Include all delivery addresses
       paymentMethod: "UPI", // Hardcoded for now, can be dynamic
-      totalAmount: totalPrice,
+      totalAmount: grandTotal, // Use the new grandTotal
       currency: "INR", // Hardcoded for now
     };
 
@@ -508,11 +521,28 @@ export default function CheckoutPage() {
                   className="flex justify-between items-center text-sm"
                   style={{ color: "rgba(234, 255, 249, 0.8)" }}
                 >
-                  <span>Delivery Fee</span>
+                  <span>Delivery Fee ({uniqueMealCategories.length} delivery x ₹{deliveryCostPerCategory})</span>
                   <span className="font-semibold" style={{ color: "#EAFFF9" }}>
-                    ₹0.00
-                  </span>{" "}
-                  {/* Placeholder */}
+                    ₹{deliveryCost.toFixed(2)}
+                  </span>
+                </div>
+                <div
+                  className="flex justify-between items-center text-sm"
+                  style={{ color: "rgba(234, 255, 249, 0.8)" }}
+                >
+                  <span>Platform Cost (10%)</span>
+                  <span className="font-semibold" style={{ color: "#EAFFF9" }}>
+                    ₹{platformCost.toFixed(2)}
+                  </span>
+                </div>
+                <div
+                  className="flex justify-between items-center text-sm"
+                  style={{ color: "rgba(234, 255, 249, 0.8)" }}
+                >
+                  <span>GST (5%)</span>
+                  <span className="font-semibold" style={{ color: "#EAFFF9" }}>
+                    ₹{gstCost.toFixed(2)}
+                  </span>
                 </div>
                 <div
                   className="flex justify-between items-center pt-4 border-t"
@@ -528,7 +558,7 @@ export default function CheckoutPage() {
                     className="text-2xl font-bold"
                     style={{ color: "#EAFFF9" }}
                   >
-                    ₹{totalPrice.toFixed(2)}
+                    ₹{grandTotal.toFixed(2)}
                   </span>
                 </div>
                 <Button

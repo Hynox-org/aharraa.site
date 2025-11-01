@@ -158,6 +158,46 @@ export default function PricingPage() {
     // setOrderConfirmed(null); // Removed
   };
 
+  const handleCheckout = async () => {
+    if (!isAuthenticated) {
+      router.push("/auth?returnUrl=/pricing");
+      return;
+    }
+
+    if (selectedMeal && selectedPlan && quantity > 0 && startDate && endDate && user?.id) {
+      const itemTotalPrice = selectedMeal.price * selectedPlan.durationDays * quantity;
+
+      const newCartItem: CartItem = {
+        id: `cart-${Date.now()}-${selectedMeal.id}`,
+        userId: user.id,
+        meal: selectedMeal,
+        plan: selectedPlan,
+        quantity: quantity,
+        personDetails: quantity >= 1 ? personDetails : undefined,
+        startDate: format(startDate, "yyyy-MM-dd"),
+        endDate: format(endDate, "yyyy-MM-dd"),
+        itemTotalPrice: itemTotalPrice,
+        addedDate: new Date().toISOString(),
+      };
+
+      addToCart(newCartItem);
+
+      toast({
+        title: "Added to Cart & Redirecting!",
+        description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added to your cart.`,
+      });
+
+      // Redirect to checkout page
+      router.push("/checkout");
+    } else {
+      toast({
+        title: "Cannot proceed to checkout",
+        description: "Please select a meal, a plan, a valid quantity, and valid dates.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Removed the entire if (orderConfirmed) block
 
   return (
@@ -635,19 +675,34 @@ export default function PricingPage() {
                               </span>
                             </div>
 
-                            <Button
-                              className="w-full py-6 text-base font-black rounded-xl transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-xl"
-                              style={{ backgroundColor: "#034C3C", color: "#EAFFF9" }}
-                              onClick={handleAddToCart}
-                              disabled={!startDate || !endDate || quantity < 1}
-                            >
-                              {!startDate || !endDate || quantity < 1 ? "Select date and quantity to continue" : (
-                                <span className="flex items-center justify-center gap-2">
-                                  Add to Cart
-                                  <ShoppingBag className="w-5 h-5" />
-                                </span>
-                              )}
-                            </Button>
+                            <div className="flex gap-3">
+                              <Button
+                                className="flex-1 py-6 text-base font-black rounded-xl transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-xl"
+                                style={{ backgroundColor: "#034C3C", color: "#EAFFF9" }}
+                                onClick={handleAddToCart}
+                                disabled={!startDate || !endDate || quantity < 1}
+                              >
+                                {!startDate || !endDate || quantity < 1 ? "Add to Cart" : (
+                                  <span className="flex items-center justify-center gap-2">
+                                    Add to Cart
+                                    <ShoppingBag className="w-5 h-5" />
+                                  </span>
+                                )}
+                              </Button>
+                              <Button
+                                className="flex-1 py-6 text-base font-black rounded-xl transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-xl"
+                                style={{ backgroundColor: "#EAFFF9", color: "#034C3C" }}
+                                onClick={handleCheckout}
+                                disabled={!startDate || !endDate || quantity < 1}
+                              >
+                                {!startDate || !endDate || quantity < 1 ? "Proceed to Checkout" : (
+                                  <span className="flex items-center justify-center gap-2">
+                                    Checkout
+                                    <ArrowRight className="w-5 h-5" />
+                                  </span>
+                                )}
+                              </Button>
+                            </div>
                           </div>
 
                           <div className="space-y-2 pt-4">
