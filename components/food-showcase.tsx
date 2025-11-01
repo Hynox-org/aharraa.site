@@ -70,10 +70,12 @@ export function FoodShowcase() {
                     {/* Animated Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-700 transform -translate-x-full group-hover:translate-x-full"></div>
                     
-                    {/* Food Emoji */}
-                    <div className="relative z-10 text-9xl transform group-hover:scale-110 transition-transform duration-500 filter drop-shadow-2xl">
-                      🍽️
-                    </div>
+                    {/* Food Showcase Image */}
+                    <img 
+                      src="/home_page_cover2.png" 
+                      alt="Delicious food showcase" 
+                      className="relative z-10 w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 filter drop-shadow-2xl rounded-2xl"
+                    />
 
                     {/* Decorative Corner Elements */}
                     <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-[#FEFAE0] opacity-50 rounded-tl-lg"></div>

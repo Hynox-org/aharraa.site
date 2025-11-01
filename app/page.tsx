@@ -55,7 +55,7 @@ export default function Home() {
             <div className="space-y-8 animate-fade-in-up">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-[#DDA15E] bg-opacity-20 backdrop-blur-sm border border-[#DDA15E] border-opacity-30 rounded-full px-4 py-2">
-                <HiSparkles className="w-5 h-5 text-[#DDA15E]" />
+                <HiSparkles className="w-5 h-5 text-[#283618]" />
                 <span className="text-sm font-medium text-[#FEFAE0]">Premium Home-Cooked Experience</span>
               </div>
 
@@ -87,7 +87,7 @@ export default function Home() {
                   <Button 
                     size="lg" 
                     variant="outline"
-                    className="border-2 border-[#FEFAE0] border-opacity-30 text-[#FEFAE0] hover:bg-[#FEFAE0] hover:text-[#283618] backdrop-blur-sm bg-white bg-opacity-10 font-semibold transform hover:scale-105 transition-all duration-300"
+                    className="border-2 border-[#FEFAE0] border-opacity-30 text-[#283618] hover:bg-[#FEFAE0] hover:text-[#283618] backdrop-blur-sm bg-white bg-opacity-10 font-semibold transform hover:scale-105 transition-all duration-300"
                   >
                     Learn More
                   </Button>
@@ -115,7 +115,7 @@ export default function Home() {
             <div className="relative animate-slide-in-right">
               <div className="relative group">
                 {/* Main Card */}
-                <div className="relative w-full h-96 bg-gradient-to-br from-[#DDA15E] to-[#BC6C25] rounded-3xl shadow-2xl overflow-hidden transform group-hover:scale-105 transition-all duration-500">
+                <div className="relative w-full h-96 rounded-3xl shadow-2xl overflow-hidden transform group-hover:scale-105 transition-all duration-500">
                   {/* Decorative Pattern Overlay */}
                   <div className="absolute inset-0 opacity-20">
                     <div className="absolute inset-0" style={{
@@ -124,9 +124,13 @@ export default function Home() {
                     }}></div>
                   </div>
                   
-                  {/* Food Emoji with Animation */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-9xl animate-bounce-slow filter drop-shadow-2xl">🍲</div>
+                  {/* Home Page Cover Image */}
+                  <div className="absolute inset-0">
+                    <img 
+                      src="/home_page_cover.png" 
+                      alt="Delicious home-cooked meal" 
+                      className="w-full h-full object-contain rounded-3xl"
+                    />
                   </div>
 
                   {/* Floating Feature Cards */}
