@@ -1,4 +1,5 @@
 // lib/types.ts
+import React from 'react';
 
 export interface User {
   id?: string;
@@ -29,12 +30,16 @@ export interface FaqItem {
   id: number;
   question: string;
   answer: string;
+  icon: string;
+  gradient: string;
 }
 
 export interface Highlight {
   icon: string;
   title: string;
   description: string;
+  iconComponent: React.ElementType;
+  gradient: string;
 }
 
 export interface Review {
@@ -44,6 +49,7 @@ export interface Review {
   content: string;
   rating: number;
   avatar: string;
+  gradient: string;
 }
 
 export interface PersonDetails {
@@ -148,6 +154,7 @@ export interface CartItem {
   endDate: string; // ISO date string (e.g., "YYYY-MM-DD")
   itemTotalPrice: number; // Price for this specific cart item (meal * plan duration * quantity)
   addedDate: string; // Timestamp when item was added to cart
+  vendor: Vendor; // Added to include vendor details directly
 }
 
 export interface Cart {
