@@ -8,15 +8,17 @@ import { FoodShowcase } from "@/components/food-showcase";
 import { Footer } from "@/components/footer";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/auth-context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { HiSparkles, HiClock, HiShieldCheck, HiHeart } from "react-icons/hi";
 import { IoRestaurant } from "react-icons/io5";
 import { MdDeliveryDining } from "react-icons/md";
+import { Spinner } from "@/components/ui/spinner"; // Import the Spinner component
 
 export default function Home() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, loading: authLoading } = useAuth(); // Get authLoading from context
+  const [isLoadingHashToken, setIsLoadingHashToken] = useState(true); // Local loading state for hash token
 
   useEffect(() => {
     const handleOAuthRedirect = async () => {
@@ -32,10 +34,20 @@ export default function Home() {
           router.push("/");
         }
       }
+      setIsLoadingHashToken(false); // Set to false after checking hash, regardless of token presence
     };
 
     handleOAuthRedirect();
   }, [router, login]);
+
+  // Show a loading spinner if either auth is loading or we are processing a hash token
+  if (authLoading || isLoadingHashToken) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+        <Spinner className="size-8" />
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#FEFAE0]">
