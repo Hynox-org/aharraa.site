@@ -1,7 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { IoCalendarOutline, IoTimeOutline, IoCheckmarkCircle } from "react-icons/io5"
 import { Plan } from "@/lib/types"
 
@@ -10,11 +10,18 @@ interface DateSelectionProps {
   endDate: Date | undefined
   selectedPlan: Plan
   onDateSelect: (date: Date | undefined) => void
+  isDisabled: boolean
 }
 
-export function DateSelection({ startDate, endDate, selectedPlan, onDateSelect }: DateSelectionProps) {
+export function DateSelection({ startDate, endDate, selectedPlan, onDateSelect, isDisabled }: DateSelectionProps) {
   const [showCalendar, setShowCalendar] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(new Date())
+
+  useEffect(() => {
+    if (isDisabled && showCalendar) {
+      setShowCalendar(false)
+    }
+  }, [isDisabled, showCalendar])
 
   // Get days in current month view
   const getDaysInMonth = (date: Date) => {
@@ -66,8 +73,9 @@ export function DateSelection({ startDate, endDate, selectedPlan, onDateSelect }
       <div className="p-6 rounded-xl" style={{ backgroundColor: "#FEFAE0" }}>
         {/* Date Button */}
         <button
-          onClick={() => setShowCalendar(!showCalendar)}
-          className="w-full h-14 px-4 rounded-lg font-bold flex items-center justify-center gap-3 transition-all"
+          onClick={() => !isDisabled && setShowCalendar(!showCalendar)}
+          disabled={isDisabled}
+          className="w-full h-14 px-4 rounded-lg font-bold flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             backgroundColor: startDate ? "#606C38" : "#ffffff",
             color: startDate ? "#FEFAE0" : "#606C38",
@@ -128,10 +136,10 @@ export function DateSelection({ startDate, endDate, selectedPlan, onDateSelect }
                   <button
                     key={day}
                     onClick={() => handleDateClick(day)}
-                    disabled={disabled}
+                    disabled={disabled || isDisabled}
                     className="w-full aspect-square rounded-lg text-sm font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                     style={{
-                      backgroundColor: selected ? "#606C38" : disabled ? "#f5f5f5" : "#FEFAE0",
+                      backgroundColor: selected ? "#606C38" : disabled || isDisabled ? "#f5f5f5" : "#FEFAE0",
                       color: selected ? "#FEFAE0" : "#283618",
                       border: selected ? "2px solid #283618" : "1px solid #DDA15E"
                     }}

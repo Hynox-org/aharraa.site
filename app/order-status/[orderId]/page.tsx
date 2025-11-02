@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { useAuth } from "@/app/context/auth-context";
-import { getOrderDetails } from "@/lib/api";
+import { getOrderDetails, verifyPayment } from "@/lib/api";
 import { Order } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
       setOrderId(currentOrderId);
 
       if (!loading && !isAuthenticated) {
-        router.push("/auth?returnUrl=/order-confirmation/" + currentOrderId);
+        router.push("/auth?returnUrl=/order-status/" + currentOrderId);
         return;
       }
 
@@ -44,15 +44,22 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
             const token = localStorage.getItem("aharraa-u-token");
             if (!token) {
               toast.error("Authentication token not found. Please log in again.");
-              router.push("/auth?returnUrl=/order-confirmation/" + currentOrderId);
+              router.push("/auth?returnUrl=/order-status/" + currentOrderId);
               return;
             }
             const orderDetails = await getOrderDetails(currentOrderId, token);
             setOrder(orderDetails);
+
+            // Verify payment after fetching order details
+            const verificationResponse = await verifyPayment(currentOrderId, token);
+            setOrder(verificationResponse.order); // Update order with verified status
+            // You can also store cashfreeDetails if needed for display
+            // const cashfreeDetails = verificationResponse.cashfreeDetails;
+
           } catch (err: any) {
-            console.error("Error fetching order details:", err);
-            setError(err.message || "Failed to fetch order details.");
-            toast.error(err.message || "Failed to fetch order details.");
+            console.error("Error fetching order details or verifying payment:", err);
+            setError(err.message || "Failed to fetch order details or verify payment.");
+            toast.error(err.message || "Failed to fetch order details or verify payment.");
           } finally {
             setPageLoading(false);
           }
@@ -113,16 +120,30 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
           <CardHeader className="pb-0">
             <CheckCircle2 className="w-24 h-24 mx-auto mb-6 text-green-500" />
             <CardTitle className="text-4xl font-black mb-2" style={{ color: "#0B132B" }}>
-              Order Confirmed!
+              Order {order.status === "confirmed" ? "Confirmed!" : order.status === "pending" ? "Pending" : "Status: " + order.status}!
             </CardTitle>
-            <p className="text-lg text-neutral-600">Thank you for your purchase.</p>
+            <p className="text-lg text-neutral-600">
+              {order.status === "confirmed" ? "Thank you for your purchase." : "Your order status has been updated."}
+            </p>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
             <div className="text-left space-y-2">
               <p className="text-xl font-bold" style={{ color: "#0B132B" }}>Order ID: <span className="font-normal text-neutral-700">{order._id}</span></p>
+              <p className="text-xl font-bold" style={{ color: "#0B132B" }}>Status: <span className={`font-normal ${order.status === "confirmed" ? "text-green-600" : "text-orange-500"}`}>{order.status.toUpperCase()}</span></p>
               <p className="text-xl font-bold" style={{ color: "#0B132B" }}>Total Amount: <span className="font-normal text-neutral-700">₹{order.totalAmount.toFixed(2)}</span></p>
               <p className="text-xl font-bold" style={{ color: "#0B132B" }}>Order Date: <span className="font-normal text-neutral-700">{new Date(order.orderDate).toLocaleDateString()}</span></p>
             </div>
+
+            {order.paymentMethod !== "COD" && order.paymentSessionId && (
+              <div className="space-y-3 text-left">
+                <h2 className="text-2xl font-black" style={{ color: "#0B132B" }}>Payment Details:</h2>
+                <div className="p-3 rounded-lg" style={{ backgroundColor: "#EAFFF9" }}>
+                  <p className="font-bold" style={{ color: "#0B132B" }}>Payment Method: <span className="font-normal text-neutral-700">{order.paymentMethod}</span></p>
+                  <p className="font-bold" style={{ color: "#0B132B" }}>Payment Session ID: <span className="font-normal text-neutral-700">{order.paymentSessionId}</span></p>
+                  {/* Add more Cashfree details here if needed from verificationResponse.cashfreeDetails */}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-3 text-left">
               <h2 className="text-2xl font-black" style={{ color: "#0B132B" }}>Delivery Addresses:</h2>

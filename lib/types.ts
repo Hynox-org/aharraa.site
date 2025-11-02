@@ -112,7 +112,7 @@ export interface Order {
   paymentSessionId: string;
   currency: string; // e.g., "INR"
   orderDate: string; // ISO date string (timestamp of order creation)
-  status: "pending" | "completed" | "cancelled" | "processing"; // Order status
+  status: "pending" | "completed" | "cancelled" | "processing" | "confirmed"; // Order status
 }
 
 export interface OrderItem {

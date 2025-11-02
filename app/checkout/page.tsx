@@ -101,11 +101,12 @@ export default function CheckoutPage() {
     new Set(userCartItems.map((item) => item.meal.category))
   )
 
-  const deliveryCostPerCategory = 50
-  const deliveryCost = uniqueMealCategories.length * deliveryCostPerCategory
-  const platformCost = totalPrice * 0.10
-  const gstCost = totalPrice * 0.05
-  const grandTotal = totalPrice + deliveryCost + platformCost + gstCost
+  const totalPlanDays = userCartItems.reduce((sum, item) => sum + item.plan.durationDays, 0);
+  const deliveryCostPerCategory = 33.33;
+  const deliveryCost = uniqueMealCategories.length * deliveryCostPerCategory * totalPlanDays;
+  const platformCost = totalPrice * 0.10;
+  const gstCost = totalPrice * 0.05;
+  const grandTotal = totalPrice + deliveryCost + platformCost + gstCost;
 
   if (userCartItems.length === 0) {
     return (
@@ -322,6 +323,7 @@ export default function CheckoutPage() {
                 grandTotal={grandTotal}
                 itemCount={userCartItems.length}
                 deliveryCostPerCategory={deliveryCostPerCategory}
+                totalPlanDays={totalPlanDays}
                 uniqueCategoryCount={uniqueMealCategories.length}
                 onProceedToPayment={handleProceedToPayment}
               />

@@ -130,6 +130,18 @@ export async function getOrderDetails(
   return response as Order;
 }
 
+export async function verifyPayment(
+  orderId: string,
+  token: string
+): Promise<{ order: Order; cashfreeDetails?: any; message?: string }> {
+  return apiRequest<{ order: Order; cashfreeDetails?: any; message?: string }>(
+    `/api/orders/verify-payment/${orderId}`,
+    "GET",
+    null,
+    token
+  );
+}
+
 export async function sendOrderConfirmationEmail(
   orderId: string,
   userEmail: string,

@@ -33,7 +33,10 @@ export default function PricingPage() {
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [quantity, setQuantity] = useState<number>(1)
-  const [personDetails, setPersonDetails] = useState<PersonDetails[]>([])
+  // Initialize personDetails based on initial quantity
+  const [personDetails, setPersonDetails] = useState<PersonDetails[]>(
+    Array.from({ length: 1 }, () => ({ name: "", phoneNumber: "" }))
+  )
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [mealDetailsOpen, setMealDetailsOpen] = useState(false)
@@ -72,12 +75,22 @@ export default function PricingPage() {
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan)
     setQuantity(1)
-    setPersonDetails([])
+    // Reset person details when plan changes
+    setPersonDetails(Array.from({ length: 1 }, () => ({ name: "", phoneNumber: "" })))
     setStartDate(undefined)
     setEndDate(undefined)
   }
 
   const handleDateSelect = (date: Date | undefined) => {
+    if (!arePersonDetailsValid()) {
+      toast({
+        title: "Missing Details",
+        description: "Please fill all person details before selecting a date.",
+        variant: "destructive",
+      })
+      return
+    }
+
     if (date && selectedPlan) {
       setStartDate(date)
       const calculatedEndDate = addDays(date, selectedPlan.durationDays - 1)
@@ -98,25 +111,28 @@ export default function PricingPage() {
   }
 
   useEffect(() => {
-    if (quantity >= 1) {
-      const newPersonDetails = Array.from({ length: quantity }, (_, i) => {
-        return personDetails[i] || { name: "", phoneNumber: "" }
+    // Adjust personDetails array size when quantity changes
+    setPersonDetails(prevDetails => {
+      const newDetails = Array.from({ length: quantity }, (_, i) => {
+        return prevDetails[i] || { name: "", phoneNumber: "" }
       })
-      setPersonDetails(newPersonDetails)
-    } else {
-      setPersonDetails([])
-    }
+      return newDetails
+    })
   }, [quantity])
 
   // Validation check for person details
   const arePersonDetailsValid = () => {
-    if (quantity < 1) return true
+    if (quantity < 1) {
+      return true;
+    }
     
-    return personDetails.slice(0, quantity).every(person => {
-      const nameValid = person?.name?.trim().length >= 2
-      const phoneValid = /^[6-9]\d{9}$/.test(person?.phoneNumber || "")
-      return nameValid && phoneValid
-    })
+    const isValid = personDetails.slice(0, quantity).every(person => {
+      const nameValid = person?.name?.trim().length >= 2;
+      const phoneValid = /^[6-9]\d{9}$/.test(person?.phoneNumber || "");
+      return nameValid && phoneValid;
+    });
+
+    return isValid;
   }
 
   const handleAddToCart = () => {
@@ -304,6 +320,7 @@ export default function PricingPage() {
                 endDate={endDate}
                 selectedPlan={selectedPlan}
                 onDateSelect={handleDateSelect}
+                isDisabled={!arePersonDetailsValid()}
               />
             )}
           </div>

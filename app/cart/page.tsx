@@ -7,6 +7,7 @@ import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { PersonDetails } from "@/lib/types"
+import { useToast } from "@/components/ui/use-toast" // Import useToast
 
 import { CartEmptyState } from "@/components/cart-empty-state"
 import { CartItemCard } from "@/components/cart-item-card"
@@ -18,12 +19,25 @@ export default function CartPage() {
   const router = useRouter()
   const cart = useStore((state) => state.cart)
   const removeFromCart = useStore((state) => state.removeFromCart)
-  const updateCartItemQuantity = useStore((state) => state.updateCartItemQuantity)
+  const updateCartItemQuantityInStore = useStore((state) => state.updateCartItemQuantity) // Rename to avoid conflict
   const updateCartItemPersonDetails = useStore((state) => state.updateCartItemPersonDetails)
+  const { toast } = useToast() // Initialize useToast
 
   const [isEditingPersonDetails, setIsEditingPersonDetails] = useState(false)
   const [currentEditingCartItemId, setCurrentEditingCartItemId] = useState<string | null>(null)
   const [editingPersonDetails, setEditingPersonDetails] = useState<PersonDetails[]>([])
+
+  // Helper function for person details validation
+  const arePersonDetailsValidForQuantity = (details: PersonDetails[] | undefined, requiredQuantity: number) => {
+    if (requiredQuantity < 1) return true;
+    if (!details || details.length < requiredQuantity) return false;
+
+    return details.slice(0, requiredQuantity).every(person => {
+      const nameValid = person?.name?.trim().length >= 2;
+      const phoneValid = /^[6-9]\d{9}$/.test(person?.phoneNumber || "");
+      return nameValid && phoneValid;
+    });
+  };
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -33,12 +47,20 @@ export default function CartPage() {
 
   const handleEditPersonDetails = (itemId: string, details: PersonDetails[] | undefined) => {
     setCurrentEditingCartItemId(itemId)
-    setEditingPersonDetails(details ? [...details] : [])
-    setIsEditingPersonDetails(true)
+    const currentItem = cart?.items.find(item => item.id === itemId);
+    const requiredQuantity = currentItem?.quantity || 0;
+    
+    // Initialize editingPersonDetails with existing details or empty objects up to requiredQuantity
+    const initialDetails = Array.from({ length: requiredQuantity }, (_, i) => {
+      return details?.[i] || { name: "", phoneNumber: "" };
+    });
+    setEditingPersonDetails(initialDetails);
+    setIsEditingPersonDetails(true);
   }
 
   const handleSavePersonDetails = () => {
     if (currentEditingCartItemId) {
+      // Validation is handled within EditPersonDetailsDialog before onSave is called
       updateCartItemPersonDetails(currentEditingCartItemId, editingPersonDetails)
       setIsEditingPersonDetails(false)
       setCurrentEditingCartItemId(null)
@@ -54,6 +76,29 @@ export default function CartPage() {
     updatedDetails[index][field] = value
     setEditingPersonDetails(updatedDetails)
   }
+
+  // New handler for updating quantity with validation
+  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
+    const currentItem = cart?.items.find(item => item.id === itemId);
+    if (!currentItem) return;
+
+    if (newQuantity > currentItem.quantity) { // Quantity is increasing
+      // Check if existing person details are valid for the new quantity
+      if (!arePersonDetailsValidForQuantity(currentItem.personDetails, newQuantity)) {
+        toast({
+          title: "Missing Details",
+          description: `Please fill person details for ${newQuantity} people before increasing quantity.`,
+          variant: "destructive",
+        });
+        // Open the edit dialog for person details
+        handleEditPersonDetails(itemId, currentItem.personDetails);
+        return;
+      }
+    }
+    // If quantity is decreasing or details are valid for increasing quantity, proceed
+    updateCartItemQuantityInStore(itemId, newQuantity);
+  };
+
 
   if (loading) {
     return (
@@ -108,7 +153,7 @@ export default function CartPage() {
                 <CartItemCard
                   key={item.id}
                   item={item}
-                  onUpdateQuantity={updateCartItemQuantity}
+                  onUpdateQuantity={handleUpdateQuantity} // Use the new handler
                   onRemoveItem={removeFromCart}
                   onEditPersonDetails={handleEditPersonDetails}
                 />
