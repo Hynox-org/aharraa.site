@@ -5,6 +5,7 @@ import {
   ValidateTokenResponse,
   CreateOrderPayload,
   Order,
+  UserProfile,
 } from "./types";
 
 export async function apiRequest<T>(
@@ -126,6 +127,33 @@ export async function getOrderDetails(
   }
   return response as Order;
 }
+
+export async function getProfileDetails(
+  token: string
+): Promise<UserProfile> {
+  const response = await apiRequest<any>(
+    `/api/users/profile`,
+    "GET",
+    null,
+    token
+  );
+  console.log({response})
+  return response as UserProfile;
+}
+
+export async function updateProfileDetails(
+  profileData: UserProfile,
+  token: string
+): Promise<UserProfile> {
+  const response = await apiRequest<any>(
+    "/api/users/profile",
+    "PUT",
+    profileData as unknown as Record<string, unknown>,
+    token
+  );
+  return response as UserProfile;
+}
+
 
 export async function verifyPayment(
   orderId: string,

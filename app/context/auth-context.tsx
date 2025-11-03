@@ -20,20 +20,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false); // New state to track active login process
+  const [token, setToken] = useState<string | null>(null); // Add token state
   const router = useRouter(); // Initialize useRouter
   const pathname = usePathname(); // Initialize usePathname
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("aharraa-u-token");
-      if (token) {
+      const storedToken = localStorage.getItem("aharraa-u-token");
+      if (storedToken) {
+        setToken(storedToken); // Set token state
         try {
-          const response = await validateToken(token);
+          const response = await validateToken(storedToken);
           setUser(response.user);
           setIsAuthenticated(true);
         } catch (error) {
           console.error("Token validation failed:", error);
           localStorage.removeItem("aharraa-u-token");
+          setToken(null); // Clear token state
           setUser(null);
           setIsAuthenticated(false);
         }
@@ -50,12 +53,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isAuthenticated, pathname, router, isLoggingIn]);
 
-  const login = async (token: string, returnUrl?: string) => { // Make login function async and accept returnUrl
-    localStorage.setItem("aharraa-u-token", token);
+  const login = async (newToken: string, returnUrl?: string) => { // Make login function async and accept returnUrl
+    localStorage.setItem("aharraa-u-token", newToken);
+    setToken(newToken); // Set token state on login
     setLoading(true);
     setIsLoggingIn(true); // Set isLoggingIn to true at the start of login
     try {
-      const response = await validateToken(token);
+      const response = await validateToken(newToken);
       setUser(response.user);
       setIsAuthenticated(true);
       setLoading(false); // Set loading to false before redirection
@@ -67,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Login failed:", error);
       localStorage.removeItem("aharraa-u-token");
+      setToken(null); // Clear token state on error
       setUser(null);
       setIsAuthenticated(false);
       setLoading(false); // Also set loading to false on error
@@ -77,12 +82,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem("aharraa-u-token");
+    setToken(null); // Clear token state on logout
     setUser(null);
     setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout, token }}>
       {children}
     </AuthContext.Provider>
   );

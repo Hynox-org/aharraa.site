@@ -13,6 +13,28 @@ export interface ValidateTokenResponse {
   user: User;
 }
 
+export interface DeliveryLocation {
+  street: string;
+  state: string;
+  pincode: string;
+  lat: number;
+  lon: number;
+}
+
+export interface UserProfile {
+  _id: string;
+  name: string;
+  email: string;
+  supabaseId: string;
+  fullName: string;
+  phoneNumber: string;
+  breakfastDeliveryLocation?: DeliveryLocation;
+  lunchDeliveryLocation?: DeliveryLocation;
+  dinnerDeliveryLocation?: DeliveryLocation;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuthApiResponse {
   accessToken?: string;
   message?: string;
@@ -24,6 +46,7 @@ export interface AuthContextType {
   loading: boolean;
   login: (token: string, returnUrl?: string) => void;
   logout: () => void;
+  token: string | null;
 }
 
 export interface FaqItem {
