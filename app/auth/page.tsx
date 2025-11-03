@@ -65,7 +65,7 @@ function AuthPageContent() {
       }
       toast.success("Sign in successful!")
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "An error occurred during sign in.")
+      toast.error(error.message || "An error occurred during sign up.")
     } finally {
       setIsSignInLoading(false)
     }
@@ -90,7 +90,7 @@ function AuthPageContent() {
 
       toast.success("Signup successful!")
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "An error occurred during sign up.")
+      toast.error(error.message || "An error occurred during sign up.")
     } finally {
       setIsSignUpLoading(false)
     }
