@@ -9,7 +9,7 @@ interface CartItemCardProps {
   item: CartItem
   onUpdateQuantity: (itemId: string, quantity: number) => void
   onRemoveItem: (itemId: string) => void
-  onEditPersonDetails: (itemId: string, details: PersonDetails[] | undefined) => void
+  onEditPersonDetails: (itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => void
 }
 
 export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPersonDetails }: CartItemCardProps) {
@@ -141,7 +141,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
             </h3>
             {item.quantity > 1 && (
               <button
-                onClick={() => onEditPersonDetails(item.id, item.personDetails)}
+                onClick={() => onEditPersonDetails(item.id, item.personDetails, item.quantity)}
                 className="h-8 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 transition-all"
                 style={{ 
                   backgroundColor: "#606C38",

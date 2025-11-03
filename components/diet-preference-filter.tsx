@@ -14,7 +14,7 @@ export function DietPreferenceFilter({ selectedDietPreference, onSelectDietPrefe
 
   return (
     <div className="mb-6">
-      <div className="flex gap-3 flex-wrap">
+      <div className="flex gap-3 flex-wrap p-2">
         {preferences.map((preference) => {
           const isSelected = selectedDietPreference === preference
           

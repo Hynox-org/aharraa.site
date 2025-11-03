@@ -69,7 +69,7 @@ export function MealCategoryTabs({ categories, selectedCategory, onSelectCategor
         </p>
       </div>
 {/* Category Tabs */}
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-3 overflow-x-auto p-2 scrollbar-hide">
         {categories.map((category) => {
           const isSelected = selectedCategory === category
           

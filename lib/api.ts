@@ -1,12 +1,17 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-import { User, ValidateTokenResponse, CreateOrderPayload, Order } from "./types";
+import {
+  User,
+  ValidateTokenResponse,
+  CreateOrderPayload,
+  Order,
+} from "./types";
 
 export async function apiRequest<T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body: Record<string, unknown> | null = null,
-  token: string | null = null,
+  token: string | null = null
 ): Promise<T> {
   const headers: HeadersInit = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -61,11 +66,7 @@ export async function apiRequest<T>(
 export async function validateToken(
   token: string
 ): Promise<ValidateTokenResponse> {
-  return apiRequest<ValidateTokenResponse>(
-    "/auth/verify",
-    "POST",
-    {token}
-  );
+  return apiRequest<ValidateTokenResponse>("/auth/verify", "POST", { token });
 }
 
 export async function oauthLogin(
@@ -80,13 +81,13 @@ export async function oauthLogin(
 }
 
 export async function createOrder(
-  payload: CreateOrderPayload,
+  orderId: string,
   token: string
 ): Promise<Order> {
   const response = await apiRequest<any>(
     "/api/orders",
     "POST",
-    payload as unknown as Record<string, unknown>,
+    { orderId },
     token
   );
   // Assuming the backend returns the order object directly or nested under an 'order' key
@@ -100,18 +101,14 @@ export async function createOrder(
 export async function createPayment(
   payload: CreateOrderPayload,
   token: string
-): Promise<string> {
+): Promise<any> {
   const response = await apiRequest<any>(
     "/api/orders/payment",
     "POST",
     payload as unknown as Record<string, unknown>,
     token
   );
-  // Assuming the backend returns the order object directly or nested under an 'order' key
-  if (response && response.paymentSessionId) {
-    return response.paymentSessionId as string;
-  }
-  return response.paymentSessionId as string;
+  return response;
 }
 
 export async function getOrderDetails(

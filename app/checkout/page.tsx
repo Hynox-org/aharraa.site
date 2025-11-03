@@ -256,11 +256,11 @@ export default function CheckoutPage() {
     }
 
     try {
-      const paymentSessionId = await createPayment(orderPayload, token)
-      console.log(paymentSessionId)
+      const response = await createPayment(orderPayload, token)
+      console.log(response.paymentSessionId)
       const cashfree = await initializeSDK()
       const checkoutOptions = {
-        paymentSessionId: paymentSessionId,
+        paymentSessionId: response.paymentSessionId,
         redirectTarget: "_self",
       }
       cashfree.checkout(checkoutOptions).then(async (result: any) => {
@@ -268,7 +268,7 @@ export default function CheckoutPage() {
           console.error("Payment error:", result.error)
         } else if (result.paymentDetails) {
           console.log("Payment completed:", result.paymentDetails)
-          const order = await createOrder(orderPayload, token)
+          const order = await createOrder(response.orderId, token)
           toast.success(`Order created successfully!`)
           clearCart()
         }

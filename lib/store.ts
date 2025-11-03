@@ -123,41 +123,12 @@ export const useStore = create<Store>((set, get) => ({
 
       const updatedItems = currentCart.items.map((item) => {
         if (item.id === cartItemId) {
-          const oldQuantity = item.quantity;
-          let updatedPersonDetails: PersonDetails[] | undefined = item.personDetails ? [...item.personDetails] : undefined;
-
-          if (quantity > oldQuantity) {
-            if (!updatedPersonDetails) {
-              updatedPersonDetails = [];
-            }
-            // Add new empty person details
-            for (let i = oldQuantity; i < quantity; i++) {
-              updatedPersonDetails.push({ name: "", phoneNumber: "" });
-            }
-          } else if (quantity < oldQuantity) {
-            if (updatedPersonDetails) {
-              // Remove person details from the end
-              updatedPersonDetails = updatedPersonDetails.slice(0, quantity);
-            }
-          }
-
-          // Ensure personDetails is undefined if quantity is 0
-          if (quantity === 0) {
-            updatedPersonDetails = undefined;
-          } else if (quantity === 1 && (!updatedPersonDetails || updatedPersonDetails.length === 0)) {
-            // If quantity is 1 and no person details, initialize with one empty entry
-            updatedPersonDetails = [{ name: "", phoneNumber: "" }];
-          } else if (quantity > 1 && (!updatedPersonDetails || updatedPersonDetails.length === 0)) {
-            // If quantity > 1 and no person details, initialize with appropriate number of empty entries
-            updatedPersonDetails = Array.from({ length: quantity }, () => ({ name: "", phoneNumber: "" }));
-          }
-
-
           return {
             ...item,
             quantity: quantity,
             itemTotalPrice: quantity * item.meal.price * item.plan.durationDays,
-            personDetails: updatedPersonDetails,
+            // personDetails are managed by updateCartItemPersonDetails in app/cart/page.tsx
+            // Do not modify personDetails here to avoid conflicts
           };
         }
         return item;

@@ -26,6 +26,7 @@ export default function CartPage() {
   const [isEditingPersonDetails, setIsEditingPersonDetails] = useState(false)
   const [currentEditingCartItemId, setCurrentEditingCartItemId] = useState<string | null>(null)
   const [editingPersonDetails, setEditingPersonDetails] = useState<PersonDetails[]>([])
+  const [pendingNewQuantity, setPendingNewQuantity] = useState<number | null>(null) // New state for pending quantity
 
   // Helper function for person details validation
   const arePersonDetailsValidForQuantity = (details: PersonDetails[] | undefined, requiredQuantity: number) => {
@@ -45,58 +46,61 @@ export default function CartPage() {
     }
   }, [isAuthenticated, loading, router])
 
-  const handleEditPersonDetails = (itemId: string, details: PersonDetails[] | undefined) => {
-    setCurrentEditingCartItemId(itemId)
-    const currentItem = cart?.items.find(item => item.id === itemId);
-    const requiredQuantity = currentItem?.quantity || 0;
+  const handleEditPersonDetails = (itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => {
+    setCurrentEditingCartItemId(itemId);
     
-    // Initialize editingPersonDetails with existing details or empty objects up to requiredQuantity
-    const initialDetails = Array.from({ length: requiredQuantity }, (_, i) => {
+    // Initialize editingPersonDetails with existing details or empty objects up to quantityToEdit
+    const initialDetails = Array.from({ length: quantityToEdit }, (_, i) => {
       return details?.[i] || { name: "", phoneNumber: "" };
     });
     setEditingPersonDetails(initialDetails);
     setIsEditingPersonDetails(true);
-  }
+  };
 
   const handleSavePersonDetails = () => {
     if (currentEditingCartItemId) {
       // Validation is handled within EditPersonDetailsDialog before onSave is called
-      updateCartItemPersonDetails(currentEditingCartItemId, editingPersonDetails)
-      setIsEditingPersonDetails(false)
-      setCurrentEditingCartItemId(null)
-      setEditingPersonDetails([])
+      updateCartItemPersonDetails(currentEditingCartItemId, editingPersonDetails);
+
+      // If there's a pending new quantity, update the quantity in the store
+      if (pendingNewQuantity !== null && currentEditingCartItemId) {
+        updateCartItemQuantityInStore(currentEditingCartItemId, pendingNewQuantity);
+        setPendingNewQuantity(null); // Reset pending quantity
+      }
+
+      setIsEditingPersonDetails(false);
+      setCurrentEditingCartItemId(null);
+      setEditingPersonDetails([]);
     }
-  }
+  };
 
   const handlePersonDetailChange = (index: number, field: keyof PersonDetails, value: string) => {
-    const updatedDetails = [...editingPersonDetails]
+    const updatedDetails = [...editingPersonDetails];
     if (!updatedDetails[index]) {
-      updatedDetails[index] = { name: "", phoneNumber: "" }
+      updatedDetails[index] = { name: "", phoneNumber: "" };
     }
-    updatedDetails[index][field] = value
-    setEditingPersonDetails(updatedDetails)
-  }
+    updatedDetails[index][field] = value;
+    setEditingPersonDetails(updatedDetails);
+  };
 
-  // New handler for updating quantity with validation
+  // New handler for updating quantity
   const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
     const currentItem = cart?.items.find(item => item.id === itemId);
     if (!currentItem) return;
 
     if (newQuantity > currentItem.quantity) { // Quantity is increasing
-      // Check if existing person details are valid for the new quantity
-      if (!arePersonDetailsValidForQuantity(currentItem.personDetails, newQuantity)) {
-        toast({
-          title: "Missing Details",
-          description: `Please fill person details for ${newQuantity} people before increasing quantity.`,
-          variant: "destructive",
-        });
-        // Open the edit dialog for person details
-        handleEditPersonDetails(itemId, currentItem.personDetails);
-        return;
-      }
+      setPendingNewQuantity(newQuantity);
+      handleEditPersonDetails(itemId, currentItem.personDetails, newQuantity);
+      return; // Quantity will be updated after person details are saved
+    } else if (newQuantity < currentItem.quantity) { // Quantity is decreasing
+      // If quantity is decreasing, we can directly update it.
+      // We might need to truncate person details if they exceed the new quantity.
+      const updatedDetails = currentItem.personDetails?.slice(0, newQuantity) || [];
+      updateCartItemPersonDetails(itemId, updatedDetails);
+      updateCartItemQuantityInStore(itemId, newQuantity);
+    } else { // Quantity is staying the same (shouldn't happen via UI, but for completeness)
+      updateCartItemQuantityInStore(itemId, newQuantity);
     }
-    // If quantity is decreasing or details are valid for increasing quantity, proceed
-    updateCartItemQuantityInStore(itemId, newQuantity);
   };
 
 
