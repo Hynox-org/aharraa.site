@@ -1,12 +1,10 @@
 "use client"
 
 import type React from "react"
-
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { Mail, Phone, MapPin, Clock } from "lucide-react"
+import { IoMail, IoCall, IoLocation, IoTime, IoCheckmarkCircle, IoSend } from "react-icons/io5"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -38,25 +36,25 @@ export default function ContactPage() {
 
   const contactInfo = [
     {
-      icon: Phone,
+      icon: IoCall,
       title: "Phone",
-      details: "+91 98765 43210",
+      details: "+91 88705 24355",
       description: "Available 9 AM - 9 PM, 7 days a week",
     },
     {
-      icon: Mail,
+      icon: IoMail,
       title: "Email",
-      details: "support@aharraa.com",
+      details: "info.aharraa@gmail.com",
       description: "We'll respond within 24 hours",
     },
     {
-      icon: MapPin,
+      icon: IoLocation,
       title: "Address",
-      details: "123 Food Street, Mumbai, India",
+      details: "Coimbatore, Tamil Nadu, India",
       description: "Visit our kitchen and meet the team",
     },
     {
-      icon: Clock,
+      icon: IoTime,
       title: "Hours",
       details: "9 AM - 9 PM",
       description: "Monday to Sunday",
@@ -64,35 +62,46 @@ export default function ContactPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-fade-in-up">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">Get in Touch</h1>
-          <p className="text-xl text-orange-100 max-w-2xl mx-auto">
+      <section className="py-16 sm:py-20 lg:py-24"
+        style={{ background: "linear-gradient(135deg, #606C38 0%, #283618 100%)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6" 
+            style={{ color: "#FEFAE0" }}>
+            Get in Touch
+          </h1>
+          <p className="text-base sm:text-lg lg:text-xl max-w-2xl mx-auto" 
+            style={{ color: "rgba(254, 250, 224, 0.9)" }}>
             Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </div>
       </section>
 
       {/* Contact Info Cards */}
-      <section className="py-16 bg-neutral-50 border-b border-neutral-200">
+      <section className="py-12 sm:py-16 lg:py-20" style={{ backgroundColor: "rgba(221, 161, 94, 0.05)" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {contactInfo.map((info, index) => {
               const Icon = info.icon
               return (
                 <div
                   key={index}
-                  className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 animate-fade-in-up text-center"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  className="p-5 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 text-center"
+                  style={{ backgroundColor: "#ffffff" }}
                 >
-                  <Icon className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-neutral-900 mb-2">{info.title}</h3>
-                  <p className="text-neutral-900 font-semibold mb-1">{info.details}</p>
-                  <p className="text-neutral-600 text-sm">{info.description}</p>
+                  <Icon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4" style={{ color: "#606C38" }} />
+                  <h3 className="text-base sm:text-lg font-bold mb-2" style={{ color: "#283618" }}>
+                    {info.title}
+                  </h3>
+                  <p className="font-semibold mb-1 text-sm sm:text-base" style={{ color: "#283618" }}>
+                    {info.details}
+                  </p>
+                  <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
+                    {info.description}
+                  </p>
                 </div>
               )
             })}
@@ -100,60 +109,98 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Form Section */}
-      <section className="py-16 border-b border-neutral-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Form */}
-            <div className="animate-fade-in-up">
-              <h2 className="text-3xl font-bold text-neutral-900 mb-8">Send us a Message</h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
+      {/* <section className="py-12 sm:py-16 lg:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8" style={{ color: "#283618" }}>
+                Send us a Message
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-900 mb-2">Full Name</label>
+                  <label className="block text-sm font-bold mb-2" style={{ color: "#283618" }}>
+                    Full Name <span style={{ color: "#BC6C25" }}>*</span>
+                  </label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base transition-all"
                     placeholder="Your name"
+                    style={{
+                      border: "2px solid #DDA15E",
+                      color: "#283618",
+                      backgroundColor: "#FEFAE0"
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-900 mb-2">Email Address</label>
+                  <label className="block text-sm font-bold mb-2" style={{ color: "#283618" }}>
+                    Email Address <span style={{ color: "#BC6C25" }}>*</span>
+                  </label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base transition-all"
                     placeholder="your@email.com"
+                    style={{
+                      border: "2px solid #DDA15E",
+                      color: "#283618",
+                      backgroundColor: "#FEFAE0"
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-900 mb-2">Phone Number</label>
+                  <label className="block text-sm font-bold mb-2" style={{ color: "#283618" }}>
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base transition-all"
                     placeholder="+91 98765 43210"
+                    style={{
+                      border: "2px solid #DDA15E",
+                      color: "#283618",
+                      backgroundColor: "#FEFAE0"
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-900 mb-2">Subject</label>
+                  <label className="block text-sm font-bold mb-2" style={{ color: "#283618" }}>
+                    Subject <span style={{ color: "#BC6C25" }}>*</span>
+                  </label>
                   <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base transition-all"
+                    style={{
+                      border: "2px solid #DDA15E",
+                      color: "#283618",
+                      backgroundColor: "#FEFAE0"
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
                   >
                     <option value="">Select a subject</option>
                     <option value="general">General Inquiry</option>
@@ -164,67 +211,89 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-900 mb-2">Message</label>
+                  <label className="block text-sm font-bold mb-2" style={{ color: "#283618" }}>
+                    Message <span style={{ color: "#BC6C25" }}>*</span>
+                  </label>
                   <textarea
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
                     required
                     rows={5}
-                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition resize-none"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base transition-all resize-none"
                     placeholder="Your message here..."
+                    style={{
+                      border: "2px solid #DDA15E",
+                      color: "#283618",
+                      backgroundColor: "#FEFAE0"
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
                   />
                 </div>
 
-                <Button
+                <button
                   type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition"
+                  className="w-full py-3 sm:py-3.5 rounded-lg font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2"
+                  style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
                 >
+                  <IoSend className="w-5 h-5" />
                   Send Message
-                </Button>
+                </button>
 
                 {submitted && (
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-center animate-fade-in-up">
-                    Thank you! Your message has been sent successfully. We'll get back to you soon.
+                  <div className="p-4 rounded-lg text-center flex items-center justify-center gap-2"
+                    style={{ backgroundColor: "rgba(96, 108, 56, 0.1)", color: "#606C38" }}>
+                    <IoCheckmarkCircle className="w-5 h-5" />
+                    <span className="text-sm sm:text-base">
+                      Thank you! Your message has been sent successfully.
+                    </span>
                   </div>
                 )}
               </form>
             </div>
 
-            {/* Info Section */}
-            <div className="animate-slide-in-right">
-              <div className="bg-gradient-to-br from-orange-50 to-white p-8 rounded-2xl border border-orange-100 shadow-lg">
-                <h3 className="text-2xl font-bold text-neutral-900 mb-6">Why Contact Us?</h3>
-                <ul className="space-y-4">
+            <div>
+              <div className="rounded-2xl p-6 sm:p-8 shadow-lg"
+                style={{ 
+                  background: "linear-gradient(135deg, rgba(221, 161, 94, 0.1) 0%, #ffffff 100%)",
+                  border: "1px solid rgba(221, 161, 94, 0.2)"
+                }}>
+                <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: "#283618" }}>
+                  Why Contact Us?
+                </h3>
+                <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                   <li className="flex gap-3">
-                    <span className="text-orange-500 font-bold">✓</span>
-                    <span className="text-neutral-600">
+                    <span className="font-bold flex-shrink-0" style={{ color: "#606C38" }}>✓</span>
+                    <span className="text-sm sm:text-base" style={{ color: "#606C38" }}>
                       <strong>Feedback:</strong> Help us improve your experience
                     </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-orange-500 font-bold">✓</span>
-                    <span className="text-neutral-600">
+                    <span className="font-bold flex-shrink-0" style={{ color: "#606C38" }}>✓</span>
+                    <span className="text-sm sm:text-base" style={{ color: "#606C38" }}>
                       <strong>Support:</strong> Get help with your orders
                     </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-orange-500 font-bold">✓</span>
-                    <span className="text-neutral-600">
+                    <span className="font-bold flex-shrink-0" style={{ color: "#606C38" }}>✓</span>
+                    <span className="text-sm sm:text-base" style={{ color: "#606C38" }}>
                       <strong>Partnerships:</strong> Collaborate with us
                     </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-orange-500 font-bold">✓</span>
-                    <span className="text-neutral-600">
+                    <span className="font-bold flex-shrink-0" style={{ color: "#606C38" }}>✓</span>
+                    <span className="text-sm sm:text-base" style={{ color: "#606C38" }}>
                       <strong>Inquiries:</strong> Ask anything about Aharraa
                     </span>
                   </li>
                 </ul>
 
-                <div className="mt-8 p-6 bg-orange-500 text-white rounded-xl">
-                  <p className="font-semibold mb-2">Quick Response Time</p>
-                  <p className="text-orange-100">
+                <div className="p-5 sm:p-6 rounded-xl" style={{ backgroundColor: "#606C38" }}>
+                  <p className="font-bold mb-2 text-sm sm:text-base" style={{ color: "#FEFAE0" }}>
+                    Quick Response Time
+                  </p>
+                  <p className="text-xs sm:text-sm" style={{ color: "rgba(254, 250, 224, 0.9)" }}>
                     We typically respond to all inquiries within 24 hours during business hours.
                   </p>
                 </div>
@@ -232,7 +301,7 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <Footer />
     </main>

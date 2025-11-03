@@ -136,7 +136,7 @@ export function Footer() {
                 <div>
                   <p className="text-xs text-[#FEFAE0] text-opacity-60 mb-0.5">Phone</p>
                   <a href="tel:+919876543210" className="text-[#FEFAE0] hover:text-[#DDA15E] transition-colors">
-                    +91 9876543210
+                    +91 8870524355
                   </a>
                 </div>
               </li>
@@ -157,7 +157,7 @@ export function Footer() {
                 </div>
                 <div>
                   <p className="text-xs text-[#FEFAE0] text-opacity-60 mb-0.5">Location</p>
-                  <span className="text-[#FEFAE0]">Mumbai, India</span>
+                  <span className="text-[#FEFAE0]">Tamil Nadu, India</span>
                 </div>
               </li>
             </ul>
