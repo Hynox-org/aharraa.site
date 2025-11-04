@@ -35,7 +35,7 @@ const ResetPasswordPage = () => {
   }, [])
 
   const validatePassword = (password: string) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/
     return passwordRegex.test(password)
   }
 
@@ -47,7 +47,7 @@ const ResetPasswordPage = () => {
     if (/[a-z]/.test(password)) strength++
     if (/[A-Z]/.test(password)) strength++
     if (/\d/.test(password)) strength++
-    if (/[@$!%*?&]/.test(password)) strength++
+    if (/[@$!%*?&#]/.test(password)) strength++
 
     if (strength <= 2) return { strength: 1, label: "Weak", color: "#BC6C25" }
     if (strength <= 3) return { strength: 2, label: "Fair", color: "#DDA15E" }
@@ -366,7 +366,7 @@ const ResetPasswordPage = () => {
                 <li>• At least 8 characters long</li>
                 <li>• Contains uppercase and lowercase letters</li>
                 <li>• Includes at least one number</li>
-                <li>• Has at least one special character (@$!%*?&)</li>
+                <li>• Has at least one special character (@$!%*?&#)</li>
               </ul>
             </div>
           </div>
