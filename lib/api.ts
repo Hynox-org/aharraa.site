@@ -3,7 +3,7 @@ export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 import {
   User,
   ValidateTokenResponse,
-  CreateOrderPayload,
+  CreatePaymentPayload,
   Order,
   UserProfile,
 } from "./types";
@@ -100,7 +100,7 @@ export async function createOrder(
 
 //createPayment
 export async function createPayment(
-  payload: CreateOrderPayload,
+  payload: CreatePaymentPayload,
   token: string
 ): Promise<any> {
   const response = await apiRequest<any>(

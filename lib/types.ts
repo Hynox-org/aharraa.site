@@ -123,8 +123,6 @@ export interface Order {
   _id?: string;
   userId: string;
   items: OrderItem[];
-  shippingAddress: DeliveryAddress;
-  billingAddress: DeliveryAddress; // Assuming billing address is same as shipping for now, or can be separate
   deliveryAddresses: { // Added to store multiple delivery addresses per category
     Breakfast?: DeliveryAddress;
     Lunch?: DeliveryAddress;
@@ -139,31 +137,23 @@ export interface Order {
 }
 
 export interface OrderItem {
-  productId: string;
+  id: string;
+  meal: Meal;
+  plan: Plan;
   quantity: number;
-  price: number;
-  mealName: string; // Added for display purposes
-  planName: string; // Added for display purposes
-  vendorName: string; // Added for display purposes
+  personDetails: PersonDetails[];
+  startDate: Date;
+  endDate: Date;
+  itemTotalPrice: number;
+  vendor: Vendor;
 }
 
-export interface CreateOrderPayload {
-  userId: string;
-  items: {
-    productId: string;
-    quantity: number;
-    price: number;
-  }[];
-  shippingAddress: DeliveryAddress;
-  billingAddress: DeliveryAddress;
-  deliveryAddresses: { // Added to send multiple delivery addresses per category
-    Breakfast?: DeliveryAddress;
-    Lunch?: DeliveryAddress;
-    Dinner?: DeliveryAddress;
-  };
-  paymentMethod: string;
-  totalAmount: number;
-  currency: string;
+export interface CreatePaymentPayload {
+  userId: string; // The ID of the user making the order
+  checkoutData: CheckoutData; // The complete checkout data
+  paymentMethod: "COD" | "CC" | "UPI"; // Must be one of: "COD", "CC", "UPI"
+  totalAmount: number; // Number, minimum 0 (This should typically match checkoutData.totalPrice)
+  currency: string; // e.g., "INR"
 }
 
 export interface CartItem {
@@ -250,14 +240,14 @@ export interface Store {
 
 export interface CheckoutItem {
   id: string; // Unique ID for the checkout item (from CartItem)
-  meal: Meal;
-  plan: Plan;
+  meal: {id: string, name: string};
+  plan: {id: string, name: string};
   quantity: number;
   personDetails?: PersonDetails[]; // Optional array of person details
   startDate: string;
   endDate: string;
   itemTotalPrice: number;
-  vendor: Vendor; // Include vendor details directly
+  vendor: {id: string, name: string}; // Include vendor details directly
 }
 
 export interface CheckoutData {

@@ -237,21 +237,21 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
                 Items
               </h2>
               {order.items.map((item) => (
-                <div key={item.productId} className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 p-3 rounded-lg" 
+                <div key={item.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 p-3 rounded-lg" 
                   style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}>
                   <div className="flex-1">
                     <p className="font-bold text-sm sm:text-base" style={{ color: "#283618" }}>
-                      {item.mealName}
+                      {item.meal.name}
                     </p>
                     <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
-                      {item.planName} from {item.vendorName}
+                      {item.plan.name} from {item.vendor.name}
                     </p>
                     <p className="text-xs" style={{ color: "#606C38" }}>
                       Qty: {item.quantity}
                     </p>
                   </div>
                   <span className="font-bold text-base sm:text-lg" style={{ color: "#606C38" }}>
-                    ₹{item.price.toFixed(0)}
+                    ₹{item.itemTotalPrice.toFixed(0)}
                   </span>
                 </div>
               ))}

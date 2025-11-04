@@ -12,7 +12,7 @@ import {
   CheckoutData,
   CheckoutItem,
   MealCategory,
-  CreateOrderPayload,
+  CreatePaymentPayload,
   Vendor,
 } from "@/lib/types"
 import { DUMMY_VENDORS } from "@/lib/data"
@@ -194,16 +194,19 @@ export default function CheckoutPage() {
       const vendor = DUMMY_VENDORS.find(
         (v: Vendor) => v.id === cartItem.meal.vendorId
       )
+      if (!vendor) {
+        throw new Error(`Vendor not found for meal ID: ${cartItem.meal.id}`);
+      }
       return {
         id: cartItem.id,
-        meal: cartItem.meal,
-        plan: cartItem.plan,
+        meal: {id: cartItem.meal.id, name: cartItem.meal.name},
+        plan: {id: cartItem.plan.id, name: cartItem.plan.name},
         quantity: cartItem.quantity,
         personDetails: cartItem.personDetails,
         startDate: cartItem.startDate,
         endDate: cartItem.endDate,
         itemTotalPrice: cartItem.itemTotalPrice,
-        vendor: vendor || { id: "unknown", name: "Unknown Vendor" },
+        vendor: {id: vendor.id, name: vendor.name},
       }
     })
 
@@ -222,27 +225,10 @@ export default function CheckoutPage() {
     console.log("Finalized Checkout Data:", finalizedCheckoutData)
     setCheckoutData(finalizedCheckoutData)
 
-    const orderItems = userCartItems.map((item) => ({
-      productId: item.meal.id,
-      quantity: item.quantity,
-      price: item.itemTotalPrice,
-    }))
-
-    const firstCategory = uniqueMealCategories[0]
-    const shippingAddress = deliveryAddresses[firstCategory]
-
-    if (!shippingAddress) {
-      toast.error("Shipping address not found.")
-      return
-    }
-
-    const orderPayload: CreateOrderPayload = {
+    const paymentPayload: CreatePaymentPayload = {
       userId: user.id,
-      items: orderItems,
-      shippingAddress: shippingAddress,
-      billingAddress: shippingAddress,
-      deliveryAddresses: finalizedCheckoutData.deliveryAddresses,
-      paymentMethod: "UPI",
+      checkoutData: finalizedCheckoutData,
+      paymentMethod: "UPI", // This should be dynamic based on user selection
       totalAmount: grandTotal,
       currency: "INR",
     }
@@ -256,7 +242,7 @@ export default function CheckoutPage() {
     }
 
     try {
-      const response = await createPayment(orderPayload, token)
+      const response = await createPayment(paymentPayload, token)
       console.log(response.paymentSessionId)
       const cashfree = await initializeSDK()
       const checkoutOptions = {
