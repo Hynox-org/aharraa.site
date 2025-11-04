@@ -81,6 +81,22 @@ export async function oauthLogin(
   );
 }
 
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>("/auth/forgot-password", "POST", { email });
+}
+
+export async function resetPassword(
+  newPassword: string, 
+  token: string
+): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(
+    "/auth/reset-password", 
+    "POST", 
+    { newPassword },  // ✅ Only newPassword in body
+    token             // ✅ Token as 4th parameter (becomes Authorization header)
+  );
+}
+
 export async function createOrder(
   orderId: string,
   token: string

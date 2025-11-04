@@ -236,9 +236,9 @@ function AuthPageContent() {
                     <label className="text-sm font-semibold" style={{ color: "#283618" }}>
                       Password
                     </label>
-                    <a href="#" className="text-xs sm:text-sm font-semibold" style={{ color: "#BC6C25" }}>
-                      Forgot?
-                    </a>
+                    <Link href="/auth/forgot-password" className="text-xs sm:text-sm font-semibold" style={{ color: "#BC6C25" }}>
+                      Forgot Password?
+                    </Link>
                   </div>
                   <div className="relative">
                     <IoLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#606C38" }} />
