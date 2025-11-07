@@ -86,7 +86,7 @@ export type DietPreference = "All" | "Veg" | "Non-Veg" | "Vegan" | "Custom";
 export type MealCategory = "Breakfast" | "Lunch" | "Dinner";
 
 export interface Meal {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   dietPreference: DietPreference;
@@ -99,53 +99,69 @@ export interface Meal {
     calories: number; // in kcal
   };
   price: number;
-  image: string;
+  image: string; // Changed from imageUrl to image
   vendorId: string; // Reference to the vendor who created this meal
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface Vendor {
-  id: string;
+  _id: string; // Changed from id to _id
   name: string;
   description?: string; // Optional description for the vendor
   image?: string; // Optional image for the vendor
   rating?: number; // Optional rating for the vendor
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface Plan {
-  id: string;
+  _id: string; // Changed from id to _id
   name: string; // e.g., "3-Day Plan", "5-Day Plan", "7-Day Plan"
   durationDays: number; // 3, 5, or 7
   price: number; // Total price for the plan
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface Order {
-  id: string;
-  _id?: string;
+  _id: string; // Changed from id to _id
   userId: string;
   items: OrderItem[];
-  deliveryAddresses: { // Added to store multiple delivery addresses per category
-    Breakfast?: DeliveryAddress;
-    Lunch?: DeliveryAddress;
-    Dinner?: DeliveryAddress;
-  };
+  deliveryAddresses: Record<string, DeliveryAddress>; // Changed to Record<string, DeliveryAddress>
   paymentMethod: string;
   totalAmount: number;
   paymentSessionId: string;
   currency: string; // e.g., "INR"
   orderDate: string; // ISO date string (timestamp of order creation)
-  status: "pending" | "completed" | "cancelled" | "processing" | "confirmed"; // Order status
+  status: "pending" | "completed" | "cancelled" | "processing" | "confirmed" | "delivered"; // Order status
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface OrderItem {
   id: string;
-  meal: Meal;
-  plan: Plan;
+  meal: {
+    _id: Meal;
+    name: string;
+  };
+  plan: {
+    _id: Plan;
+    name: string;
+  };
+  vendor: {
+    _id: Vendor;
+    name: string;
+  };
   quantity: number;
   personDetails: PersonDetails[];
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   itemTotalPrice: number;
-  vendor: Vendor;
 }
 
 export interface CreatePaymentPayload {
@@ -185,7 +201,6 @@ export interface DeliveryAddress {
   street: string;
   city: string;
   zip: string;
-  // Add other address fields as needed
 }
 
 export interface DateRange {

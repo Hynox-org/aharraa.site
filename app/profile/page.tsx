@@ -6,8 +6,13 @@ import { useAuth } from "@/app/context/auth-context";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { toast } from "sonner";
-import { getProfileDetails, updateProfileDetails } from "@/lib/api";
-import { DeliveryLocation, UserProfile } from "@/lib/types";
+import {
+  getProfileDetails,
+  updateProfileDetails,
+  getAllOrders,
+  updateOrder,
+} from "@/lib/api";
+import { DeliveryLocation, UserProfile, Order } from "@/lib/types";
 import {
   User,
   Mail,
@@ -31,8 +36,10 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<"personal-details" | "orders">(
-    "personal-details"
+  "personal-details"
   );
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
@@ -67,6 +74,24 @@ export default function ProfilePage() {
       fetchUserProfile(token);
     }
   }, [user, token, authLoading, router]);
+
+  useEffect(() => {
+    if (activeTab === "orders" && token) {
+      fetchOrders(token);
+    }
+  }, [activeTab, token]);
+
+  const fetchOrders = async (token: string) => {
+    setLoading(true);
+    try {
+      const data = await getAllOrders(token);
+      setOrders(data);
+    } catch (error: any) {
+      toast.error(`Failed to fetch orders: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchUserProfile = async (token: string) => {
     setLoading(true);
@@ -105,6 +130,33 @@ export default function ProfilePage() {
       });
     } catch (error: any) {
       toast.error(`Failed to fetch profile: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!token) {
+      toast.error("Authentication token not found. Please log in again.");
+      router.push("/auth");
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to cancel this order?")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const updatedOrder = await updateOrder(orderId, { status: "cancelled" }, token);
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === orderId ? { ...order, status: updatedOrder.status } : order
+        )
+      );
+      toast.success(`Order ${orderId.substring(0, 8)}... cancelled successfully!`);
+    } catch (error: any) {
+      toast.error(`Failed to cancel order: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -196,6 +248,21 @@ export default function ProfilePage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "text-yellow-600"; // Example color for pending
+      case "confirmed":
+        return "text-blue-600"; // Example color for confirmed
+      case "delivered":
+        return "text-green-600"; // Example color for delivered
+      case "cancelled":
+        return "text-red-600"; // Example color for cancelled
+      default:
+        return "text-gray-600";
     }
   };
 
@@ -672,7 +739,12 @@ export default function ProfilePage() {
                                     )}
                                     {(item.location?.lat !== 0 && item.location?.lat !== undefined) ||
                                     (item.location?.lon !== 0 && item.location?.lon !== undefined) ? (
-                                      <div className="flex items-center gap-2 pt-2">
+                                      <a
+                                        href={`https://www.google.com/maps/search/?api=1&query=${item.location.lat},${item.location.lon}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 pt-2 cursor-pointer hover:underline"
+                                      >
                                         <MapPin
                                           className="w-3 h-3"
                                           style={{ color: "#BC6C25" }}
@@ -684,7 +756,7 @@ export default function ProfilePage() {
                                           {item.location.lat.toFixed(4)},{" "}
                                           {item.location.lon.toFixed(4)}
                                         </p>
-                                      </div>
+                                      </a>
                                     ) : null}
                                   </>
                                 );
@@ -716,42 +788,213 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Orders Tab */}
+            {/* Orders Tab */}
         {activeTab === "orders" && (
-          <div
-            className="rounded-2xl p-12 text-center"
-            style={{ backgroundColor: "#ffffff" }}
-          >
-            <div className="max-w-md mx-auto">
+          <div>
+            {orders.length === 0 ? (
               <div
-                className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, #DDA15E, #BC6C25)",
-                }}
+                className="rounded-xl p-12 text-center"
+                style={{ backgroundColor: "#ffffff" }}
               >
-                <Package className="w-10 h-10" style={{ color: "#FEFAE0" }} />
+                <Package
+                  className="w-16 h-16 mx-auto mb-4"
+                  style={{ color: "#DDA15E" }}
+                />
+                <h3 className="text-xl font-bold mb-2" style={{ color: "#283618" }}>
+                  No Orders Yet
+                </h3>
+                <p className="mb-6" style={{ color: "#606C38" }}>
+                  Start ordering delicious meals today!
+                </p>
+                <button
+                  onClick={() => router.push("/")}
+                  className="px-6 py-3 rounded-lg font-semibold"
+                  style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
+                >
+                  Browse Meals
+                </button>
               </div>
-              <h3
-                className="text-2xl font-bold mb-3"
-                style={{ color: "#283618" }}
+            ) : (
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{ backgroundColor: "#ffffff", border: "1px solid #e5e5e5" }}
               >
-                No Orders Yet
-              </h3>
-              <p
-                className="text-sm sm:text-base mb-6"
-                style={{ color: "#606C38" }}
-              >
-                Start ordering delicious home-cooked meals and they'll appear
-                here!
-              </p>
-              <button
-                onClick={() => router.push("/")}
-                className="px-6 py-3 rounded-xl font-bold transition-all"
-                style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
-              >
-                Browse Meals
-              </button>
-            </div>
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead style={{ backgroundColor: "#f9f9f9" }}>
+                      <tr>
+                        <th
+                          className="text-left px-6 py-4 font-semibold text-sm"
+                          style={{ color: "#606C38" }}
+                        >
+                          Order ID
+                        </th>
+                        <th
+                          className="text-left px-6 py-4 font-semibold text-sm"
+                          style={{ color: "#606C38" }}
+                        >
+                          Status
+                        </th>
+                        <th
+                          className="text-left px-6 py-4 font-semibold text-sm"
+                          style={{ color: "#606C38" }}
+                        >
+                          Total Amount
+                        </th>
+                        <th
+                          className="text-right px-6 py-4 font-semibold text-sm"
+                          style={{ color: "#606C38" }}
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map((order, index) => (
+                        <tr
+                          key={order._id}
+                          className="border-t"
+                          style={{ borderColor: "#e5e5e5" }}
+                        >
+                          <td
+                            className="px-6 py-4 text-sm font-medium"
+                            style={{ color: "#283618" }}
+                          >
+                            {order._id?.substring(0, 8)}...
+                          </td>
+                          <td className="px-6 py-4 text-sm">
+                            <span
+                              className={`font-semibold capitalize ${getStatusColor(
+                                order.status
+                              )}`}
+                            >
+                              {order.status}
+                            </span>
+                          </td>
+                          <td
+                            className="px-6 py-4 text-sm font-medium"
+                            style={{ color: "#283618" }}
+                          >
+                            ₹{order.totalAmount.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={() =>
+                                  order._id &&
+                                  router.push(`/order-details/${order._id}`)
+                                }
+                                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                                style={{
+                                  backgroundColor: "#DDA15E",
+                                  color: "#283618",
+                                }}
+                              >
+                                View Details
+                              </button>
+                              {(order.status === "pending" ||
+                                order.status === "confirmed") && (
+                                <button
+                                  onClick={() =>
+                                    order._id && handleCancelOrder(order._id)
+                                  }
+                                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                                  style={{
+                                    backgroundColor: "#BC6C25",
+                                    color: "#FEFAE0",
+                                  }}
+                                  disabled={loading}
+                                >
+                                  Cancel
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile List */}
+                <div className="md:hidden divide-y" style={{ borderColor: "#e5e5e5" }}>
+                  {orders.map((order) => (
+                    <div key={order._id} className="p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p
+                            className="text-xs font-semibold mb-1"
+                            style={{ color: "#999" }}
+                          >
+                            Order ID
+                          </p>
+                          <p
+                            className="text-sm font-medium"
+                            style={{ color: "#283618" }}
+                          >
+                            {order._id?.substring(0, 8)}...
+                          </p>
+                        </div>
+                        <span
+                          className={`text-sm font-semibold capitalize ${getStatusColor(
+                            order.status
+                          )}`}
+                        >
+                          {order.status}
+                        </span>
+                      </div>
+
+                      <div>
+                        <p
+                          className="text-xs font-semibold mb-1"
+                          style={{ color: "#999" }}
+                        >
+                          Total Amount
+                        </p>
+                        <p
+                          className="text-sm font-medium"
+                          style={{ color: "#283618" }}
+                        >
+                          ₹{order.totalAmount.toFixed(2)}
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={() =>
+                            order._id && router.push(`/order-details/${order._id}`)
+                          }
+                          className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold"
+                          style={{
+                            backgroundColor: "#DDA15E",
+                            color: "#283618",
+                          }}
+                        >
+                          View Details
+                        </button>
+                        {(order.status === "pending" ||
+                          order.status === "confirmed") && (
+                          <button
+                            onClick={() =>
+                              order._id && handleCancelOrder(order._id)
+                            }
+                            className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold"
+                            style={{
+                              backgroundColor: "#BC6C25",
+                              color: "#FEFAE0",
+                            }}
+                            disabled={loading}
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

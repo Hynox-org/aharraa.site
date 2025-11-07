@@ -195,3 +195,27 @@ export async function sendOrderConfirmationEmail(
     token
   );
 }
+
+export async function getAllOrders(token: string): Promise<Order[]> {
+  const response = await apiRequest<any>(
+    "/api/orders",
+    "GET",
+    null,
+    token
+  );
+  return response as Order[];
+}
+
+export async function updateOrder(
+  orderId: string,
+  updatePayload: Record<string, unknown>,
+  token: string
+): Promise<Order> {
+  const response = await apiRequest<any>(
+    `/api/orders/${orderId}`,
+    "PUT",
+    updatePayload,
+    token
+  );
+  return response as Order;
+}
