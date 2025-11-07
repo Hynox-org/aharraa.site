@@ -138,6 +138,7 @@ export interface Order {
   currency: string; // e.g., "INR"
   orderDate: string; // ISO date string (timestamp of order creation)
   status: "pending" | "completed" | "cancelled" | "processing" | "confirmed" | "delivered"; // Order status
+  skippedDates?: string[]; // Array of ISO date strings (YYYY-MM-DD) for skipped deliveries
   createdAt: string;
   updatedAt: string;
   __v: number;
