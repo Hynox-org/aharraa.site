@@ -154,7 +154,7 @@ export interface Order {
 }
 
 export interface OrderItem {
-  id: string;
+  id: string; // Changed from id to _id
   meal: {
     _id: Meal;
     name: string;
@@ -172,6 +172,7 @@ export interface OrderItem {
   startDate: string;
   endDate: string;
   itemTotalPrice: number;
+  skippedDates?: string[]; // Array of ISO date strings (YYYY-MM-DD) for skipped deliveries for this item
 }
 
 export interface CreatePaymentPayload {

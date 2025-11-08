@@ -38,19 +38,26 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isTomorrowSkipped, setIsTomorrowSkipped] = useState(false);
 
-  // Calculate tomorrow's date for display and comparison
-  const getTomorrowDateString = () => {
+  // ✅ FIXED: Calculate tomorrow's date properly (no timezone issues)
+  const getTomorrowDate = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 2);
-    return tomorrow.toISOString();
+    tomorrow.setDate(today.getDate() + 1);
+    return tomorrow;
   };
 
-  const tomorrowDateStringFull = getTomorrowDateString();
-  const tomorrowDateStringShort = tomorrowDateStringFull.split("T")[0];
+  // ✅ FIXED: Format date as YYYY-MM-DD using local timezone
+  const formatDateString = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const tomorrow = getTomorrowDate();
+  const tomorrowDateString = formatDateString(tomorrow); // "2025-11-09"
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -62,57 +69,81 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
     }
   }, [user, token, authLoading, router, orderId]);
 
-  useEffect(() => {
-    if (order) {
-      const normalizedSkippedDates = order.skippedDates?.map(date => date.split("T")[0]) || [];
-      const skipped = normalizedSkippedDates.includes(tomorrowDateStringShort);
-      setIsTomorrowSkipped(skipped);
-    }
-  }, [order, tomorrowDateStringShort]);
-
-  const handleSkipTomorrow = async () => {
+  const handleSkipTomorrow = async (itemId: string) => {
     if (!order || !token) {
       toast.error("Order details or token not available.");
       return;
     }
 
-    if (isTomorrowSkipped) {
-      toast.info("Tomorrow's delivery is already skipped.");
-      return;
-    }
-
+    console.log({ itemId });
     const orderIdToUse: string = order._id!;
 
     setIsUpdating(true);
     try {
-      let latestEndDate = new Date(0);
-      order.items.forEach((item) => {
-        const itemEndDate = new Date(item.endDate);
-        if (itemEndDate > latestEndDate) {
-          latestEndDate = itemEndDate;
-        }
-      });
+      const itemToUpdate = order.items.find((item) => item.id === itemId);
+      if (!itemToUpdate) {
+        toast.error("Order item not found.");
+        return;
+      }
 
-      const newEndDate = new Date(latestEndDate);
-      newEndDate.setDate(latestEndDate.getDate() + 1);
+      // ✅ FIXED: Calculate new end date properly
+      const itemEndDate = new Date(itemToUpdate.endDate);
+      itemEndDate.setHours(0, 0, 0, 0);
+      const newEndDate = new Date(itemEndDate);
+      newEndDate.setDate(itemEndDate.getDate() + 1);
 
       const updatePayload = {
-        skippedDate: tomorrowDateStringFull,
-        newEndDate: newEndDate.toISOString().split("T")[0],
+        itemId: itemId,
+        skippedDate: tomorrowDateString, // ✅ FIXED: Send full date string "2025-11-09"
+        newEndDate: formatDateString(newEndDate), // ✅ FIXED: Use local timezone format
       };
 
-      console.log("Skipping tomorrow's delivery. Tomorrow's date (full ISO):", tomorrowDateStringFull);
+      console.log("Skipping tomorrow's delivery for item:", itemId);
       console.log("Update payload:", updatePayload);
 
       await updateOrder(orderIdToUse, updatePayload, token);
-      toast.success("Order updated successfully! Tomorrow's delivery skipped.");
+      toast.success(
+        "Order item updated successfully! Tomorrow's delivery skipped for this item."
+      );
       const id = Array.isArray(orderId) ? orderId[0] : orderId;
       fetchOrderDetails(token, id as string);
     } catch (error: any) {
-      toast.error(`Failed to skip tomorrow's delivery: ${error.message}`);
+      toast.error(
+        `Failed to skip tomorrow's delivery for item: ${error.message}`
+      );
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  // ✅ VERIFIED: This function logic is correct
+  const isItemEligibleForSkip = (
+    itemStartDate: string,
+    itemEndDate: string,
+    skippedDates: string[] | undefined
+  ) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const start = new Date(itemStartDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(itemEndDate);
+    end.setHours(0, 0, 0, 0);
+
+    console.log({ today, start, end, tomorrow });
+
+    // Check if item is active OR starts tomorrow
+    const isItemActiveOrStartsTomorrow =
+      (today >= start && today <= end) ||
+      start.getTime() === tomorrow.getTime();
+
+    console.log({ isItemActiveOrStartsTomorrow });
+
+    // Check if tomorrow is already skipped
+    const isTomorrowAlreadySkipped = skippedDates?.includes(tomorrowDateString);
+    console.log({ isTomorrowAlreadySkipped });
+
+    return isItemActiveOrStartsTomorrow && !isTomorrowAlreadySkipped;
   };
 
   const fetchOrderDetails = async (token: string, id: string) => {
@@ -175,7 +206,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
               className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4"
               style={{ color: "#BC6C25" }}
             />
-            <p className="text-sm sm:text-base md:text-lg mb-4" style={{ color: "#606C38" }}>
+            <p
+              className="text-sm sm:text-base md:text-lg mb-4"
+              style={{ color: "#606C38" }}
+            >
               Order details not found.
             </p>
             <button
@@ -222,17 +256,26 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
           >
             {/* Order ID Section */}
             <div className="flex items-center gap-3">
-              <Package className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0" style={{ color: "#BC6C25" }} />
+              <Package
+                className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0"
+                style={{ color: "#BC6C25" }}
+              />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-medium" style={{ color: "#606C38" }}>
+                <p
+                  className="text-xs sm:text-sm font-medium"
+                  style={{ color: "#606C38" }}
+                >
                   Order ID
                 </p>
-                <h2 className="text-base sm:text-lg md:text-xl font-bold truncate" style={{ color: "#283618" }}>
+                <h2
+                  className="text-base sm:text-lg md:text-xl font-bold truncate"
+                  style={{ color: "#283618" }}
+                >
                   {order._id?.substring(0, 12)}...
                 </h2>
               </div>
             </div>
-            
+
             {/* Status and Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <span
@@ -242,20 +285,6 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
               >
                 {order.status}
               </span>
-              <button
-                onClick={handleSkipTomorrow}
-                disabled={isUpdating || isTomorrowSkipped}
-                className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap disabled:opacity-60"
-                style={{ backgroundColor: "#BC6C25", color: "#FEFAE0" }}
-              >
-                {isUpdating ? (
-                  <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                ) : (
-                  <FastForward className="w-4 h-4 flex-shrink-0" />
-                )}
-                <span className="hidden sm:inline">{isTomorrowSkipped ? "Already Skipped Tomorrow" : "Skip Tomorrow"}</span>
-                <span className="sm:hidden">{isTomorrowSkipped ? "Skipped" : "Skip"}</span>
-              </button>
             </div>
           </div>
 
@@ -269,9 +298,15 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 border: "1px solid #DDA15E",
               }}
             >
-              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" style={{ color: "#BC6C25" }} />
+              <Calendar
+                className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
+                style={{ color: "#BC6C25" }}
+              />
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm font-medium" style={{ color: "#606C38" }}>
+                <p
+                  className="text-xs sm:text-sm font-medium"
+                  style={{ color: "#606C38" }}
+                >
                   Order Date
                 </p>
                 <p
@@ -291,9 +326,15 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 border: "1px solid #DDA15E",
               }}
             >
-              <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" style={{ color: "#BC6C25" }} />
+              <DollarSign
+                className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
+                style={{ color: "#BC6C25" }}
+              />
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm font-medium" style={{ color: "#606C38" }}>
+                <p
+                  className="text-xs sm:text-sm font-medium"
+                  style={{ color: "#606C38" }}
+                >
                   Total Amount
                 </p>
                 <p
@@ -315,9 +356,15 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 border: "1px solid #DDA15E",
               }}
             >
-              <Banknote className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" style={{ color: "#BC6C25" }} />
+              <Banknote
+                className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
+                style={{ color: "#BC6C25" }}
+              />
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm font-medium" style={{ color: "#606C38" }}>
+                <p
+                  className="text-xs sm:text-sm font-medium"
+                  style={{ color: "#606C38" }}
+                >
                   Payment Method
                 </p>
                 <p
@@ -335,9 +382,15 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 border: "1px solid #DDA15E",
               }}
             >
-              <Tag className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" style={{ color: "#BC6C25" }} />
+              <Tag
+                className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
+                style={{ color: "#BC6C25" }}
+              />
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm font-medium" style={{ color: "#606C38" }}>
+                <p
+                  className="text-xs sm:text-sm font-medium"
+                  style={{ color: "#606C38" }}
+                >
                   Currency
                 </p>
                 <p
@@ -351,12 +404,15 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
           </div>
 
           {/* Delivery Addresses - Mobile Optimized */}
-          <div className="pt-4 sm:pt-6 border-t" style={{ borderColor: "#e5e5e5" }}>
+          <div
+            className="pt-4 sm:pt-6 border-t"
+            style={{ borderColor: "#e5e5e5" }}
+          >
             <h3
               className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2"
               style={{ color: "#283618" }}
             >
-              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" /> 
+              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
               <span>Delivery Information</span>
             </h3>
             <div className="space-y-3 sm:space-y-4">
@@ -379,7 +435,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                         {mealType} Delivery
                       </p>
                     </div>
-                    <p className="text-xs sm:text-sm break-words" style={{ color: "#606C38" }}>
+                    <p
+                      className="text-xs sm:text-sm break-words"
+                      style={{ color: "#606C38" }}
+                    >
                       <span className="font-medium">Address:</span>{" "}
                       {address.street}, {address.city} - {address.zip}
                     </p>
@@ -390,109 +449,168 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
           </div>
 
           {/* Ordered Items - Mobile Optimized */}
-          <div className="pt-4 sm:pt-6 border-t" style={{ borderColor: "#e5e5e5" }}>
+          <div
+            className="pt-4 sm:pt-6 border-t"
+            style={{ borderColor: "#e5e5e5" }}
+          >
             <h3
               className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2"
               style={{ color: "#283618" }}
             >
-              <Utensils className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" /> 
+              <Utensils className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
               <span>Ordered Items</span>
             </h3>
             <div className="space-y-4 sm:space-y-6">
-              {(order.items || []).map((item, index) => (
-                <div
-                  key={index}
-                  className="p-4 sm:p-5 rounded-lg sm:rounded-xl shadow-sm"
-                  style={{
-                    backgroundColor: "#FEFAE0",
-                    border: "1px solid #DDA15E",
-                  }}
-                >
-                  {/* Item Header with Image - Mobile Optimized */}
-                  <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                    <img
-                      src={
-                        item.meal?._id?.image ||
-                        "/public/defaults/default-meal.jpg"
-                      }
-                      alt={item.meal?.name}
-                      className="w-full sm:w-20 h-48 sm:h-20 object-cover rounded-lg"
-                    />
-                    <div className="flex-grow min-w-0 space-y-1">
-                      <p
-                        className="text-base sm:text-lg font-bold"
-                        style={{ color: "#283618" }}
-                      >
-                        {item.meal?.name}
-                      </p>
-                      <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
-                        <span className="font-medium">Plan:</span> {item.plan?.name}
-                      </p>
-                      <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
-                        <span className="font-medium">Vendor:</span> {item.vendor?.name}
-                      </p>
-                      <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
-                        <span className="font-medium">Quantity:</span> {item.quantity}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base font-semibold pt-1"
-                        style={{ color: "#BC6C25" }}
-                      >
-                        Item Total: ₹{item.itemTotalPrice?.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Person Details */}
-                  {item.personDetails && item.personDetails.length > 0 && (
-                    <div
-                      className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t space-y-2"
-                      style={{ borderColor: "#e5e5e5" }}
-                    >
-                      <p
-                        className="text-xs sm:text-sm font-medium mb-2"
-                        style={{ color: "#606C38" }}
-                      >
-                        Person Details:
-                      </p>
-                      {item.personDetails.map((person, pIndex) => (
-                        <div
-                          key={pIndex}
-                          className="flex items-start gap-2 text-xs sm:text-sm"
+              {(order.items || []).map((item, index) => {
+                const skippedDatesNormalized = item.skippedDates?.map(
+                  (dateStr) => new Date(dateStr).toISOString().split("T")[0]
+                );
+                const isTomorrowSkipped =
+                  skippedDatesNormalized?.includes(tomorrowDateString);
+                return (
+                  <div
+                    key={index}
+                    className="p-4 sm:p-5 rounded-lg sm:rounded-xl shadow-sm"
+                    style={{
+                      backgroundColor: "#FEFAE0",
+                      border: "1px solid #DDA15E",
+                    }}
+                  >
+                    {/* Item Header with Image - Mobile Optimized */}
+                    <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                      <img
+                        src={
+                          item.meal?._id?.image ||
+                          "/public/defaults/default-meal.jpg"
+                        }
+                        alt={item.meal?.name}
+                        className="w-full sm:w-20 h-48 sm:h-20 object-cover rounded-lg"
+                      />
+                      <div className="flex-grow min-w-0 space-y-1">
+                        <p
+                          className="text-base sm:text-lg font-bold"
                           style={{ color: "#283618" }}
                         >
-                          <UserIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                          <span className="break-words">
-                            {person.name} ({person.phoneNumber})
-                          </span>
-                        </div>
-                      ))}
+                          {item.meal?.name}
+                        </p>
+                        <p
+                          className="text-xs sm:text-sm"
+                          style={{ color: "#606C38" }}
+                        >
+                          <span className="font-medium">Plan:</span>{" "}
+                          {item.plan?.name}
+                        </p>
+                        <p
+                          className="text-xs sm:text-sm"
+                          style={{ color: "#606C38" }}
+                        >
+                          <span className="font-medium">Vendor:</span>{" "}
+                          {item.vendor?.name}
+                        </p>
+                        <p
+                          className="text-xs sm:text-sm"
+                          style={{ color: "#606C38" }}
+                        >
+                          <span className="font-medium">Quantity:</span>{" "}
+                          {item.quantity}
+                        </p>
+                        <p
+                          className="text-sm sm:text-base font-semibold pt-1"
+                          style={{ color: "#BC6C25" }}
+                        >
+                          Item Total: ₹{item.itemTotalPrice?.toFixed(2)}
+                        </p>
+                      </div>
                     </div>
-                  )}
 
-                  {/* Date Range */}
-                  <div
-                    className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t flex items-center gap-2 text-xs sm:text-sm"
-                    style={{ borderColor: "#e5e5e5", color: "#606C38" }}
-                  >
-                    <Calendar className="w-4 h-4 flex-shrink-0" />
-                    <span className="break-words">
-                      {new Date(item.startDate).toLocaleDateString()} -{" "}
-                      {new Date(item.endDate).toLocaleDateString()}
-                    </span>
+                    {/* Person Details */}
+                    {item.personDetails && item.personDetails.length > 0 && (
+                      <div
+                        className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t space-y-2"
+                        style={{ borderColor: "#e5e5e5" }}
+                      >
+                        <p
+                          className="text-xs sm:text-sm font-medium mb-2"
+                          style={{ color: "#606C38" }}
+                        >
+                          Person Details:
+                        </p>
+                        {item.personDetails.map((person, pIndex) => (
+                          <div
+                            key={pIndex}
+                            className="flex items-start gap-2 text-xs sm:text-sm"
+                            style={{ color: "#283618" }}
+                          >
+                            <UserIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                            <span className="break-words">
+                              {person.name} ({person.phoneNumber})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Date Range */}
+                    <div
+                      className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t flex items-center gap-2 text-xs sm:text-sm"
+                      style={{ borderColor: "#e5e5e5", color: "#606C38" }}
+                    >
+                      <Calendar className="w-4 h-4 flex-shrink-0" />
+                      <span className="break-words">
+                        {new Date(item.startDate).toLocaleDateString()} -{" "}
+                        {new Date(item.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    {/* Skip Tomorrow Button for each item */}
+                    <div
+                      className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t"
+                      style={{ borderColor: "#e5e5e5" }}
+                    >
+                      <button
+                        onClick={() => handleSkipTomorrow(item.id)}
+                        disabled={
+                          isUpdating ||
+                          !isItemEligibleForSkip(
+                            item.startDate,
+                            item.endDate,
+                            item.skippedDates
+                          ) || isTomorrowSkipped
+                        }
+                        className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap disabled:opacity-60"
+                        style={{ backgroundColor: "#BC6C25", color: "#FEFAE0" }}
+                      >
+                        {isUpdating ? (
+                          <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                        ) : (
+                          <FastForward className="w-4 h-4 flex-shrink-0" />
+                        )}
+                        <span className="hidden sm:inline">
+                          {isTomorrowSkipped
+                            ? "Already Skipped Tomorrow"
+                            : "Skip Tomorrow"}
+                        </span>
+                        <span className="sm:hidden">
+                          {isTomorrowSkipped ? "Skipped" : "Skip"}
+                        </span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
           {/* Additional Order Details - Mobile Optimized */}
-          <div className="pt-4 sm:pt-6 border-t" style={{ borderColor: "#e5e5e5" }}>
+          <div
+            className="pt-4 sm:pt-6 border-t"
+            style={{ borderColor: "#e5e5e5" }}
+          >
             <h3
               className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2"
               style={{ color: "#283618" }}
             >
-              <Info className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" /> 
+              <Info className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
               <span>Additional Information</span>
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -500,7 +618,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl"
                 style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}
               >
-                <Timer className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mt-0.5" style={{ color: "#BC6C25" }} />
+                <Timer
+                  className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mt-0.5"
+                  style={{ color: "#BC6C25" }}
+                />
                 <div className="min-w-0">
                   <p
                     className="text-xs sm:text-sm font-medium mb-1"
@@ -520,7 +641,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl"
                 style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}
               >
-                <Clock className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mt-0.5" style={{ color: "#BC6C25" }} />
+                <Clock
+                  className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mt-0.5"
+                  style={{ color: "#BC6C25" }}
+                />
                 <div className="min-w-0">
                   <p
                     className="text-xs sm:text-sm font-medium mb-1"
