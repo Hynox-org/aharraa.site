@@ -104,6 +104,15 @@ export interface Meal {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  specialties?: string[];
+  location?: string;
+  deliveryAreas?: string[];
+  contactInfo?: ContactInfo;
+}
+
+export interface ContactInfo {
+  phone: string;
+  email: string;
 }
 
 export interface Vendor {
@@ -202,6 +211,8 @@ export interface DeliveryAddress {
   street: string;
   city: string;
   zip: string;
+  lat?: number;
+  lon?: number;
 }
 
 export interface DateRange {
@@ -256,7 +267,7 @@ export interface Store {
 
 export interface CheckoutItem {
   id: string; // Unique ID for the checkout item (from CartItem)
-  meal: {id: string, name: string};
+  meal: {id: string, name: string, image: string}; // Added image property
   plan: {id: string, name: string};
   quantity: number;
   personDetails?: PersonDetails[]; // Optional array of person details

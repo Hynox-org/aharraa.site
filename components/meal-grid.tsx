@@ -109,13 +109,13 @@ export function MealGrid({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
         {filteredMeals.map((meal, index) => (
           <div
-            key={meal.id}
+            key={meal._id}
             className="animate-fade-in-up"
             style={{ animationDelay: `${index * 0.05}s` }}
           >
             <MealCard
               meal={meal}
-              selectedMealId={selectedMeal?.id || null}
+              selectedMealId={selectedMeal?._id || null}
               vendors={vendors}
               onMealClick={handleMealClick}
               onMealSelect={handleMealSelect}

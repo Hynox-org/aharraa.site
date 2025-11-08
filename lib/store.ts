@@ -68,8 +68,8 @@ export const useStore = create<Store>((set, get) => ({
 
       const existingItemIndex = currentCart.items.findIndex(
         (cartItem) =>
-          cartItem.meal.id === item.meal.id &&
-          cartItem.plan.id === item.plan.id &&
+          cartItem.meal._id === item.meal._id &&
+          cartItem.plan._id === item.plan._id &&
           cartItem.startDate === item.startDate
       );
 

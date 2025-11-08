@@ -807,7 +807,7 @@ export default function ProfilePage() {
                   Start ordering delicious meals today!
                 </p>
                 <button
-                  onClick={() => router.push("/")}
+                  onClick={() => router.push("/pricing")}
                   className="px-6 py-3 rounded-lg font-semibold"
                   style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
                 >

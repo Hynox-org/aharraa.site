@@ -6,6 +6,9 @@ import {
   CreatePaymentPayload,
   Order,
   UserProfile,
+  Meal,
+  Plan,
+  Vendor,
 } from "./types";
 
 export async function apiRequest<T>(
@@ -218,4 +221,31 @@ export async function updateOrder(
     token
   );
   return response as Order;
+}
+
+export async function getMeals(
+  vendorId?: string,
+  category?: string,
+  dietPreference?: string
+): Promise<Meal[]> {
+  const params = new URLSearchParams();
+  if (vendorId) params.append("vendorId", vendorId);
+  if (category) params.append("category", category);
+  if (dietPreference) params.append("dietPreference", dietPreference);
+
+  const queryString = params.toString();
+  const endpoint = `/api/meals${queryString ? `?${queryString}` : ""}`;
+  return apiRequest<Meal[]>(endpoint, "GET");
+}
+
+export async function getMealById(id: string): Promise<Meal> {
+  return apiRequest<Meal>(`/api/meals/${id}`, "GET");
+}
+
+export async function getPlans(): Promise<Plan[]> {
+  return apiRequest<Plan[]>("/api/plans", "GET");
+}
+
+export async function getVendors(): Promise<Vendor[]> {
+  return apiRequest<Vendor[]>("/api/vendors", "GET");
 }

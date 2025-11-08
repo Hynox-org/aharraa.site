@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useStore } from "@/lib/store"
@@ -15,8 +15,8 @@ import {
   CreatePaymentPayload,
   Vendor,
 } from "@/lib/types"
-import { DUMMY_VENDORS } from "@/lib/data"
-import { createOrder, createPayment } from "@/lib/api"
+import { VENDORS } from "@/lib/vendor-data"
+import { createOrder, createPayment, updateProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
 
 import { CheckoutEmptyState } from "@/components/checkout-empty-state"
@@ -101,6 +101,42 @@ export default function CheckoutPage() {
     new Set(userCartItems.map((item) => item.meal.category))
   )
 
+  const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
+    return userCartItems
+      .map((cartItem): CheckoutItem | null => { // Explicitly type the return of map
+        let vendor = VENDORS.find(
+          (v: Vendor) => v._id === cartItem.meal.vendorId
+        )
+        if (!vendor) {
+          console.warn(`Vendor not found for meal ID: ${cartItem.meal._id}. Using a placeholder vendor.`);
+          // Provide a placeholder vendor to allow the item to be displayed
+          vendor = {
+            _id: "placeholder-vendor",
+            name: "Unknown Vendor",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            __v: 0,
+          };
+        }
+        return {
+          id: cartItem.id,
+          meal: {
+            id: cartItem.meal._id,
+            name: cartItem.meal.name,
+            image: cartItem.meal.image || '/defaults/default-meal.jpg', // Added image with fallback
+          },
+          plan: {id: cartItem.plan._id, name: cartItem.plan.name},
+          quantity: cartItem.quantity,
+          personDetails: cartItem.personDetails,
+          startDate: cartItem.startDate,
+          endDate: cartItem.endDate,
+          itemTotalPrice: cartItem.itemTotalPrice,
+          vendor: {id: vendor._id, name: vendor.name},
+        }
+      })
+      .filter((item): item is CheckoutItem => item !== null); // Keep the filter for safety, though with placeholder it might not be strictly necessary for nulls
+  }, [userCartItems]) // Recalculate if userCartItems changes
+
   const totalPlanDays = userCartItems.reduce((sum, item) => sum + item.plan.durationDays, 0);
   const deliveryCostPerCategory = 33.33;
   const deliveryCost = uniqueMealCategories.length * deliveryCostPerCategory * totalPlanDays;
@@ -141,20 +177,16 @@ export default function CheckoutPage() {
             `Fetching location for ${category}: Lat ${latitude}, Lng ${longitude}`
           )
 
-          const dummyStreet = "123 Main Road"
-          const dummyZip = "641001"
-
           setDeliveryAddresses((prev) => ({
             ...prev,
             [category]: {
               ...prev[category],
-              street: dummyStreet,
-              city: "Coimbatore",
-              zip: dummyZip,
+              lat: latitude,
+              lon: longitude,
             } as DeliveryAddress,
           }))
           toast.success(
-            `Location fetched for ${category}. Please verify details.`
+            `Location fetched for ${category}.`
           )
         },
         (error) => {
@@ -170,8 +202,8 @@ export default function CheckoutPage() {
   }
 
   const handleProceedToPayment = async () => {
-    if (!user?.id) {
-      toast.error("User not authenticated.")
+    if (!user?.id || !user?.email) {
+      toast.error("User not authenticated or user email not found.")
       return
     }
 
@@ -190,49 +222,6 @@ export default function CheckoutPage() {
       }
     }
 
-    const checkoutItems: CheckoutItem[] = userCartItems.map((cartItem) => {
-      const vendor = DUMMY_VENDORS.find(
-        (v: Vendor) => v.id === cartItem.meal.vendorId
-      )
-      if (!vendor) {
-        throw new Error(`Vendor not found for meal ID: ${cartItem.meal.id}`);
-      }
-      return {
-        id: cartItem.id,
-        meal: {id: cartItem.meal.id, name: cartItem.meal.name},
-        plan: {id: cartItem.plan.id, name: cartItem.plan.name},
-        quantity: cartItem.quantity,
-        personDetails: cartItem.personDetails,
-        startDate: cartItem.startDate,
-        endDate: cartItem.endDate,
-        itemTotalPrice: cartItem.itemTotalPrice,
-        vendor: {id: vendor.id, name: vendor.name},
-      }
-    })
-
-    const finalizedCheckoutData: CheckoutData = {
-      id: `checkout-${Date.now()}-${user.id}`,
-      userId: user.id,
-      items: checkoutItems,
-      deliveryAddresses: deliveryAddresses as Record<
-        MealCategory,
-        DeliveryAddress
-      >,
-      totalPrice: totalPrice,
-      checkoutDate: new Date().toISOString(),
-    }
-
-    console.log("Finalized Checkout Data:", finalizedCheckoutData)
-    setCheckoutData(finalizedCheckoutData)
-
-    const paymentPayload: CreatePaymentPayload = {
-      userId: user.id,
-      checkoutData: finalizedCheckoutData,
-      paymentMethod: "UPI", // This should be dynamic based on user selection
-      totalAmount: grandTotal,
-      currency: "INR",
-    }
-
     const token = localStorage.getItem("aharraa-u-token")
 
     if (!token) {
@@ -242,6 +231,67 @@ export default function CheckoutPage() {
     }
 
     try {
+      // 1. Update user profile with meal-specific delivery addresses
+      const profileUpdatePayload: any = {
+        email: user.email, // Ensure email is included for identification
+      }
+
+      if (deliveryAddresses.Breakfast) {
+        profileUpdatePayload.breakfastDeliveryLocation = {
+          street: deliveryAddresses.Breakfast.street,
+          state: "Tamil Nadu", // Assuming a default state for Coimbatore
+          pincode: deliveryAddresses.Breakfast.zip,
+          lat: deliveryAddresses.Breakfast.lat,
+          lon: deliveryAddresses.Breakfast.lon,
+        }
+      }
+      if (deliveryAddresses.Lunch) {
+        profileUpdatePayload.lunchDeliveryLocation = {
+          street: deliveryAddresses.Lunch.street,
+          state: "Tamil Nadu",
+          pincode: deliveryAddresses.Lunch.zip,
+          lat: deliveryAddresses.Lunch.lat,
+          lon: deliveryAddresses.Lunch.lon,
+        }
+      }
+      if (deliveryAddresses.Dinner) {
+        profileUpdatePayload.dinnerDeliveryLocation = {
+          street: deliveryAddresses.Dinner.street,
+          state: "Tamil Nadu",
+          pincode: deliveryAddresses.Dinner.zip,
+          lat: deliveryAddresses.Dinner.lat,
+          lon: deliveryAddresses.Dinner.lon,
+        }
+      }
+
+      console.log("Updating user profile with delivery addresses:", profileUpdatePayload)
+      await updateProfileDetails(profileUpdatePayload, token)
+      toast.success("Delivery addresses saved to your profile!")
+
+      // 2. Proceed with payment
+      const finalizedCheckoutData: CheckoutData = {
+        id: `checkout-${Date.now()}-${user.id}`,
+        userId: user.id,
+        items: displayCheckoutItems,
+        deliveryAddresses: deliveryAddresses as Record<
+          MealCategory,
+          DeliveryAddress
+        >,
+        totalPrice: totalPrice,
+        checkoutDate: new Date().toISOString(),
+      }
+
+      console.log("Finalized Checkout Data:", finalizedCheckoutData)
+      setCheckoutData(finalizedCheckoutData)
+
+      const paymentPayload: CreatePaymentPayload = {
+        userId: user.id,
+        checkoutData: finalizedCheckoutData,
+        paymentMethod: "UPI", // This should be dynamic based on user selection
+        totalAmount: grandTotal,
+        currency: "INR",
+      }
+
       const response = await createPayment(paymentPayload, token)
       console.log(response.paymentSessionId)
       const cashfree = await initializeSDK()
@@ -252,17 +302,19 @@ export default function CheckoutPage() {
       cashfree.checkout(checkoutOptions).then(async (result: any) => {
         if (result.error) {
           console.error("Payment error:", result.error)
+          toast.error("Payment failed. Please try again.")
         } else if (result.paymentDetails) {
           console.log("Payment completed:", result.paymentDetails)
           const order = await createOrder(response.orderId, token)
           toast.success(`Order created successfully!`)
           clearCart()
+          router.push(`/order-status/${order._id}`) // Redirect to order status page
         }
       })
     } catch (error: any) {
-      console.error("Error creating order:", error)
+      console.error("Error during checkout process:", error)
       toast.error(
-        `Failed to create order: ${error.message || "Unknown error"}`
+        `Failed to complete checkout: ${error.message || "Unknown error"}`
       )
     }
   }
@@ -295,7 +347,7 @@ export default function CheckoutPage() {
               />
             ))}
 
-            <CheckoutItemCard items={userCartItems} />
+            <CheckoutItemCard items={displayCheckoutItems} />
           </div>
 
           {/* Right Column - Summary */}

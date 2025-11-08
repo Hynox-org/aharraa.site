@@ -3,13 +3,13 @@
 import { useState, useMemo, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { DUMMY_MEALS, DUMMY_PLANS, DUMMY_VENDORS } from "@/lib/data"
-import { Meal, Plan, MealCategory, DietPreference, CartItem, PersonDetails } from "@/lib/types"
+import { Meal, Plan, MealCategory, DietPreference, CartItem, PersonDetails, Vendor } from "@/lib/types"
+import { getMeals, getPlans, getVendors } from "@/lib/api"
 import { format, addDays } from "date-fns"
 import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 
 import { PricingHeroSection } from "@/components/pricing-hero-section"
 import { MealCategoryTabs } from "@/components/meal-category-tabs"
@@ -23,17 +23,22 @@ import { OrderSummarySidebar } from "@/components/order-summary-sidebar"
 import { MealDetailsModal } from "@/components/meal-details-modal"
 
 export default function PricingPage() {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, token } = useAuth()
   const router = useRouter()
   const { addToCart } = useStore()
-  const { toast } = useToast()
+  // The 'toast' function is now directly imported from 'sonner'
+
+  const [meals, setMeals] = useState<Meal[]>([])
+  const [plans, setPlans] = useState<Plan[]>([])
+  const [vendors, setVendors] = useState<Vendor[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const [selectedCategory, setSelectedCategory] = useState<MealCategory>("Breakfast")
   const [selectedDietPreference, setSelectedDietPreference] = useState<DietPreference>("All")
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [quantity, setQuantity] = useState<number>(1)
-  // Initialize personDetails based on initial quantity
   const [personDetails, setPersonDetails] = useState<PersonDetails[]>(
     Array.from({ length: 1 }, () => ({ name: "", phoneNumber: "" }))
   )
@@ -42,21 +47,45 @@ export default function PricingPage() {
   const [mealDetailsOpen, setMealDetailsOpen] = useState(false)
   const [detailMeal, setDetailMeal] = useState<Meal | null>(null)
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true)
+        const fetchedMeals = await getMeals()
+        const fetchedPlans = await getPlans()
+        const fetchedVendors = await getVendors()
+        console.log("Fetched Meals:", fetchedMeals);
+        console.log("Fetched Vendors:", fetchedVendors);
+        setMeals(fetchedMeals)
+        setPlans(fetchedPlans)
+        setVendors(fetchedVendors)
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch data")
+        toast.error("Error", {
+          description: err.message || "Failed to fetch data.",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, []) // Removed toast from dependency array as it's a direct import now
+
   const mealsByCategory = useMemo(() => {
-    return DUMMY_MEALS.reduce((acc, meal) => {
+    return meals.reduce((acc, meal) => {
       (acc[meal.category] = acc[meal.category] || []).push(meal)
       return acc
     }, {} as Record<MealCategory, Meal[]>)
-  }, [])
+  }, [meals])
 
   const categories = Object.keys(mealsByCategory) as MealCategory[]
 
   const filteredMeals = useMemo(() => {
-    let meals = mealsByCategory[selectedCategory] || []
+    let currentMeals = mealsByCategory[selectedCategory] || []
     if (selectedDietPreference !== "All") {
-      meals = meals.filter(meal => meal.dietPreference === selectedDietPreference)
+      currentMeals = currentMeals.filter(meal => meal.dietPreference === selectedDietPreference)
     }
-    return meals
+    return currentMeals
   }, [selectedCategory, selectedDietPreference, mealsByCategory])
 
   const handleMealClick = (meal: Meal) => {
@@ -83,10 +112,8 @@ export default function PricingPage() {
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!arePersonDetailsValid()) {
-      toast({
-        title: "Missing Details",
+      toast.error("Missing Details", {
         description: "Please fill all person details before selecting a date.",
-        variant: "destructive",
       })
       return
     }
@@ -136,63 +163,104 @@ export default function PricingPage() {
   }
 
   const handleAddToCart = () => {
+    console.log("handleAddToCart called");
+    console.log("isAuthenticated:", isAuthenticated);
+    console.log("selectedMeal:", selectedMeal);
+    console.log("selectedPlan:", selectedPlan);
+    console.log("quantity:", quantity);
+    console.log("startDate:", startDate);
+    console.log("endDate:", endDate);
+    console.log("user?.id:", user?.id);
+    console.log("personDetails:", personDetails);
+
     if (!isAuthenticated) {
+      console.log("User not authenticated, redirecting to /auth");
       router.push("/auth?returnUrl=/pricing")
       return
     }
 
     // Validate person details
     if (!arePersonDetailsValid()) {
-      toast({
-        title: "Invalid Details",
+      console.log("Person details are invalid.");
+      toast.error("Invalid Details", {
         description: "Please fill all person details correctly.",
-        variant: "destructive",
       })
       return
     }
 
-    if (selectedMeal && selectedPlan && quantity > 0 && startDate && endDate && user?.id) {
-      const itemTotalPrice = selectedMeal.price * selectedPlan.durationDays * quantity
-
-      const vendor = DUMMY_VENDORS.find((v) => v.id === selectedMeal.vendorId)
-      if (!vendor) {
-        toast({
-          title: "Error",
-          description: "Vendor not found for the selected meal.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const newCartItem: CartItem = {
-        id: `cart-${Date.now()}-${selectedMeal.id}`,
-        userId: user.id,
-        meal: selectedMeal,
-        plan: selectedPlan,
-        quantity: quantity,
-        personDetails: quantity >= 1 ? personDetails : undefined,
-        startDate: format(startDate, "yyyy-MM-dd"),
-        endDate: format(endDate, "yyyy-MM-dd"),
-        itemTotalPrice: itemTotalPrice,
-        addedDate: new Date().toISOString(),
-        vendor: vendor,
-      }
-
-      addToCart(newCartItem)
-
-      toast({
-        title: "Added to Cart!",
-        description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added to your cart.`,
+    if (!selectedMeal) {
+      console.log("No meal selected.");
+      toast.error("Cannot add to cart", {
+        description: "Please select a meal.",
       })
-
-      resetSelection()
-    } else {
-      toast({
-        title: "Cannot add to cart",
-        description: "Please complete all required fields.",
-        variant: "destructive",
-      })
+      return
     }
+    if (!selectedPlan) {
+      console.log("No plan selected.");
+      toast.error("Cannot add to cart", {
+        description: "Please select a plan.",
+      })
+      return
+    }
+    if (quantity <= 0) {
+      console.log("Quantity is not greater than 0.");
+      toast.error("Cannot add to cart", {
+        description: "Quantity must be greater than 0.",
+      })
+      return
+    }
+    if (!startDate || !endDate) {
+      console.log("Start or end date not selected.");
+      toast.error("Cannot add to cart", {
+        description: "Please select a start date.",
+      })
+      return
+    }
+    if (!user?.id) {
+      console.log("User ID is missing.");
+      toast.error("Cannot add to cart", {
+        description: "User not authenticated. Please log in.",
+      })
+      return
+    }
+
+    const itemTotalPrice = selectedMeal.price * selectedPlan.durationDays * quantity
+
+    console.log("Attempting to find vendor for selectedMeal.vendorId:", selectedMeal.vendorId);
+    console.log("Available vendors:", vendors.map(v => ({ _id: v._id, name: v.name })));
+    // Corrected: Access the _id property of selectedMeal.vendorId
+    const vendor = vendors.find((v) => v._id === (selectedMeal.vendorId as any)._id);
+    if (!vendor) {
+      console.log("Vendor not found for selected meal. selectedMeal.vendorId._id:", (selectedMeal.vendorId as any)._id);
+      toast.error("Error", {
+        description: "Vendor not found for the selected meal.",
+      })
+      return
+    }
+    console.log("Vendor found:", vendor);
+    console.log("All validations passed. Adding to cart.");
+
+    const newCartItem: CartItem = {
+      id: `cart-${Date.now()}-${selectedMeal._id}`,
+      userId: user.id,
+      meal: selectedMeal,
+      plan: selectedPlan,
+      quantity: quantity,
+      personDetails: quantity >= 1 ? personDetails : undefined,
+      startDate: format(startDate, "yyyy-MM-dd"),
+      endDate: format(endDate, "yyyy-MM-dd"),
+      itemTotalPrice: itemTotalPrice,
+      addedDate: new Date().toISOString(),
+      vendor: vendor,
+    }
+
+    addToCart(newCartItem)
+
+    toast("Added to Cart!", {
+      description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added to your cart.`,
+    })
+
+    resetSelection()
   }
 
   const resetSelection = () => {
@@ -212,10 +280,8 @@ export default function PricingPage() {
 
     // Validate person details
     if (!arePersonDetailsValid()) {
-      toast({
-        title: "Invalid Details",
+      toast.error("Invalid Details", {
         description: "Please fill all person details correctly.",
-        variant: "destructive",
       })
       return
     }
@@ -223,18 +289,16 @@ export default function PricingPage() {
     if (selectedMeal && selectedPlan && quantity > 0 && startDate && endDate && user?.id) {
       const itemTotalPrice = selectedMeal.price * selectedPlan.durationDays * quantity
 
-      const vendor = DUMMY_VENDORS.find((v) => v.id === selectedMeal.vendorId)
+      const vendor = vendors.find((v) => v._id === (selectedMeal.vendorId as any)._id)
       if (!vendor) {
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: "Vendor not found for the selected meal.",
-          variant: "destructive",
         })
         return
       }
 
       const newCartItem: CartItem = {
-        id: `cart-${Date.now()}-${selectedMeal.id}`,
+        id: `cart-${Date.now()}-${selectedMeal._id}`,
         userId: user.id,
         meal: selectedMeal,
         plan: selectedPlan,
@@ -249,17 +313,14 @@ export default function PricingPage() {
 
       addToCart(newCartItem)
 
-      toast({
-        title: "Added to Cart & Redirecting!",
+      toast("Added to Cart & Redirecting!", {
         description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added to your cart.`,
       })
 
       router.push("/checkout")
     } else {
-      toast({
-        title: "Cannot proceed to checkout",
+      toast.error("Cannot proceed to checkout", {
         description: "Please complete all required fields.",
-        variant: "destructive",
       })
     }
   }
@@ -281,19 +342,25 @@ export default function PricingPage() {
               selectedDietPreference={selectedDietPreference}
               onSelectDietPreference={setSelectedDietPreference}
             />
-            <MealGrid
-              filteredMeals={filteredMeals}
-              selectedMeal={selectedMeal}
-              vendors={DUMMY_VENDORS}
-              handleMealClick={handleMealClick}
-              handleMealSelect={handleMealSelect}
-            />
+            {loading ? (
+              <div className="text-center text-gray-600">Loading meals...</div>
+            ) : error ? (
+              <div className="text-center text-red-600">{error}</div>
+            ) : (
+              <MealGrid
+                filteredMeals={filteredMeals}
+                selectedMeal={selectedMeal}
+                vendors={vendors}
+                handleMealClick={handleMealClick}
+                handleMealSelect={handleMealSelect}
+              />
+            )}
 
             {selectedMeal && (
               <PlanSelection
                 selectedMeal={selectedMeal}
                 selectedPlan={selectedPlan}
-                plans={DUMMY_PLANS}
+                plans={plans}
                 onPlanSelect={handlePlanSelect}
               />
             )}
@@ -344,7 +411,7 @@ export default function PricingPage() {
       <MealDetailsModal
         mealDetailsOpen={mealDetailsOpen}
         detailMeal={detailMeal}
-        selectedMealId={selectedMeal?.id || null}
+        selectedMealId={selectedMeal?._id || null}
         onClose={() => setMealDetailsOpen(false)}
         onMealSelect={handleMealSelect}
       />

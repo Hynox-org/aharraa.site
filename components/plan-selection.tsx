@@ -22,18 +22,18 @@ export function PlanSelection({ selectedMeal, selectedPlan, plans, onPlanSelect 
       {/* Simple Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {plans.map((plan) => {
-          const isSelected = selectedPlan?.id === plan.id;
+          const isSelected = selectedPlan?._id === plan._id;
           const totalPrice = (selectedMeal.price * plan.durationDays).toFixed(0);
           const dailyPrice = selectedMeal.price.toFixed(0);
 
           return (
             <button
-              key={plan.id}
+              key={plan._id}
               onClick={() => onPlanSelect(plan)}
               className={cn(
                 "relative p-6 rounded-xl text-left transition-all",
-                isSelected 
-                  ? "shadow-lg scale-105" 
+                isSelected
+                  ? "shadow-lg scale-105"
                   : "hover:shadow-md"
               )}
               style={{

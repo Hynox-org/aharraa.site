@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react"
 import { Meal, Vendor } from "@/lib/types"
-import { DUMMY_VENDORS } from "@/lib/data"
+import { VENDORS } from "@/lib/vendor-data"
 import { IoCheckmarkCircle } from "react-icons/io5"
 
 interface MealDetailsModalProps {
@@ -57,7 +57,7 @@ export function MealDetailsModal({
               <div>
                 <h3 className="font-bold text-2xl text-white mb-1">{detailMeal.name}</h3>
                 <p className="text-white/80 text-sm">
-                  by {DUMMY_VENDORS.find((v: Vendor) => v.id === detailMeal.vendorId)?.name}
+                  by {VENDORS.find((v: Vendor) => v._id === detailMeal.vendorId)?.name}
                 </p>
               </div>
               <span className="text-xl font-bold px-4 py-2 rounded-lg" 
@@ -148,11 +148,11 @@ export function MealDetailsModal({
             }}
             className="w-full py-4 rounded-lg font-bold text-base transition-all flex items-center justify-center gap-2"
             style={{
-              backgroundColor: selectedMealId === detailMeal.id ? "#606C38" : "#DDA15E",
+              backgroundColor: selectedMealId === detailMeal._id ? "#606C38" : "#DDA15E",
               color: "#FEFAE0"
             }}
           >
-            {selectedMealId === detailMeal.id ? (
+            {selectedMealId === detailMeal._id ? (
               <>
                 <IoCheckmarkCircle className="w-5 h-5" />
                 Selected

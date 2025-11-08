@@ -13,8 +13,8 @@ interface MealCardProps {
 }
 
 export function MealCard({ meal, selectedMealId, vendors, onMealClick, onMealSelect }: MealCardProps) {
-  const isSelected = selectedMealId === meal.id
-  const vendor = vendors.find((v: Vendor) => v.id === meal.vendorId)
+  const isSelected = selectedMealId === meal._id
+  const vendor = vendors.find((v: Vendor) => v._id === meal.vendorId)
 
   return (
     <div

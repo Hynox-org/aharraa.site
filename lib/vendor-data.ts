@@ -2,7 +2,7 @@ import { Vendor } from "./types";
 
 export const VENDORS: Vendor[] = [
   {
-    id: "v1",
+    _id: "v1",
     name: "Spice Garden Kitchen",
     description: "Authentic North Indian cuisine with a modern twist. Specializing in vegetarian and non-vegetarian dishes.",
     image: "/defaults/default-meal.jpg",
@@ -16,7 +16,7 @@ export const VENDORS: Vendor[] = [
     }
   },
   {
-    id: "v2",
+    _id: "v2",
     name: "South India Delights",
     description: "Traditional South Indian vegetarian meals prepared with authentic recipes and fresh ingredients.",
     image: "/defaults/default-meal.jpg",
@@ -30,7 +30,7 @@ export const VENDORS: Vendor[] = [
     }
   },
   {
-    id: "v3",
+    _id: "v3",
     name: "Royal Kitchen",
     description: "Premium non-vegetarian cuisine specializing in Mughlai and North Indian delicacies.",
     image: "/defaults/default-meal.jpg",
