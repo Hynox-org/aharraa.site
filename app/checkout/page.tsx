@@ -42,6 +42,74 @@ export default function CheckoutPage() {
     return cashfree
   }
 
+  const userCartItems = useMemo(
+    () => cart?.items.filter((item) => item.userId === user?.id) || [],
+    [cart?.items, user?.id]
+  )
+
+  const totalPrice = useMemo(
+    () => userCartItems.reduce((sum, item) => sum + item.itemTotalPrice, 0),
+    [userCartItems]
+  )
+
+  const uniqueMealCategories = useMemo(
+    () => Array.from(new Set(userCartItems.map((item) => item.meal.category))),
+    [userCartItems]
+  )
+
+  const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
+    return userCartItems
+      .map((cartItem): CheckoutItem | null => {
+        let vendor = VENDORS.find(
+          (v: Vendor) => v._id === cartItem.meal.vendorId
+        )
+        if (!vendor) {
+          console.warn(
+            `Vendor not found for meal ID: ${cartItem.meal._id}. Using a placeholder vendor.`
+          )
+          vendor = {
+            _id: "placeholder-vendor",
+            name: "Unknown Vendor",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            __v: 0,
+          }
+        }
+        return {
+          id: cartItem.id,
+          meal: {
+            id: cartItem.meal._id,
+            name: cartItem.meal.name,
+            image: cartItem.meal.image || "/defaults/default-meal.jpg",
+          },
+          plan: { id: cartItem.plan._id, name: cartItem.plan.name },
+          quantity: cartItem.quantity,
+          personDetails: cartItem.personDetails,
+          startDate: cartItem.startDate,
+          endDate: cartItem.endDate,
+          itemTotalPrice: cartItem.itemTotalPrice,
+          vendor: { id: vendor._id, name: vendor.name },
+        }
+      })
+      .filter((item): item is CheckoutItem => item !== null)
+  }, [userCartItems])
+
+  const totalPlanDays = useMemo(
+    () => userCartItems.reduce((sum, item) => sum + item.plan.durationDays, 0),
+    [userCartItems]
+  )
+  const deliveryCostPerCategory = 33.33
+  const deliveryCost = useMemo(
+    () => uniqueMealCategories.length * deliveryCostPerCategory * totalPlanDays,
+    [uniqueMealCategories.length, totalPlanDays]
+  )
+  const platformCost = useMemo(() => totalPrice * 0.1, [totalPrice])
+  const gstCost = useMemo(() => totalPrice * 0.05, [totalPrice])
+  const grandTotal = useMemo(
+    () => totalPrice + deliveryCost + platformCost + gstCost,
+    [totalPrice, deliveryCost, platformCost, gstCost]
+  )
+
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/auth?returnUrl=/checkout")
@@ -49,16 +117,17 @@ export default function CheckoutPage() {
   }, [isAuthenticated, loading, router])
 
   useEffect(() => {
-    const userCartItems =
-      cart?.items.filter((item) => item.userId === user?.id) || []
+    if (!loading && isAuthenticated && userCartItems.length === 0) {
+      toast.info("Your cart is empty. Redirecting to pricing page.")
+      router.push("/pricing")
+    }
+  }, [loading, isAuthenticated, userCartItems.length, router])
+
+  useEffect(() => {
     if (userCartItems.length > 0) {
       const initialAddresses: Partial<Record<MealCategory, DeliveryAddress>> =
         {}
-      const uniqueCategories = Array.from(
-        new Set(userCartItems.map((item) => item.meal.category))
-      )
-
-      uniqueCategories.forEach((category) => {
+      uniqueMealCategories.forEach((category) => {
         initialAddresses[category] = {
           street: "",
           city: "Coimbatore",
@@ -67,7 +136,7 @@ export default function CheckoutPage() {
       })
       setDeliveryAddresses(initialAddresses)
     }
-  }, [cart?.items, user?.id])
+  }, [userCartItems, uniqueMealCategories])
 
   if (loading) {
     return (
@@ -75,9 +144,10 @@ export default function CheckoutPage() {
         <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
-              style={{ borderColor: "#606C38", borderTopColor: "transparent" }}>
-            </div>
+            <div
+              className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
+              style={{ borderColor: "#606C38", borderTopColor: "transparent" }}
+            ></div>
             <p className="text-lg font-medium" style={{ color: "#283618" }}>
               Loading checkout...
             </p>
@@ -90,70 +160,6 @@ export default function CheckoutPage() {
   if (!isAuthenticated || !user) {
     return null
   }
-
-  const userCartItems =
-    cart?.items.filter((item) => item.userId === user.id) || []
-  const totalPrice = userCartItems.reduce(
-    (sum, item) => sum + item.itemTotalPrice,
-    0
-  )
-  const uniqueMealCategories = Array.from(
-    new Set(userCartItems.map((item) => item.meal.category))
-  )
-
-  const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
-    return userCartItems
-      .map((cartItem): CheckoutItem | null => { // Explicitly type the return of map
-        let vendor = VENDORS.find(
-          (v: Vendor) => v._id === cartItem.meal.vendorId
-        )
-        if (!vendor) {
-          console.warn(`Vendor not found for meal ID: ${cartItem.meal._id}. Using a placeholder vendor.`);
-          // Provide a placeholder vendor to allow the item to be displayed
-          vendor = {
-            _id: "placeholder-vendor",
-            name: "Unknown Vendor",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            __v: 0,
-          };
-        }
-        return {
-          id: cartItem.id,
-          meal: {
-            id: cartItem.meal._id,
-            name: cartItem.meal.name,
-            image: cartItem.meal.image || '/defaults/default-meal.jpg', // Added image with fallback
-          },
-          plan: {id: cartItem.plan._id, name: cartItem.plan.name},
-          quantity: cartItem.quantity,
-          personDetails: cartItem.personDetails,
-          startDate: cartItem.startDate,
-          endDate: cartItem.endDate,
-          itemTotalPrice: cartItem.itemTotalPrice,
-          vendor: {id: vendor._id, name: vendor.name},
-        }
-      })
-      .filter((item): item is CheckoutItem => item !== null); // Keep the filter for safety, though with placeholder it might not be strictly necessary for nulls
-  }, [userCartItems]) // Recalculate if userCartItems changes
-
-  const totalPlanDays = userCartItems.reduce((sum, item) => sum + item.plan.durationDays, 0);
-  const deliveryCostPerCategory = 33.33;
-  const deliveryCost = uniqueMealCategories.length * deliveryCostPerCategory * totalPlanDays;
-  const platformCost = totalPrice * 0.10;
-  const gstCost = totalPrice * 0.05;
-  const grandTotal = totalPrice + deliveryCost + platformCost + gstCost;
-
-  if (userCartItems.length === 0) {
-    return (
-      <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
-        <Header />
-        <CheckoutEmptyState />
-        <Footer />
-      </main>
-    )
-  }
-
   const handleAddressChange = (
     category: MealCategory,
     field: keyof DeliveryAddress,

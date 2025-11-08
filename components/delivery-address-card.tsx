@@ -61,7 +61,7 @@ export function DeliveryAddressCard({ category, address, onAddressChange, onGeol
                 backgroundColor: "#FEFAE0"
               }}
             />
-            <button
+            {/* <button
               onClick={() => onGeolocation(category)}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center transition-all flex-shrink-0"
               style={{ 
@@ -71,7 +71,7 @@ export function DeliveryAddressCard({ category, address, onAddressChange, onGeol
               title="Use current location"
             >
               <IoNavigate className="w-5 h-5" />
-            </button>
+            </button> */}
           </div>
           {streetError && (
             <p className="text-xs mt-1" style={{ color: "#BC6C25" }}>
