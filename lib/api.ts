@@ -108,30 +108,30 @@ export async function resetPassword(
   );
 }
 
-export async function createOrder(
-  orderId: string,
-  token: string
-): Promise<Order> {
-  const response = await apiRequest<any>(
-    "/api/orders",
-    "POST",
-    { orderId },
-    token
-  );
-  // Assuming the backend returns the order object directly or nested under an 'order' key
-  if (response && response.order) {
-    return response.order as Order;
-  }
-  return response as Order;
-}
+// export async function createOrder(
+//   orderId: string,
+//   token: string
+// ): Promise<Order> {
+//   const response = await apiRequest<any>(
+//     "/api/orders",
+//     "POST",
+//     { orderId },
+//     token
+//   );
+//   // Assuming the backend returns the order object directly or nested under an 'order' key
+//   if (response && response.order) {
+//     return response.order as Order;
+//   }
+//   return response as Order;
+// }
 
 //createPayment
-export async function createPayment(
+export async function createOrder(
   payload: CreatePaymentPayload,
   token: string
 ): Promise<any> {
   const response = await apiRequest<any>(
-    "/api/orders/payment",
+    "/api/orders",
     "POST",
     payload as unknown as Record<string, unknown>,
     token

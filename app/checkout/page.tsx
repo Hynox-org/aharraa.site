@@ -15,7 +15,7 @@ import {
   CreatePaymentPayload,
   Vendor,
 } from "@/lib/types"
-import { createOrder, createPayment, updateProfileDetails } from "@/lib/api"
+import { createOrder, updateProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
 
 import { CheckoutEmptyState } from "@/components/checkout-empty-state"
@@ -295,7 +295,7 @@ export default function CheckoutPage() {
         currency: "INR",
       }
 
-      const response = await createPayment(paymentPayload, token)
+      const response = await createOrder(paymentPayload, token)
       console.log(response.paymentSessionId)
       const cashfree = await initializeSDK()
       const checkoutOptions = {
@@ -308,10 +308,9 @@ export default function CheckoutPage() {
           toast.error("Payment failed. Please try again.")
         } else if (result.paymentDetails) {
           console.log("Payment completed:", result.paymentDetails)
-          const order = await createOrder(response.orderId, token)
+          // const order = await createOrder(response.orderId, token)
           toast.success(`Order created successfully!`)
           clearCart()
-          router.push(`/order-status/${order._id}`) // Redirect to order status page
         }
       })
     } catch (error: any) {
