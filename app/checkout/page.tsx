@@ -89,10 +89,13 @@ export default function CheckoutPage() {
   )
   const platformCost = useMemo(() => totalPrice * 0.1, [totalPrice])
   const gstCost = useMemo(() => totalPrice * 0.05, [totalPrice])
-  const grandTotal = useMemo(
-    () => totalPrice + deliveryCost + platformCost + gstCost,
-    [totalPrice, deliveryCost, platformCost, gstCost]
-  )
+  const grandTotal = useMemo(() => {
+    const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
+    if (environment === "development") {
+      return 1; // Set total to 1 Rs for development environment
+    }
+    return totalPrice + deliveryCost + platformCost + gstCost;
+  }, [totalPrice, deliveryCost, platformCost, gstCost]);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
