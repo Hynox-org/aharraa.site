@@ -45,6 +45,14 @@ export async function apiRequest<T>(
 
     if (!res.ok) {
       console.error("❌ API Error:", res?.status, data);
+      if (res.status === 401) {
+        // Redirect to auth page on 401 Unauthorized
+        if (typeof window !== "undefined") {
+          // Ensure this runs only in the browser
+          window.location.href = "/auth";
+        }
+        throw new Error("Unauthorized: Redirecting to login.");
+      }
       const cleanMessage =
         data?.message ||
         data?.error ||

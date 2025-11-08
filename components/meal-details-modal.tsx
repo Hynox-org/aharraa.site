@@ -2,8 +2,9 @@
 
 import { X } from "lucide-react"
 import { Meal, Vendor } from "@/lib/types"
-import { VENDORS } from "@/lib/vendor-data"
+import { getVendors } from "@/lib/api"
 import { IoCheckmarkCircle } from "react-icons/io5"
+import { useEffect, useState } from "react"
 
 interface MealDetailsModalProps {
   mealDetailsOpen: boolean
@@ -20,7 +21,26 @@ export function MealDetailsModal({
   onClose,
   onMealSelect,
 }: MealDetailsModalProps) {
+  const [vendors, setVendors] = useState<Vendor[]>([])
+
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const fetchedVendors = await getVendors()
+        setVendors(fetchedVendors)
+      } catch (error) {
+        console.error("Failed to fetch vendors:", error)
+      }
+    }
+
+    if (mealDetailsOpen) {
+      fetchVendors()
+    }
+  }, [mealDetailsOpen])
+
   if (!mealDetailsOpen || !detailMeal) return null
+
+  const vendorName = vendors.find((v: Vendor) => v._id === detailMeal.vendorId)?.name || "Unknown Vendor"
 
   return (
     <div
@@ -57,7 +77,7 @@ export function MealDetailsModal({
               <div>
                 <h3 className="font-bold text-2xl text-white mb-1">{detailMeal.name}</h3>
                 <p className="text-white/80 text-sm">
-                  by {VENDORS.find((v: Vendor) => v._id === detailMeal.vendorId)?.name}
+                  by {vendorName}
                 </p>
               </div>
               <span className="text-xl font-bold px-4 py-2 rounded-lg" 

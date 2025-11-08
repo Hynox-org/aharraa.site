@@ -15,7 +15,6 @@ import {
   CreatePaymentPayload,
   Vendor,
 } from "@/lib/types"
-import { VENDORS } from "@/lib/vendor-data"
 import { createOrder, createPayment, updateProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
 
@@ -60,21 +59,6 @@ export default function CheckoutPage() {
   const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItem | null => {
-        let vendor = VENDORS.find(
-          (v: Vendor) => v._id === cartItem.meal.vendorId
-        )
-        if (!vendor) {
-          console.warn(
-            `Vendor not found for meal ID: ${cartItem.meal._id}. Using a placeholder vendor.`
-          )
-          vendor = {
-            _id: "placeholder-vendor",
-            name: "Unknown Vendor",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            __v: 0,
-          }
-        }
         return {
           id: cartItem.id,
           meal: {
@@ -88,7 +72,7 @@ export default function CheckoutPage() {
           startDate: cartItem.startDate,
           endDate: cartItem.endDate,
           itemTotalPrice: cartItem.itemTotalPrice,
-          vendor: { id: vendor._id, name: vendor.name },
+          vendor: { id: cartItem.vendor._id, name: cartItem.vendor.name },
         }
       })
       .filter((item): item is CheckoutItem => item !== null)
@@ -290,9 +274,19 @@ export default function CheckoutPage() {
       console.log("Finalized Checkout Data:", finalizedCheckoutData)
       setCheckoutData(finalizedCheckoutData)
 
+      // Create a deep copy of finalizedCheckoutData and remove the image property from meal objects
+      const checkoutDataForBackend: CheckoutData = JSON.parse(
+        JSON.stringify(finalizedCheckoutData)
+      )
+      checkoutDataForBackend.items.forEach((item) => {
+        if (item.meal.image) {
+          delete item.meal.image
+        }
+      })
+
       const paymentPayload: CreatePaymentPayload = {
         userId: user.id,
-        checkoutData: finalizedCheckoutData,
+        checkoutData: checkoutDataForBackend,
         paymentMethod: "UPI", // This should be dynamic based on user selection
         totalAmount: grandTotal,
         currency: "INR",

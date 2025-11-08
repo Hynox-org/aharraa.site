@@ -267,7 +267,7 @@ export interface Store {
 
 export interface CheckoutItem {
   id: string; // Unique ID for the checkout item (from CartItem)
-  meal: {id: string, name: string, image: string}; // Added image property
+  meal: {id: string, name: string, image?: string}; // Made image property optional
   plan: {id: string, name: string};
   quantity: number;
   personDetails?: PersonDetails[]; // Optional array of person details
