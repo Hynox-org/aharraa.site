@@ -154,7 +154,7 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
         <div className="rounded-2xl p-6 sm:p-8 shadow-xl" style={{ backgroundColor: "#ffffff" }}>
           {/* Success Icon & Title */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center animate-bounce"
+            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center"
               style={{ backgroundColor: "rgba(96, 108, 56, 0.1)" }}>
               <IoCheckmarkCircle className="w-12 h-12 sm:w-16 sm:h-16" style={{ color: getStatusColor(order.status) }} />
             </div>

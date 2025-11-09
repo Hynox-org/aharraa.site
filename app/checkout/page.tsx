@@ -22,6 +22,12 @@ import { CheckoutEmptyState } from "@/components/checkout-empty-state"
 import { DeliveryAddressCard } from "@/components/delivery-address-card"
 import { CheckoutItemCard } from "@/components/checkout-item-card"
 import { CheckoutOrderSummary } from "@/components/checkout-order-summary"
+import {
+  calculateGrandTotal,
+  calculateDeliveryCost,
+  calculatePlatformCost,
+  calculateGstCost,
+} from "@/lib/checkout-helpers"
 
 export default function CheckoutPage() {
   const { isAuthenticated, loading, user } = useAuth()
@@ -46,16 +52,6 @@ export default function CheckoutPage() {
     [cart?.items, user?.id]
   )
 
-  const totalPrice = useMemo(
-    () => userCartItems.reduce((sum, item) => sum + item.itemTotalPrice, 0),
-    [userCartItems]
-  )
-
-  const uniqueMealCategories = useMemo(
-    () => Array.from(new Set(userCartItems.map((item) => item.meal.category))),
-    [userCartItems]
-  )
-
   const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItem | null => {
@@ -78,24 +74,46 @@ export default function CheckoutPage() {
       .filter((item): item is CheckoutItem => item !== null)
   }, [userCartItems])
 
+   const totalPrice = useMemo(
+    () => userCartItems.reduce((sum, item) => sum + item.itemTotalPrice, 0),
+    [userCartItems]
+  )
+
+  const uniqueMealCategories = useMemo(
+    () => Array.from(new Set(userCartItems.map((item) => item.meal.category))),
+    [userCartItems]
+  )
+
   const totalPlanDays = useMemo(
     () => userCartItems.reduce((sum, item) => sum + item.plan.durationDays, 0),
     [userCartItems]
   )
   const deliveryCostPerCategory = 33.33
   const deliveryCost = useMemo(
-    () => uniqueMealCategories.length * deliveryCostPerCategory * totalPlanDays,
-    [uniqueMealCategories.length, totalPlanDays]
+    () =>
+      calculateDeliveryCost(
+        uniqueMealCategories,
+        totalPlanDays,
+        deliveryCostPerCategory
+      ),
+    [uniqueMealCategories, totalPlanDays, deliveryCostPerCategory]
   )
-  const platformCost = useMemo(() => totalPrice * 0.1, [totalPrice])
-  const gstCost = useMemo(() => totalPrice * 0.05, [totalPrice])
-  const grandTotal = useMemo(() => {
-    const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
-    if (environment === "development") {
-      return 1; // Set total to 1 Rs for development environment
-    }
-    return totalPrice + deliveryCost + platformCost + gstCost;
-  }, [totalPrice, deliveryCost, platformCost, gstCost]);
+  const platformCost = useMemo(
+    () => calculatePlatformCost(totalPrice),
+    [totalPrice]
+  )
+  const gstCost = useMemo(() => calculateGstCost(totalPrice), [totalPrice])
+  const grandTotal = useMemo(
+    () =>
+      calculateGrandTotal({
+        subtotal: totalPrice,
+        deliveryCost,
+        platformCost,
+        gstCost,
+        environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
+      }),
+    [totalPrice, deliveryCost, platformCost, gstCost]
+  )
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -270,7 +288,7 @@ export default function CheckoutPage() {
           MealCategory,
           DeliveryAddress
         >,
-        totalPrice: totalPrice,
+        totalPrice: grandTotal,
         checkoutDate: new Date().toISOString(),
       }
 
@@ -308,7 +326,6 @@ export default function CheckoutPage() {
           toast.error("Payment failed. Please try again.")
         } else if (result.paymentDetails) {
           console.log("Payment completed:", result.paymentDetails)
-          // const order = await createOrder(response.orderId, token)
           toast.success(`Order created successfully!`)
           clearCart()
         }
