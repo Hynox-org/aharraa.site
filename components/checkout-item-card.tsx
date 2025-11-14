@@ -9,6 +9,7 @@ interface CheckoutItemCardProps {
 }
 
 export function CheckoutItemCard({ items }: CheckoutItemCardProps) {
+  console.log(items);
   return (
     <div className="rounded-xl p-4 sm:p-6 shadow-md" style={{ backgroundColor: "#ffffff" }}>
       {/* Header */}

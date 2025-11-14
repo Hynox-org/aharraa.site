@@ -13,12 +13,13 @@ import { CartEmptyState } from "@/components/cart-empty-state"
 import { CartItemCard } from "@/components/cart-item-card"
 import { CartSummaryCard } from "@/components/cart-summary-card"
 import { EditPersonDetailsDialog } from "@/components/edit-person-details-dialog"
-
+import { getCartItems ,removeFromCart } from "@/lib/api"
+import { User } from "@/lib/types"
 export default function CartPage() {
   const { isAuthenticated, loading, user } = useAuth()
   const router = useRouter()
-  const cart = useStore((state) => state.cart)
-  const removeFromCart = useStore((state) => state.removeFromCart)
+  // const cart = useStore((state) => state.cart)
+  // const removeFromCart = useStore((state) => state.removeFromCart)
   const updateCartItemQuantityInStore = useStore((state) => state.updateCartItemQuantity) // Rename to avoid conflict
   const updateCartItemPersonDetails = useStore((state) => state.updateCartItemPersonDetails)
   const { toast } = useToast() // Initialize useToast
@@ -26,7 +27,8 @@ export default function CartPage() {
   const [isEditingPersonDetails, setIsEditingPersonDetails] = useState(false)
   const [currentEditingCartItemId, setCurrentEditingCartItemId] = useState<string | null>(null)
   const [editingPersonDetails, setEditingPersonDetails] = useState<PersonDetails[]>([])
-  const [pendingNewQuantity, setPendingNewQuantity] = useState<number | null>(null) // New state for pending quantity
+  const [pendingNewQuantity, setPendingNewQuantity] = useState<number | null>(null)
+  const [fetchedCart, setFetchedCart] = useState<any>(null)
 
   // Helper function for person details validation
   const arePersonDetailsValidForQuantity = (details: PersonDetails[] | undefined, requiredQuantity: number) => {
@@ -39,12 +41,33 @@ export default function CartPage() {
       return nameValid && phoneValid;
     });
   };
-
+ const User= user;
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/auth?returnUrl=/cart")
     }
   }, [isAuthenticated, loading, router])
+
+  useEffect(() => {
+    if (!loading && isAuthenticated && user?.id) {
+      const token = localStorage.getItem("aharraa-u-token");
+      console.log(token);
+      if (!token) {
+        console.error("No auth token found — user must log in first");
+        router.push("/auth?returnUrl=/cart")
+      }
+      const fetchCart = async () => {
+        try {
+        const cartData = await getCartItems(user.id!, token!); // Use ! to assert user.id is not undefined
+        console.log("Fetched cart items:", cartData);
+          setFetchedCart(cartData);
+        } catch (error) {
+          console.error("Failed to fetch cart items:", error);
+        }
+      };
+      fetchCart();
+    }
+  }, [isAuthenticated, loading, user?.id]);
 
   const handleEditPersonDetails = (itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => {
     setCurrentEditingCartItemId(itemId);
@@ -85,24 +108,34 @@ export default function CartPage() {
 
   // New handler for updating quantity
   const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
-    const currentItem = cart?.items.find(item => item.id === itemId);
+    const currentItem = (fetchedCart?.items || []).find((item: any) => item.id === itemId);
     if (!currentItem) return;
 
-    if (newQuantity > currentItem.quantity) { // Quantity is increasing
+    if (newQuantity > currentItem.quantity) {
       setPendingNewQuantity(newQuantity);
       handleEditPersonDetails(itemId, currentItem.personDetails, newQuantity);
-      return; // Quantity will be updated after person details are saved
-    } else if (newQuantity < currentItem.quantity) { // Quantity is decreasing
-      // If quantity is decreasing, we can directly update it.
-      // We might need to truncate person details if they exceed the new quantity.
+      return;
+    } else if (newQuantity < currentItem.quantity) {
       const updatedDetails = currentItem.personDetails?.slice(0, newQuantity) || [];
       updateCartItemPersonDetails(itemId, updatedDetails);
       updateCartItemQuantityInStore(itemId, newQuantity);
-    } else { // Quantity is staying the same (shouldn't happen via UI, but for completeness)
+    } else {
       updateCartItemQuantityInStore(itemId, newQuantity);
     }
   };
 
+  const handleRemoveItem = async(itemId: string) => {
+    const token = localStorage.getItem("aharraa-u-token");
+    if(!token){       
+      router.push("/auth?returnUrl=/cart")
+    }
+    
+    if (!User?.id) return;
+    const updatedCart = await removeFromCart(User.id, itemId , token! );
+    if (updatedCart) {
+    setFetchedCart(updatedCart);
+  }
+  };
 
   if (loading) {
     return (
@@ -126,9 +159,9 @@ export default function CartPage() {
     return null
   }
 
-  const userCartItems = cart?.items.filter(item => item.userId === user.id) || []
-  const totalItems = userCartItems.reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = userCartItems.reduce((sum, item) => sum + item.itemTotalPrice, 0)
+  const userCartItems = (fetchedCart?.items || []).filter((item: any) => item.userId === user.id) || []
+  const totalItems = userCartItems.reduce((sum: number, item: any) => sum + item.quantity, 0)
+  const totalPrice = userCartItems.reduce((sum: number, item: any) => sum + item.itemTotalPrice, 0)
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
@@ -153,12 +186,12 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Cart Items - Mobile: Full width, Desktop: 2 columns */}
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-              {userCartItems.map((item) => (
+              {userCartItems.map((item: any) => (
                 <CartItemCard
-                  key={item.id}
+                  key={item._id}
                   item={item}
                   onUpdateQuantity={handleUpdateQuantity} // Use the new handler
-                  onRemoveItem={removeFromCart}
+                  onRemoveItem={() => handleRemoveItem(item._id!)}
                   onEditPersonDetails={handleEditPersonDetails}
                 />
               ))}

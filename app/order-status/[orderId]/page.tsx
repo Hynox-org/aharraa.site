@@ -48,7 +48,7 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
             }
             const orderDetails = await getOrderDetails(currentOrderId, token)
             setOrder(orderDetails)
-
+            console.log("Order details:", orderDetails)
             // Verify payment after fetching order details
             const verificationResponse = await verifyPayment(currentOrderId, token)
             setOrder(verificationResponse.order)

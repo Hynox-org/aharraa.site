@@ -9,7 +9,11 @@ import {
   Meal,
   Plan,
   Vendor,
+  Cart,
+  CartItem,
+  PersonDetails
 } from "./types";
+
 
 export async function apiRequest<T>(
   endpoint: string,
@@ -27,13 +31,13 @@ export async function apiRequest<T>(
       url: `${API_URL}${endpoint}`,
       method,
       headers,
-      body: method !== "GET" ? payload : null,
+      body: method !== "GET" && method !== "DELETE" ? JSON.stringify(payload) : null,
     });
 
     const res = await fetch(`${API_URL}${endpoint}`, {
       method,
       headers,
-      body: method !== "GET" ? JSON.stringify(payload) : null,
+      body: method !== "GET" && method !== "DELETE" ? JSON.stringify(payload) : null,
     });
 
     let data: any = {};
@@ -257,3 +261,32 @@ export async function getPlans(): Promise<Plan[]> {
 export async function getVendors(): Promise<Vendor[]> {
   return apiRequest<Vendor[]>("/api/vendors", "GET");
 }
+
+export async function getCartItems(
+  userId: string,
+  token: string
+): Promise<Cart> {
+  return apiRequest<Cart>(`/api/cart/${userId}`, "GET", null, token);
+}
+
+// ➕ Add a new item to cart
+export async function addToCartApi(
+  userId: string,
+  cartItem: {
+    mealId: string;
+    planId: string;
+    quantity: number;
+    startDate: string;
+    personDetails?: PersonDetails[];
+  },
+  token: string
+): Promise<Cart> {
+  const endpoint = `/api/cart/${userId}/add`;
+  return apiRequest<Cart>(endpoint, "POST", cartItem, token);
+}
+export async function clearCart(userId: string, token: string) {
+  return apiRequest(`/api/cart/${userId}/clear`, "DELETE", null, token);
+}
+export async function removeFromCart(userId: string, cartItemId: string, token: string) {
+  return apiRequest(`/api/cart/${userId}/remove/${cartItemId}`, "DELETE", null, token);
+} 

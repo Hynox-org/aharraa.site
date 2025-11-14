@@ -21,7 +21,7 @@ import { PersonDetailsInput } from "@/components/person-details-input"
 import { DateSelection } from "@/components/date-selection"
 import { OrderSummarySidebar } from "@/components/order-summary-sidebar"
 import { MealDetailsModal } from "@/components/meal-details-modal"
-
+import { addToCartApi } from "@/lib/api"
 export default function PricingPage() {
   const { user, isAuthenticated, token } = useAuth()
   const router = useRouter()
@@ -162,7 +162,7 @@ export default function PricingPage() {
     return isValid;
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async() => {
     console.log("handleAddToCart called");
     console.log("isAuthenticated:", isAuthenticated);
     console.log("selectedMeal:", selectedMeal);
@@ -179,89 +179,80 @@ export default function PricingPage() {
       return
     }
 
-    // Validate person details
-    if (!arePersonDetailsValid()) {
-      console.log("Person details are invalid.");
-      toast.error("Invalid Details", {
-        description: "Please fill all person details correctly.",
-      })
-      return
-    }
-
-    if (!selectedMeal) {
-      console.log("No meal selected.");
-      toast.error("Cannot add to cart", {
-        description: "Please select a meal.",
-      })
-      return
-    }
-    if (!selectedPlan) {
-      console.log("No plan selected.");
-      toast.error("Cannot add to cart", {
-        description: "Please select a plan.",
-      })
-      return
-    }
-    if (quantity <= 0) {
-      console.log("Quantity is not greater than 0.");
-      toast.error("Cannot add to cart", {
-        description: "Quantity must be greater than 0.",
-      })
-      return
-    }
-    if (!startDate || !endDate) {
-      console.log("Start or end date not selected.");
-      toast.error("Cannot add to cart", {
-        description: "Please select a start date.",
-      })
-      return
-    }
-    if (!user?.id) {
-      console.log("User ID is missing.");
-      toast.error("Cannot add to cart", {
-        description: "User not authenticated. Please log in.",
-      })
-      return
-    }
-
-    const itemTotalPrice = selectedMeal.price * selectedPlan.durationDays * quantity
-
-    console.log("Attempting to find vendor for selectedMeal.vendorId:", selectedMeal.vendorId);
-    console.log("Available vendors:", vendors.map(v => ({ _id: v._id, name: v.name })));
-    // Corrected: Access the _id property of selectedMeal.vendorId
-    const vendor = vendors.find((v) => v._id === (selectedMeal.vendorId as any)._id);
-    if (!vendor) {
-      console.log("Vendor not found for selected meal. selectedMeal.vendorId._id:", (selectedMeal.vendorId as any)._id);
-      toast.error("Error", {
-        description: "Vendor not found for the selected meal.",
-      })
-      return
-    }
-    console.log("Vendor found:", vendor);
-    console.log("All validations passed. Adding to cart.");
-
-    const newCartItem: CartItem = {
-      id: `cart-${Date.now()}-${selectedMeal._id}`,
-      userId: user.id,
-      meal: selectedMeal,
-      plan: selectedPlan,
-      quantity: quantity,
-      personDetails: quantity >= 1 ? personDetails : undefined,
-      startDate: format(startDate, "yyyy-MM-dd"),
-      endDate: format(endDate, "yyyy-MM-dd"),
-      itemTotalPrice: itemTotalPrice,
-      addedDate: new Date().toISOString(),
-      vendor: vendor,
-    }
-
-    addToCart(newCartItem)
-
-    toast("Added to Cart!", {
-      description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added to your cart.`,
-    })
-
-    resetSelection()
+  // --- Validation ---
+  if (!selectedMeal) {
+    toast.error("Cannot add to cart", { description: "Please select a meal." });
+    return;
   }
+  if (!selectedPlan) {
+    toast.error("Cannot add to cart", { description: "Please select a plan." });
+    return;
+  }
+  if (quantity <= 0) {
+    toast.error("Cannot add to cart", { description: "Quantity must be greater than 0." });
+    return;
+  }
+  if (!startDate || !endDate) {
+    toast.error("Cannot add to cart", { description: "Please select a start date." });
+    return;
+  }
+  if (!arePersonDetailsValid()) {
+    toast.error("Invalid Details", { description: "Please fill all person details correctly." });
+    return;
+  }
+  if (!user?.id) {
+    toast.error("Cannot add to cart", { description: "User not authenticated. Please log in." });
+    return;
+  }
+
+  console.log("✅ All validations passed.");
+
+  const token = localStorage.getItem("aharraa-u-token");
+  console.log("Token:", token);
+  if (!token) {
+    console.error("❌ No auth token found. User must log in first.");
+    router.push("/auth?returnUrl=/pricing");
+    return;
+  }
+
+  // --- Vendor check ---
+  const vendor = vendors.find((v) => v._id === (selectedMeal.vendorId as any)._id);
+  if (!vendor) {
+    toast.error("Error", { description: "Vendor not found for selected meal." });
+    return;
+  }
+
+  // --- Prepare cart item ---
+  const cartItem = {
+    mealId: selectedMeal._id,
+    planId: selectedPlan._id,
+    quantity,
+    startDate: format(startDate, "yyyy-MM-dd"),
+    personDetails: quantity >= 1 ? personDetails : undefined,
+  };
+
+  console.log("📦 Sending cart item to backend:", cartItem);
+
+  try {
+    // --- Add item to cart API ---
+    const updatedCart = await addToCartApi(user.id!, cartItem, token);
+    console.log("✅ Added to cart successfully:", updatedCart);
+
+    // --- Update UI / store ---
+    toast.success("Added to Cart!", {
+      description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added successfully.`,
+    });
+
+    // --- Reset selection for next item ---
+    resetSelection();
+
+  } catch (error: any) {
+    console.error("❌ Error adding to cart:", error);
+    toast.error("Error", {
+      description: error.message || "Failed to add item to cart.",
+    });
+  }
+}
 
   const resetSelection = () => {
     setSelectedMeal(null)

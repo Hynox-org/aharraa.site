@@ -14,6 +14,7 @@ import {
   MealCategory,
   CreatePaymentPayload,
   Vendor,
+  Cart,
 } from "@/lib/types"
 import { createOrder, updateProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
@@ -28,18 +29,48 @@ import {
   calculatePlatformCost,
   calculateGstCost,
 } from "@/lib/checkout-helpers"
+import { getCartItems , clearCart} from "@/lib/api"; 
 
 export default function CheckoutPage() {
   const { isAuthenticated, loading, user } = useAuth()
   const router = useRouter()
-  const cart = useStore((state) => state.cart)
   const setCheckoutData = useStore((state) => state.setCheckoutData)
-  const clearCart = useStore((state) => state.clearCart)
-
+  const [cartData, setCartData] = useState<Cart | null>(null);
+  const [cartLoading, setCartLoading] = useState(true);
   const [deliveryAddresses, setDeliveryAddresses] = useState<
     Partial<Record<MealCategory, DeliveryAddress>>
   >({})
 
+//  Fetch Cart Items from MongoDB
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (!user?.id) return
+      const token = localStorage.getItem("aharraa-u-token");
+      console.log("Token:", token);
+      if (!token) {
+        console.error("❌ No auth token found. User must log in first.");
+        router.push("/auth?returnUrl=/pricing");
+        return;
+      }
+      try {
+        setCartLoading(true)
+        const fetchedCart = await getCartItems(user.id, token);
+        if (fetchedCart) {
+          setCartData(fetchedCart)
+        } else {
+          toast.info("Your cart is empty.")
+        }
+      } catch (error) {
+        console.error("Error fetching cart items:", error)
+        toast.error("Failed to load cart items.")
+      } finally {
+        setCartLoading(false)
+      }
+    }
+    if (isAuthenticated && !loading) {
+      fetchCart()
+    }
+  }, [isAuthenticated, loading, user?.id])
   const initializeSDK = async () => {
     const cashfree = await load({
       mode: `${process.env.NEXT_PUBLIC_CASHFREE_ENVIRONMENT}`,
@@ -48,32 +79,38 @@ export default function CheckoutPage() {
   }
 
   const userCartItems = useMemo(
-    () => cart?.items.filter((item) => item.userId === user?.id) || [],
-    [cart?.items, user?.id]
+    () => cartData?.items.filter((item) => item.userId === user?.id) || [],
+    [cartData?.items, user?.id]
+    
   )
+console.log("userCartItems:", userCartItems);
 
   const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItem | null => {
+        console.log("cartItem:", cartItem);
         return {
-          id: cartItem.id,
+          id: cartItem._id,
           meal: {
             id: cartItem.meal._id,
             name: cartItem.meal.name,
             image: cartItem.meal.image || "/defaults/default-meal.jpg",
           },
-          plan: { id: cartItem.plan._id, name: cartItem.plan.name },
+          plan: { id: cartItem.plan._id, name: cartItem.plan.name , durationDays: cartItem.plan.durationDays },
           quantity: cartItem.quantity,
           personDetails: cartItem.personDetails,
           startDate: cartItem.startDate,
           endDate: cartItem.endDate,
           itemTotalPrice: cartItem.itemTotalPrice,
-          vendor: { id: cartItem.vendor._id, name: cartItem.vendor.name },
+          vendor: { 
+          id: cartItem.meal.vendorId._id, 
+          name: cartItem.meal.vendorId.name ,
+        },        
         }
       })
       .filter((item): item is CheckoutItem => item !== null)
   }, [userCartItems])
-
+  console.log("displayCheckoutItems:", displayCheckoutItems);
    const totalPrice = useMemo(
     () => userCartItems.reduce((sum, item) => sum + item.itemTotalPrice, 0),
     [userCartItems]
@@ -122,7 +159,7 @@ export default function CheckoutPage() {
   }, [isAuthenticated, loading, router])
 
   useEffect(() => {
-    if (!loading && isAuthenticated && userCartItems.length === 0) {
+  if (!loading && !cartLoading && isAuthenticated && userCartItems.length === 0) {
       toast.info("Your cart is empty. Redirecting to pricing page.")
       router.push("/pricing")
     }
@@ -278,7 +315,7 @@ export default function CheckoutPage() {
       console.log("Updating user profile with delivery addresses:", profileUpdatePayload)
       await updateProfileDetails(profileUpdatePayload, token)
       toast.success("Delivery addresses saved to your profile!")
-
+      console.log("initialCheckoutItems:",displayCheckoutItems )
       // 2. Proceed with payment
       const finalizedCheckoutData: CheckoutData = {
         id: `checkout-${Date.now()}-${user.id}`,
@@ -301,7 +338,10 @@ export default function CheckoutPage() {
       )
       checkoutDataForBackend.items.forEach((item) => {
         if (item.meal.image) {
-          delete item.meal.image
+          delete item.meal.image 
+        }
+        if(item.plan.durationDays){
+          delete item.plan.durationDays
         }
       })
 
@@ -312,7 +352,7 @@ export default function CheckoutPage() {
         totalAmount: grandTotal,
         currency: "INR",
       }
-
+      console.log("Payment Payload:", paymentPayload)
       const response = await createOrder(paymentPayload, token)
       console.log(response.paymentSessionId)
       const cashfree = await initializeSDK()
@@ -327,16 +367,28 @@ export default function CheckoutPage() {
         } else if (result.paymentDetails) {
           console.log("Payment completed:", result.paymentDetails)
           toast.success(`Order created successfully!`)
-          clearCart()
+          // ✅ Clear cart from MongoDB after successful payment
+          // try {
+          //   if (user?.id && token) {
+          //     await clearCart(user.id, token)
+          //     toast.success("Cart cleared successfully!")
+          //     console.log("🧹 Cart cleared in MongoDB.")
+          //   }
+          // } catch (clearErr) {
+          //   console.error("Error clearing cart:", clearErr)
+          //   toast.error("Failed to clear cart. Please refresh later.")
+          // }
+          // // Optional: Redirect to order confirmation or history
+          // setTimeout(() => {
+          //   router.push("/orders")
+          // }, 1500)
         }
       })
-    } catch (error: any) {
-      console.error("Error during checkout process:", error)
-      toast.error(
-        `Failed to complete checkout: ${error.message || "Unknown error"}`
-      )
-    }
+  } catch (error: any) {
+    console.error("Error during checkout process:", error)
+    toast.error(`Failed to complete checkout: ${error.message || "Unknown error"}`)
   }
+}
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
