@@ -289,7 +289,7 @@ export default function PricingPage() {
       }
 
       const newCartItem: CartItem = {
-        id: `cart-${Date.now()}-${selectedMeal._id}`,
+        _id: `cart-${Date.now()}-${selectedMeal._id}`,
         userId: user.id,
         meal: selectedMeal,
         plan: selectedPlan,

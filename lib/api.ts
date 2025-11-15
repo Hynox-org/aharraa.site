@@ -290,3 +290,19 @@ export async function clearCart(userId: string, token: string) {
 export async function removeFromCart(userId: string, cartItemId: string, token: string) {
   return apiRequest(`/api/cart/${userId}/remove/${cartItemId}`, "DELETE", null, token);
 } 
+export async function updateCartItemQuantity(
+  userId: string,
+  cartItemId: string,
+  quantity: number,
+  token: string
+): Promise<Cart> {
+    return apiRequest<Cart>(`/api/cart/${userId}/update-quantity/${cartItemId}`,"PUT",{ quantity }, token);
+}
+export async function updateCartItemPersonDetails(
+  userId: string,
+  cartItemId: string,
+  personDetails: PersonDetails[],
+  token: string
+): Promise<Cart> {
+    return apiRequest<Cart>(`/api/cart/${userId}/update-person-details/${cartItemId}`,"PUT",{ personDetails },token);
+}

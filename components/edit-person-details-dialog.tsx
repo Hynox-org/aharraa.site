@@ -8,7 +8,8 @@ interface EditPersonDetailsDialogProps {
   onOpenChange: (open: boolean) => void
   editingPersonDetails: PersonDetails[]
   onPersonDetailChange: (index: number, field: keyof PersonDetails, value: string) => void
-  onSave: () => void
+  onSave: (cartItemId: string) => void;  // expect id as argument
+  currentEditingCartItemId: string | null;  // add this new prop
 }
 
 export function EditPersonDetailsDialog({
@@ -17,6 +18,7 @@ export function EditPersonDetailsDialog({
   editingPersonDetails,
   onPersonDetailChange,
   onSave,
+  currentEditingCartItemId,
 }: EditPersonDetailsDialogProps) {
   if (!isOpen) return null
 
@@ -29,10 +31,18 @@ export function EditPersonDetailsDialog({
       return isNameValid(person.name) && isPhoneValid(person.phoneNumber)
     })
   }
-
+console.log("currentEditingCartItemId:", currentEditingCartItemId);
   const handleSave = () => {
     if (areAllDetailsValid()) {
-      onSave()
+      if(currentEditingCartItemId){
+          console.log("Saving person details...");
+          onSave(currentEditingCartItemId); // pass the ID explicitly
+    }else{
+      console.log("currentEditingCartItemId is null");
+    }
+    }
+    else{
+      console.log("validation failed");
     }
   }
 

@@ -184,7 +184,7 @@ export interface CreatePaymentPayload {
 }
 
 export interface CartItem {
-  id: string; // Unique ID for the cart item
+  _id: string; // Unique ID for the cart item
   userId: string;
   meal: Meal;
   plan: Plan;

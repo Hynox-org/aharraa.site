@@ -13,15 +13,15 @@ import { CartEmptyState } from "@/components/cart-empty-state"
 import { CartItemCard } from "@/components/cart-item-card"
 import { CartSummaryCard } from "@/components/cart-summary-card"
 import { EditPersonDetailsDialog } from "@/components/edit-person-details-dialog"
-import { getCartItems ,removeFromCart } from "@/lib/api"
+import { getCartItems ,removeFromCart , updateCartItemQuantity ,updateCartItemPersonDetails} from "@/lib/api"
 import { User } from "@/lib/types"
 export default function CartPage() {
   const { isAuthenticated, loading, user } = useAuth()
   const router = useRouter()
   // const cart = useStore((state) => state.cart)
   // const removeFromCart = useStore((state) => state.removeFromCart)
-  const updateCartItemQuantityInStore = useStore((state) => state.updateCartItemQuantity) // Rename to avoid conflict
-  const updateCartItemPersonDetails = useStore((state) => state.updateCartItemPersonDetails)
+  // const updateCartItemQuantityInStore = useStore((state) => state.updateCartItemQuantity) // Rename to avoid conflict
+  // const updateCartItemPersonDetails = useStore((state) => state.updateCartItemPersonDetails)
   const { toast } = useToast() // Initialize useToast
 
   const [isEditingPersonDetails, setIsEditingPersonDetails] = useState(false)
@@ -47,6 +47,11 @@ export default function CartPage() {
       router.push("/auth?returnUrl=/cart")
     }
   }, [isAuthenticated, loading, router])
+useEffect(() => {
+  if (currentEditingCartItemId !== null) {
+    setIsEditingPersonDetails(true);
+  }
+}, [currentEditingCartItemId]);
 
   useEffect(() => {
     if (!loading && isAuthenticated && user?.id) {
@@ -70,6 +75,7 @@ export default function CartPage() {
   }, [isAuthenticated, loading, user?.id]);
 
   const handleEditPersonDetails = (itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => {
+    console.log("setting currentEditingCartItemId to", itemId);
     setCurrentEditingCartItemId(itemId);
     
     // Initialize editingPersonDetails with existing details or empty objects up to quantityToEdit
@@ -80,20 +86,45 @@ export default function CartPage() {
     setIsEditingPersonDetails(true);
   };
 
-  const handleSavePersonDetails = () => {
+  const handleSavePersonDetails = async () => {
+    console.log("handleSavePersonalDetails called")
+    const currentItem=currentEditingCartItemId;
     if (currentEditingCartItemId) {
       // Validation is handled within EditPersonDetailsDialog before onSave is called
-      updateCartItemPersonDetails(currentEditingCartItemId, editingPersonDetails);
-
-      // If there's a pending new quantity, update the quantity in the store
-      if (pendingNewQuantity !== null && currentEditingCartItemId) {
-        updateCartItemQuantityInStore(currentEditingCartItemId, pendingNewQuantity);
-        setPendingNewQuantity(null); // Reset pending quantity
+      const token = localStorage.getItem("aharraa-u-token");
+      if (!token || !user?.id) {
+        router.push("/auth?returnUrl=/cart");
+        return;
       }
+      console.log("verified token and user");
+      try {
+        // Update person details via API
+        console.log("Calling updateCartItemPersonDetails API");
+        const updatedCart = await updateCartItemPersonDetails(user.id, currentEditingCartItemId, editingPersonDetails, token);
+        console.log("API call success, updating local state");
+        setFetchedCart(updatedCart);
+        toast({ title: "Person details updated successfully!" });
 
+        // If there's a pending new quantity, update the quantity in the store
+        if (pendingNewQuantity !== null) {
+          console.log("Updating quantity after person details update");
+          const updatedCartWithQuantity = await updateCartItemQuantity(user.id, currentEditingCartItemId, pendingNewQuantity, token);
+          setFetchedCart(updatedCartWithQuantity);
+          toast({ title: "Quantity updated successfully!" });
+        
+        setPendingNewQuantity(null);
+      }
+      console.log("Closing edit dialog");
       setIsEditingPersonDetails(false);
       setCurrentEditingCartItemId(null);
       setEditingPersonDetails([]);
+    }
+    catch (error) {
+        console.error("Failed to update person details:", error);
+        toast({ title: "Error", description: "Failed to save person details." });      
+      }
+    }else{
+      console.error("currentEditingCartItemId is null");
     }
   };
 
@@ -107,20 +138,34 @@ export default function CartPage() {
   };
 
   // New handler for updating quantity
-  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
-    const currentItem = (fetchedCart?.items || []).find((item: any) => item.id === itemId);
-    if (!currentItem) return;
-
+  const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
+    const currentItem = (fetchedCart?.items || []).find((item: any) => item._id === itemId);
+    if (!currentItem || !user?.id) return;
+    const token = localStorage.getItem("aharraa-u-token");
+    if (!token) {
+      router.push("/auth?returnUrl=/cart");
+      return;
+    }
     if (newQuantity > currentItem.quantity) {
       setPendingNewQuantity(newQuantity);
       handleEditPersonDetails(itemId, currentItem.personDetails, newQuantity);
       return;
     } else if (newQuantity < currentItem.quantity) {
       const updatedDetails = currentItem.personDetails?.slice(0, newQuantity) || [];
-      updateCartItemPersonDetails(itemId, updatedDetails);
-      updateCartItemQuantityInStore(itemId, newQuantity);
-    } else {
-      updateCartItemQuantityInStore(itemId, newQuantity);
+      try {
+        const updatedCart = await updateCartItemPersonDetails(user.id, itemId, updatedDetails, token);
+        setFetchedCart(updatedCart);
+        toast({ title: "Person details updated!" });
+      } catch (error) {
+        toast({ title: "Failed to update person details", variant: "destructive" });
+      }
+    } 
+    try {
+      const updatedCart = await updateCartItemQuantity(user.id, itemId, newQuantity, token);
+      setFetchedCart(updatedCart);
+      toast({ title: "Quantity updated successfully!" });
+    } catch (error) {
+      toast({ title: "Failed to update quantity", variant: "destructive" });
     }
   };
 
@@ -218,6 +263,7 @@ export default function CartPage() {
         editingPersonDetails={editingPersonDetails}
         onPersonDetailChange={handlePersonDetailChange}
         onSave={handleSavePersonDetails}
+        currentEditingCartItemId={currentEditingCartItemId}
       />
     </main>
   )
