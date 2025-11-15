@@ -37,27 +37,27 @@ export default function ContactPage() {
   const contactInfo = [
     {
       icon: IoCall,
-      title: "Phone",
-      details: "+91 88705 24355",
+      title: "Telephone No",
+      details: "9952213571",
       description: "Available 9 AM - 9 PM, 7 days a week",
     },
     {
       icon: IoMail,
-      title: "Email",
+      title: "E-Mail ID",
       details: "info.aharraa@gmail.com",
       description: "We'll respond within 24 hours",
     },
     {
       icon: IoLocation,
-      title: "Address",
-      details: "Coimbatore, Tamil Nadu, India",
-      description: "Visit our kitchen and meet the team",
+      title: "Registered Address",
+      details: "8/1765,PONNAMMAL NAGAR MAIN ROAD,PANDIAN NAGAR, TIRUPPUR, TAMIL NADU, PIN: 641602",
+      description: "Merchant Legal entity name: THE BLACK CREST",
     },
     {
-      icon: IoTime,
-      title: "Hours",
-      details: "9 AM - 9 PM",
-      description: "Monday to Sunday",
+      icon: IoLocation,
+      title: "Operational Address",
+      details: "8/1765,PONNAMMAL NAGAR MAIN ROAD,PANDIAN NAGAR, TIRUPPUR, TAMIL NADU, PIN: 641602",
+      description: "Visit our kitchen and meet the team",
     },
   ]
 
@@ -71,11 +71,15 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6" 
             style={{ color: "#FEFAE0" }}>
-            Get in Touch
+            Contact Us
           </h1>
           <p className="text-base sm:text-lg lg:text-xl max-w-2xl mx-auto" 
             style={{ color: "rgba(254, 250, 224, 0.9)" }}>
-            Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            Last updated on 15-11-2025 19:49:01
+          </p>
+          <p className="text-base sm:text-lg lg:text-xl max-w-2xl mx-auto" 
+            style={{ color: "rgba(254, 250, 224, 0.9)" }}>
+            You may contact us using the information below:
           </p>
         </div>
       </section>

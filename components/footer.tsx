@@ -107,7 +107,7 @@ export function Footer() {
                 { label: "FAQ", href: "/#faq" },
                 { label: "Privacy Policy", href: "/privacy-policy" },
                 { label: "Terms & Conditions", href: "/terms-and-conditions" },
-                { label: "Refund Policy", href: "/refund-policy" },
+                { label: "Refund Policy", href: "/cancellation-and-refund-policy" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link 
