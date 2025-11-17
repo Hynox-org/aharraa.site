@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Meal, Plan, MealCategory, DietPreference, CartItem, PersonDetails, Vendor } from "@/lib/types"
-import { getMeals, getPlans, getVendors } from "@/lib/api"
+import { Plan, CartItem, PersonDetails, Vendor, Menu, PopulatedMenu } from "@/lib/types"
+import { getPlans, getVendors, getMenusByVendor } from "@/lib/api"
 import { format, addDays } from "date-fns"
 import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
@@ -12,31 +12,28 @@ import { useStore } from "@/lib/store"
 import { toast } from "sonner"
 
 import { PricingHeroSection } from "@/components/pricing-hero-section"
-import { MealCategoryTabs } from "@/components/meal-category-tabs"
-import { DietPreferenceFilter } from "@/components/diet-preference-filter"
-import { MealGrid } from "@/components/meal-grid"
 import { PlanSelection } from "@/components/plan-selection"
 import { QuantitySelection } from "@/components/quantity-selection"
 import { PersonDetailsInput } from "@/components/person-details-input"
 import { DateSelection } from "@/components/date-selection"
 import { OrderSummarySidebar } from "@/components/order-summary-sidebar"
-import { MealDetailsModal } from "@/components/meal-details-modal"
 import { addToCartApi } from "@/lib/api"
+import { VendorSelection } from "@/components/vendor-selection" // New component
+import { MenuGrid } from "@/components/menu-grid" // New component
+
 export default function PricingPage() {
   const { user, isAuthenticated, token } = useAuth()
   const router = useRouter()
   const { addToCart } = useStore()
-  // The 'toast' function is now directly imported from 'sonner'
 
-  const [meals, setMeals] = useState<Meal[]>([])
   const [plans, setPlans] = useState<Plan[]>([])
   const [vendors, setVendors] = useState<Vendor[]>([])
+  const [menus, setMenus] = useState<Menu[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [selectedCategory, setSelectedCategory] = useState<MealCategory>("Breakfast")
-  const [selectedDietPreference, setSelectedDietPreference] = useState<DietPreference>("All")
-  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null)
+  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [quantity, setQuantity] = useState<number>(1)
   const [personDetails, setPersonDetails] = useState<PersonDetails[]>(
@@ -44,19 +41,13 @@ export default function PricingPage() {
   )
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [mealDetailsOpen, setMealDetailsOpen] = useState(false)
-  const [detailMeal, setDetailMeal] = useState<Meal | null>(null)
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true)
-        const fetchedMeals = await getMeals()
         const fetchedPlans = await getPlans()
         const fetchedVendors = await getVendors()
-        console.log("Fetched Meals:", fetchedMeals);
-        console.log("Fetched Vendors:", fetchedVendors);
-        setMeals(fetchedMeals)
         setPlans(fetchedPlans)
         setVendors(fetchedVendors)
       } catch (err: any) {
@@ -69,42 +60,48 @@ export default function PricingPage() {
       }
     }
     fetchData()
-  }, []) // Removed toast from dependency array as it's a direct import now
+  }, [])
 
-  const mealsByCategory = useMemo(() => {
-    return meals.reduce((acc, meal) => {
-      (acc[meal.category] = acc[meal.category] || []).push(meal)
-      return acc
-    }, {} as Record<MealCategory, Meal[]>)
-  }, [meals])
-
-  const categories = Object.keys(mealsByCategory) as MealCategory[]
-
-  const filteredMeals = useMemo(() => {
-    let currentMeals = mealsByCategory[selectedCategory] || []
-    if (selectedDietPreference !== "All") {
-      currentMeals = currentMeals.filter(meal => meal.dietPreference === selectedDietPreference)
+  useEffect(() => {
+    async function fetchMenusForVendor() {
+      if (selectedVendor) {
+        try {
+          setLoading(true)
+          const fetchedMenus = await getMenusByVendor(selectedVendor._id)
+          setMenus(fetchedMenus)
+        } catch (err: any) {
+          setError(err.message || "Failed to fetch menus")
+          toast.error("Error", {
+            description: err.message || "Failed to fetch menus.",
+          })
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setMenus([])
+      }
     }
-    return currentMeals
-  }, [selectedCategory, selectedDietPreference, mealsByCategory])
+    fetchMenusForVendor()
+  }, [selectedVendor])
 
-  const handleMealClick = (meal: Meal) => {
-    setDetailMeal(meal)
-    setMealDetailsOpen(true)
-  }
-
-  const handleMealSelect = (meal: Meal) => {
-    setSelectedMeal(meal)
+  const handleVendorSelect = (vendor: Vendor) => {
+    setSelectedVendor(vendor)
+    setSelectedMenu(null) // Reset menu when vendor changes
     setSelectedPlan(null)
     setStartDate(undefined)
     setEndDate(undefined)
-    setMealDetailsOpen(false)
+  }
+
+  const handleMenuSelect = (menu: Menu) => {
+    setSelectedMenu(menu)
+    setSelectedPlan(null)
+    setStartDate(undefined)
+    setEndDate(undefined)
   }
 
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan)
     setQuantity(1)
-    // Reset person details when plan changes
     setPersonDetails(Array.from({ length: 1 }, () => ({ name: "", phoneNumber: "" })))
     setStartDate(undefined)
     setEndDate(undefined)
@@ -138,7 +135,6 @@ export default function PricingPage() {
   }
 
   useEffect(() => {
-    // Adjust personDetails array size when quantity changes
     setPersonDetails(prevDetails => {
       const newDetails = Array.from({ length: quantity }, (_, i) => {
         return prevDetails[i] || { name: "", phoneNumber: "" }
@@ -147,7 +143,6 @@ export default function PricingPage() {
     })
   }, [quantity])
 
-  // Validation check for person details
   const arePersonDetailsValid = () => {
     if (quantity < 1) {
       return true;
@@ -163,25 +158,17 @@ export default function PricingPage() {
   }
 
   const handleAddToCart = async() => {
-    console.log("handleAddToCart called");
-    console.log("isAuthenticated:", isAuthenticated);
-    console.log("selectedMeal:", selectedMeal);
-    console.log("selectedPlan:", selectedPlan);
-    console.log("quantity:", quantity);
-    console.log("startDate:", startDate);
-    console.log("endDate:", endDate);
-    console.log("user?.id:", user?.id);
-    console.log("personDetails:", personDetails);
-
     if (!isAuthenticated) {
-      console.log("User not authenticated, redirecting to /auth");
       router.push("/auth?returnUrl=/pricing")
       return
     }
 
-  // --- Validation ---
-  if (!selectedMeal) {
-    toast.error("Cannot add to cart", { description: "Please select a meal." });
+  if (!selectedVendor) {
+    toast.error("Cannot add to cart", { description: "Please select a vendor." });
+    return;
+  }
+  if (!selectedMenu) {
+    toast.error("Cannot add to cart", { description: "Please select a menu." });
     return;
   }
   if (!selectedPlan) {
@@ -205,49 +192,27 @@ export default function PricingPage() {
     return;
   }
 
-  console.log("✅ All validations passed.");
-
   const token = localStorage.getItem("aharraa-u-token");
-  console.log("Token:", token);
   if (!token) {
-    console.error("❌ No auth token found. User must log in first.");
     router.push("/auth?returnUrl=/pricing");
     return;
   }
 
-  // --- Vendor check ---
-  const vendor = vendors.find((v) => v._id === (selectedMeal.vendorId as any)._id);
-  if (!vendor) {
-    toast.error("Error", { description: "Vendor not found for selected meal." });
-    return;
-  }
-
-  // --- Prepare cart item ---
   const cartItem = {
-    mealId: selectedMeal._id,
+    menuId: selectedMenu._id,
     planId: selectedPlan._id,
     quantity,
     startDate: format(startDate, "yyyy-MM-dd"),
     personDetails: quantity >= 1 ? personDetails : undefined,
   };
 
-  console.log("📦 Sending cart item to backend:", cartItem);
-
   try {
-    // --- Add item to cart API ---
     const updatedCart = await addToCartApi(user.id!, cartItem, token);
-    console.log("✅ Added to cart successfully:", updatedCart);
-
-    // --- Update UI / store ---
     toast.success("Added to Cart!", {
-      description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added successfully.`,
+      description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added successfully.`,
     });
-
-    // --- Reset selection for next item ---
     resetSelection();
-
   } catch (error: any) {
-    console.error("❌ Error adding to cart:", error);
     toast.error("Error", {
       description: error.message || "Failed to add item to cart.",
     });
@@ -255,7 +220,7 @@ export default function PricingPage() {
 }
 
   const resetSelection = () => {
-    setSelectedMeal(null)
+    setSelectedMenu(null)
     setSelectedPlan(null)
     setQuantity(1)
     setPersonDetails([])
@@ -269,7 +234,6 @@ export default function PricingPage() {
       return
     }
 
-    // Validate person details
     if (!arePersonDetailsValid()) {
       toast.error("Invalid Details", {
         description: "Please fill all person details correctly.",
@@ -277,21 +241,13 @@ export default function PricingPage() {
       return
     }
 
-    if (selectedMeal && selectedPlan && quantity > 0 && startDate && endDate && user?.id) {
-      const itemTotalPrice = selectedMeal.price * selectedPlan.durationDays * quantity
-
-      const vendor = vendors.find((v) => v._id === (selectedMeal.vendorId as any)._id)
-      if (!vendor) {
-        toast.error("Error", {
-          description: "Vendor not found for the selected meal.",
-        })
-        return
-      }
+    if (selectedVendor && selectedMenu && selectedPlan && quantity > 0 && startDate && endDate && user?.id) {
+      const itemTotalPrice = selectedMenu.perDayPrice * selectedPlan.durationDays * quantity
 
       const newCartItem: CartItem = {
-        _id: `cart-${Date.now()}-${selectedMeal._id}`,
-        userId: user.id,
-        meal: selectedMeal,
+        _id: `cart-${Date.now()}-${selectedMenu._id}`,
+        user: user.id,
+        menu: selectedMenu,
         plan: selectedPlan,
         quantity: quantity,
         personDetails: quantity >= 1 ? personDetails : undefined,
@@ -299,13 +255,13 @@ export default function PricingPage() {
         endDate: format(endDate, "yyyy-MM-dd"),
         itemTotalPrice: itemTotalPrice,
         addedDate: new Date().toISOString(),
-        vendor: vendor,
+        vendor: selectedVendor._id,
       }
 
       addToCart(newCartItem)
 
       toast("Added to Cart & Redirecting!", {
-        description: `${quantity}x ${selectedMeal.name} (${selectedPlan.name}) added to your cart.`,
+        description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added to your cart.`,
       })
 
       router.push("/checkout")
@@ -324,32 +280,29 @@ export default function PricingPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <MealCategoryTabs
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-            />
-            <DietPreferenceFilter
-              selectedDietPreference={selectedDietPreference}
-              onSelectDietPreference={setSelectedDietPreference}
-            />
             {loading ? (
-              <div className="text-center text-gray-600">Loading meals...</div>
+              <div className="text-center text-gray-600">Loading vendors...</div>
             ) : error ? (
               <div className="text-center text-red-600">{error}</div>
             ) : (
-              <MealGrid
-                filteredMeals={filteredMeals}
-                selectedMeal={selectedMeal}
+              <VendorSelection
                 vendors={vendors}
-                handleMealClick={handleMealClick}
-                handleMealSelect={handleMealSelect}
+                selectedVendor={selectedVendor}
+                onSelectVendor={handleVendorSelect}
               />
             )}
 
-            {selectedMeal && (
+            {selectedVendor && (
+              <MenuGrid
+                menus={menus}
+                selectedMenu={selectedMenu}
+                onMenuSelect={handleMenuSelect}
+              />
+            )}
+
+            {selectedMenu && (
               <PlanSelection
-                selectedMeal={selectedMeal}
+                selectedMenu={selectedMenu} // Meal is no longer directly selected
                 selectedPlan={selectedPlan}
                 plans={plans}
                 onPlanSelect={handlePlanSelect}
@@ -385,7 +338,7 @@ export default function PricingPage() {
 
           <div className="lg:col-span-1">
             <OrderSummarySidebar
-              selectedMeal={selectedMeal}
+              selectedMenu={selectedMenu}
               selectedPlan={selectedPlan}
               quantity={quantity}
               startDate={startDate}
@@ -398,14 +351,6 @@ export default function PricingPage() {
       </div>
 
       <Footer />
-
-      <MealDetailsModal
-        mealDetailsOpen={mealDetailsOpen}
-        detailMeal={detailMeal}
-        selectedMealId={selectedMeal?._id || null}
-        onClose={() => setMealDetailsOpen(false)}
-        onMealSelect={handleMealSelect}
-      />
     </main>
   )
 }

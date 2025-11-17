@@ -11,7 +11,8 @@ import {
   Vendor,
   Cart,
   CartItem,
-  PersonDetails
+  PersonDetails,
+  Menu
 } from "./types";
 
 
@@ -235,31 +236,16 @@ export async function updateOrder(
   return response as Order;
 }
 
-export async function getMeals(
-  vendorId?: string,
-  category?: string,
-  dietPreference?: string
-): Promise<Meal[]> {
-  const params = new URLSearchParams();
-  if (vendorId) params.append("vendorId", vendorId);
-  if (category) params.append("category", category);
-  if (dietPreference) params.append("dietPreference", dietPreference);
-
-  const queryString = params.toString();
-  const endpoint = `/api/meals${queryString ? `?${queryString}` : ""}`;
-  return apiRequest<Meal[]>(endpoint, "GET");
-}
-
-export async function getMealById(id: string): Promise<Meal> {
-  return apiRequest<Meal>(`/api/meals/${id}`, "GET");
-}
-
 export async function getPlans(): Promise<Plan[]> {
   return apiRequest<Plan[]>("/api/plans", "GET");
 }
 
 export async function getVendors(): Promise<Vendor[]> {
   return apiRequest<Vendor[]>("/api/vendors", "GET");
+}
+
+export async function getMenusByVendor(vendorId: string): Promise<Menu[]> {
+  return apiRequest<Menu[]>(`/api/vendors/${vendorId}/menus`, "GET");
 }
 
 export async function getCartItems(
@@ -273,7 +259,7 @@ export async function getCartItems(
 export async function addToCartApi(
   userId: string,
   cartItem: {
-    mealId: string;
+    menuId: string; // Changed from mealId to menuId
     planId: string;
     quantity: number;
     startDate: string;
@@ -305,4 +291,11 @@ export async function updateCartItemPersonDetails(
   token: string
 ): Promise<Cart> {
     return apiRequest<Cart>(`/api/cart/${userId}/update-person-details/${cartItemId}`,"PUT",{ personDetails },token);
+}
+
+export async function getCartTotalQuantity(
+  userId: string,
+  token: string
+): Promise<{ totalItems: number }> {
+  return apiRequest<{ totalItems: number }>(`/api/cart/${userId}/quantity`, "GET", null, token);
 }

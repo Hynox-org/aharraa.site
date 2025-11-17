@@ -3,10 +3,10 @@
 import Image from "next/image"
 import { format } from "date-fns"
 import { IoRemoveCircle, IoAddCircle, IoTrash, IoPencil } from "react-icons/io5"
-import { CartItem, PersonDetails } from "@/lib/types"
+import { CartItem, PopulatedCartItem, PersonDetails } from "@/lib/types"
 
 interface CartItemCardProps {
-  item: CartItem
+  item: PopulatedCartItem
   onUpdateQuantity: (itemId: string, quantity: number) => void
   onRemoveItem: (itemId: string) => void
   onEditPersonDetails: (itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => void
@@ -21,8 +21,8 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
         {/* Image */}
         <div className="flex-shrink-0">
           <Image
-            src={item.meal.image}
-            alt={item.meal.name}
+            src={item.menu.coverImage || "/public/defaults/default-meal.jpg"}
+            alt={item.menu.name}
             width={120}
             height={120}
             className="rounded-lg object-cover w-full sm:w-24 sm:h-24 lg:w-28 lg:h-28"
@@ -32,7 +32,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
         {/* Details */}
         <div className="flex-1 min-w-0">
           <h2 className="text-lg sm:text-xl font-bold mb-1 truncate" style={{ color: "#283618" }}>
-            {item.meal.name}
+            {item.menu.name}
           </h2>
           <p className="text-sm mb-1" style={{ color: "#606C38" }}>
             {item.plan.name} ({item.plan.durationDays} days)

@@ -2,7 +2,6 @@
 
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { useStore } from "@/lib/store"
 import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -203,8 +202,10 @@ useEffect(() => {
   if (!isAuthenticated || !user) {
     return null
   }
-
-  const userCartItems = (fetchedCart?.items || []).filter((item: any) => item.userId === user.id) || []
+  console.log("User ID:", user?.id);
+  console.log("Fetched Cart:", fetchedCart);
+  const userCartItems = (fetchedCart?.items || []).filter((item: any) => item.user === user.id) || []
+  console.log("User Cart Items:", userCartItems);
   const totalItems = userCartItems.reduce((sum: number, item: any) => sum + item.quantity, 0)
   const totalPrice = userCartItems.reduce((sum: number, item: any) => sum + item.itemTotalPrice, 0)
 

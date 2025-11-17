@@ -4,14 +4,32 @@ import Image from "next/image"
 import Link from "next/link"
 import { useStore } from "@/lib/store"
 import { HiShoppingCart, HiMenu, HiX, HiUser, HiLogout, HiHome, HiInformationCircle, HiMail } from "react-icons/hi"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/app/context/auth-context"
+import { getCartTotalQuantity } from "@/lib/api" // Import the new API function
 
 export function Header() {
-  const { isAuthenticated, user, logout } = useAuth()
-  const cart = useStore((state) => state.cart)
-  const cartCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
+  const { isAuthenticated, user, logout, token } = useAuth() // Get token from useAuth
+  const [cartCount, setCartCount] = useState(0) // Initialize cartCount with useState
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const fetchCartQuantity = async () => {
+      if (isAuthenticated && user?.id && token) {
+        try {
+          const response = await getCartTotalQuantity(user.id, token)
+          setCartCount(response.totalItems)
+        } catch (error) {
+          console.error("Failed to fetch cart total quantity:", error)
+          setCartCount(0) // Reset cart count on error
+        }
+      } else {
+        setCartCount(0) // Reset cart count if not authenticated
+      }
+    }
+
+    fetchCartQuantity()
+  }, [isAuthenticated, user?.id, token]) // Re-run when auth status, user ID, or token changes
 
   const navLinks = [
     { href: "/", label: "Home", icon: HiHome },

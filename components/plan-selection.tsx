@@ -1,17 +1,17 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { Meal, Plan } from "@/lib/types";
+import { Meal, Menu, Plan } from "@/lib/types";
 import { IoCheckmarkCircle } from "react-icons/io5";
 
 interface PlanSelectionProps {
-  selectedMeal: Meal;
+  selectedMenu: Menu;
   selectedPlan: Plan | null;
   plans: Plan[];
   onPlanSelect: (plan: Plan) => void;
 }
 
-export function PlanSelection({ selectedMeal, selectedPlan, plans, onPlanSelect }: PlanSelectionProps) {
+export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect }: PlanSelectionProps) {
   return (
     <div className="py-8">
       {/* Simple Header */}
@@ -23,8 +23,8 @@ export function PlanSelection({ selectedMeal, selectedPlan, plans, onPlanSelect 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {plans.map((plan) => {
           const isSelected = selectedPlan?._id === plan._id;
-          const totalPrice = (selectedMeal.price * plan.durationDays).toFixed(0);
-          const dailyPrice = selectedMeal.price.toFixed(0);
+          const totalPrice = (selectedMenu.perDayPrice * plan.durationDays).toFixed(0);
+          const dailyPrice = selectedMenu.perDayPrice.toFixed(0);
 
           return (
             <button

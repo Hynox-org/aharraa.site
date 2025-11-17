@@ -2,11 +2,11 @@
 
 import { IoCart, IoCheckmarkCircle } from "react-icons/io5"
 import { GiMeal } from "react-icons/gi"
-import { Meal, Plan } from "@/lib/types"
+import { Menu, Plan } from "@/lib/types" // Changed from Meal to Menu
 import { format } from "date-fns"
 
 interface OrderSummarySidebarProps {
-  selectedMeal: Meal | null
+  selectedMenu: Menu | null // Changed from selectedMeal to selectedMenu
   selectedPlan: Plan | null
   quantity: number
   startDate: Date | undefined
@@ -16,7 +16,7 @@ interface OrderSummarySidebarProps {
 }
 
 export function OrderSummarySidebar({
-  selectedMeal,
+  selectedMenu, // Changed from selectedMeal
   selectedPlan,
   quantity,
   startDate,
@@ -24,8 +24,8 @@ export function OrderSummarySidebar({
   onAddToCart,
   onCheckout,
 }: OrderSummarySidebarProps) {
-  const totalAmount = selectedMeal && selectedPlan ? selectedMeal.price * selectedPlan.durationDays * quantity : 0
-  const isComplete = selectedMeal && selectedPlan && startDate && endDate && quantity >= 1
+  const totalAmount = selectedMenu && selectedPlan ? selectedMenu.perDayPrice * selectedPlan.durationDays * quantity : 0 // Changed from selectedMeal.price to selectedMenu.perDayPrice
+  const isComplete = selectedMenu && selectedPlan && startDate && endDate && quantity >= 1 // Changed from selectedMeal
 
   return (
     <div className="sticky top-6">
@@ -39,32 +39,34 @@ export function OrderSummarySidebar({
         </div>
 
         {/* Content */}
-        {!selectedMeal ? (
+        {!selectedMenu ? (
           <div className="text-center py-12">
             <GiMeal className="w-16 h-16 mx-auto mb-4 opacity-30" style={{ color: "#FEFAE0" }} />
             <p className="text-sm" style={{ color: "rgba(254, 250, 224, 0.6)" }}>
-              Select a meal to begin
+              Select a menu to begin
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Meal */}
+            {/* Menu */}
             <div>
               <p className="text-xs font-bold mb-2 uppercase" style={{ color: "#DDA15E" }}>
-                Meal
+                Menu
               </p>
               <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: "rgba(254, 250, 224, 0.1)" }}>
-                <img
-                  src={selectedMeal.image}
-                  alt={selectedMeal.name}
-                  className="w-12 h-12 object-cover rounded-lg"
-                />
+                {selectedMenu.coverImage && (
+                  <img
+                    src={selectedMenu.coverImage}
+                    alt={selectedMenu.name}
+                    className="w-12 h-12 object-cover rounded-lg"
+                  />
+                )}
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm truncate" style={{ color: "#FEFAE0" }}>
-                    {selectedMeal.name}
+                    {selectedMenu.name}
                   </p>
                   <p className="text-xs" style={{ color: "#DDA15E" }}>
-                    ₹{selectedMeal.price}/meal
+                    ₹{selectedMenu.perDayPrice}/day
                   </p>
                 </div>
               </div>
@@ -81,7 +83,7 @@ export function OrderSummarySidebar({
                     {selectedPlan.name}
                   </p>
                   <p className="text-xs" style={{ color: "#DDA15E" }}>
-                    {selectedPlan.durationDays} days • ₹{selectedMeal.price.toFixed(0)}/day
+                    {selectedPlan.durationDays} days • ₹{selectedMenu.perDayPrice.toFixed(0)}/day
                   </p>
                 </div>
               </div>

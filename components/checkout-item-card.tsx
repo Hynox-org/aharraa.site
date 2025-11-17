@@ -2,10 +2,10 @@
 
 import Image from "next/image"
 import { IoCart } from "react-icons/io5"
-import { CheckoutItem, PersonDetails } from "@/lib/types"
+import { CheckoutItem, CheckoutItemView, PersonDetails } from "@/lib/types"
 
 interface CheckoutItemCardProps {
-  items: CheckoutItem[]
+  items: CheckoutItemView[]
 }
 
 export function CheckoutItemCard({ items }: CheckoutItemCardProps) {
@@ -40,8 +40,8 @@ export function CheckoutItemCard({ items }: CheckoutItemCardProps) {
               {/* Image */}
               <div className="flex-shrink-0">
                 <Image
-                  src={item.meal.image}
-                  alt={item.meal.name}
+                  src={item.menu.coverImage || "/defaults/default-meal.jpg"}
+                  alt={item.menu.name}
                   width={80}
                   height={80}
                   className="rounded-lg object-cover w-16 h-16 sm:w-20 sm:h-20"
@@ -51,7 +51,7 @@ export function CheckoutItemCard({ items }: CheckoutItemCardProps) {
               {/* Details */}
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-base sm:text-lg mb-1 truncate" style={{ color: "#283618" }}>
-                  {item.meal.name}
+                  {item.menu.name}
                 </p>
                 <p className="text-xs sm:text-sm mb-1" style={{ color: "#606C38" }}>
                   {item.plan.name} ({item.plan.durationDays} days)

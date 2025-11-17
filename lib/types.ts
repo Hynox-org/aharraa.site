@@ -1,11 +1,14 @@
 // lib/types.ts
 import React from 'react';
 
+// ============================================
+// Authentication & User Types
+// ============================================
+
 export interface User {
   id?: string;
   name?: string;
   email?: string;
-  // Add other user properties as needed
 }
 
 export interface ValidateTokenResponse {
@@ -49,6 +52,10 @@ export interface AuthContextType {
   token: string | null;
 }
 
+// ============================================
+// UI Component Types
+// ============================================
+
 export interface FaqItem {
   id: number;
   question: string;
@@ -80,10 +87,41 @@ export interface PersonDetails {
   phoneNumber: string;
 }
 
-// New Schema for Meals, Vendors, Plans, and Orders
+// ============================================
+// Core Business Types
+// ============================================
 
 export type DietPreference = "All" | "Veg" | "Non-Veg" | "Vegan" | "Custom";
 export type MealCategory = "Breakfast" | "Lunch" | "Dinner";
+export type DayOfWeek = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+
+// ============================================
+// Vendor Schema
+// ============================================
+
+export interface Vendor {
+  _id: string;
+  name: string;
+  description?: string;
+  email?: string;
+  image?: string;
+  rating?: number;
+  menus?: string[]; // Array of Menu IDs
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
+}
+
+// ============================================
+// Meal Schema
+// ============================================
+
+export interface NutritionalDetails {
+  protein: number; // in grams
+  carbs: number; // in grams
+  fats: number; // in grams
+  calories: number; // in kcal
+}
 
 export interface Meal {
   _id: string;
@@ -92,121 +130,79 @@ export interface Meal {
   dietPreference: DietPreference;
   category: MealCategory;
   subProducts: string[]; // e.g., ["Rice", "Curry", "Salad"]
-  nutritionalDetails: {
-    protein: number; // in grams
-    carbs: number; // in grams
-    fats: number; // in grams
-    calories: number; // in kcal
-  };
+  nutritionalDetails: NutritionalDetails;
   price: number;
-  image: string; // Changed from imageUrl to image
-  vendorId: string; // Reference to the vendor who created this meal
+  image: string;
+  vendorId: string; // Reference to Vendor._id
   createdAt: string;
   updatedAt: string;
-  __v: number;
-  specialties?: string[];
-  location?: string;
-  deliveryAreas?: string[];
-  contactInfo?: ContactInfo;
+  __v?: number;
 }
 
-export interface ContactInfo {
-  phone: string;
-  email: string;
+// ============================================
+// Menu Schema (NEW - synced with backend)
+// ============================================
+
+export interface MenuItem {
+  day: DayOfWeek;
+  category: MealCategory;
+  meal: string; // Meal ID reference
 }
 
-export interface Vendor {
-  _id: string; // Changed from id to _id
+export interface Menu {
+  _id: string;
   name: string;
-  description?: string; // Optional description for the vendor
-  image?: string; // Optional image for the vendor
-  rating?: number; // Optional rating for the vendor
+  vendor: string; // Vendor ID reference
+  coverImage?: string | null;
+  description?: string;
+  perDayPrice: number;
+  menuItems: MenuItem[];
   createdAt: string;
   updatedAt: string;
-  __v: number;
+  __v?: number;
 }
+
+// Populated Menu (when meal is populated)
+export interface PopulatedMenuItem {
+  day: DayOfWeek;
+  category: MealCategory;
+  meal: Meal; // Populated Meal object
+}
+
+export interface PopulatedMenu extends Omit<Menu, 'menuItems' | 'vendor'> {
+  vendor: Vendor; // Populated Vendor object
+  menuItems: PopulatedMenuItem[];
+}
+
+// ============================================
+// Plan Schema
+// ============================================
 
 export interface Plan {
-  _id: string; // Changed from id to _id
+  _id: string;
   name: string; // e.g., "3-Day Plan", "5-Day Plan", "7-Day Plan"
-  durationDays: number; // 3, 5, or 7
-  price: number; // Total price for the plan
+  durationDays: 3 | 5 | 7;
   createdAt: string;
   updatedAt: string;
-  __v: number;
+  __v?: number;
 }
 
-export interface Order {
-  _id: string; // Changed from id to _id
-  userId: string;
-  items: OrderItem[];
-  deliveryAddresses: Record<string, DeliveryAddress>; // Changed to Record<string, DeliveryAddress>
-  paymentMethod: string;
-  totalAmount: number;
-  paymentSessionId: string;
-  currency: string; // e.g., "INR"
-  orderDate: string; // ISO date string (timestamp of order creation)
-  status: "pending" | "completed" | "cancelled" | "processing" | "confirmed" | "delivered"; // Order status
-  skippedDates?: string[]; // Array of ISO date strings (YYYY-MM-DD) for skipped deliveries
+// ============================================
+// Accompaniment Schema (NEW - synced with backend)
+// ============================================
+
+export interface Accompaniment {
+  _id: string;
+  name: string;
+  price: number;
   createdAt: string;
   updatedAt: string;
-  __v: number;
+  __v?: number;
 }
 
-export interface OrderItem {
-  id: string; // Changed from id to _id
-  meal: {
-    _id: Meal;
-    name: string;
-  };
-  plan: {
-    _id: Plan;
-    name: string;
-  };
-  vendor: {
-    _id: Vendor;
-    name: string;
-  };
-  quantity: number;
-  personDetails: PersonDetails[];
-  startDate: string;
-  endDate: string;
-  itemTotalPrice: number;
-  skippedDates?: string[]; // Array of ISO date strings (YYYY-MM-DD) for skipped deliveries for this item
-}
-
-export interface CreatePaymentPayload {
-  userId: string; // The ID of the user making the order
-  checkoutData: CheckoutData; // The complete checkout data
-  paymentMethod: "COD" | "CC" | "UPI"; // Must be one of: "COD", "CC", "UPI"
-  totalAmount: number; // Number, minimum 0 (This should typically match checkoutData.totalPrice)
-  currency: string; // e.g., "INR"
-}
-
-export interface CartItem {
-  _id: string; // Unique ID for the cart item
-  userId: string;
-  meal: Meal;
-  plan: Plan;
-  quantity: number;
-  personDetails?: PersonDetails[]; // Optional array of person details
-  startDate: string; // ISO date string (e.g., "YYYY-MM-DD")
-  endDate: string; // ISO date string (e.g., "YYYY-MM-DD")
-  itemTotalPrice: number; // Price for this specific cart item (meal * plan duration * quantity)
-  addedDate: string; // Timestamp when item was added to cart
-  vendor: Vendor; // Added to include vendor details directly
-}
-
-export interface Cart {
-  id: string; // Unique ID for the cart (could be user ID if one cart per user)
-  userId: string;
-  items: CartItem[];
-  totalItems: number;
-  cartTotalPrice: number;
-  lastUpdated: string; // Timestamp of last update
-}
-
-export type MealType = "breakfast" | "lunch" | "dinner";
+// ============================================
+// Delivery Address Schema
+// ============================================
 
 export interface DeliveryAddress {
   street: string;
@@ -216,77 +212,185 @@ export interface DeliveryAddress {
   lon?: number;
 }
 
-export interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
+// For storage/display purposes
+export interface DeliveryAddressDocument {
+  _id: string;
+  userId: string;
+  street: string;
+  city: string;
+  zip: string;
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
 }
 
-export interface Accompaniment {
-  id: string;
-  name: string;
-  price: number;
-}
+// ============================================
+// Cart Schema
+// ============================================
 
-export interface Store {
-  selectedPlan: Plan | null;
-  deliveryAddresses: {
-    breakfast: DeliveryAddress | null;
-    lunch: DeliveryAddress | null;
-    dinner: DeliveryAddress | null;
-  };
-  setDeliveryAddress: (mealType: MealType, address: DeliveryAddress) => void;
-  setSelectedPlan: (plan: Plan) => void;
-
-  selectedDates: DateRange | null;
-  setSelectedDates: (dates: DateRange) => void;
-
-  selectedVendorId: string | null;
-  setSelectedVendorId: (vendorId: string | null) => void;
-
-  selectedAccompaniments: Accompaniment[];
-  toggleAccompaniment: (accompaniment: Accompaniment) => void;
-
-  datesConfirmed: boolean;
-  setDatesConfirmed: (confirmed: boolean) => void;
-
-  cart: Cart | null;
-  addToCart: (item: CartItem) => void;
-  removeFromCart: (cartItemId: string) => void;
-  updateCartItemQuantity: (cartItemId: string, quantity: number) => void;
-  updateCartItemPersonDetails: (cartItemId: string, personDetails: PersonDetails[]) => void;
-  clearCart: () => void;
-  getCartTotalPrice: () => number;
-  getCartTotalItems: () => number;
-
-  returnUrl: string;
-  setReturnUrl: (url: string) => void;
-
-  checkoutData: CheckoutData | null;
-  setCheckoutData: (data: CheckoutData | null) => void;
-  clearCheckoutData: () => void;
-}
-
-export interface CheckoutItem {
-  id: string; // Unique ID for the checkout item (from CartItem)
-  meal: {id: string, name: string, image?: string}; // Made image property optional
-  plan: {id: string, name: string , durationDays?: number};
+export interface CartItem {
+  _id: string;
+  user: string; // User ID reference
+  menu: string | Menu; // Menu ID reference or populated Menu
+  plan: string | Plan; // Plan ID reference or populated Plan
   quantity: number;
-  personDetails?: PersonDetails[]; // Optional array of person details
+  personDetails?: PersonDetails[];
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
+  itemTotalPrice: number;
+  addedDate: string;
+  vendor: string; // Vendor ID reference
+  __v?: number;
+}
+
+// Populated CartItem (when menu and plan are populated)
+export interface PopulatedCartItem extends Omit<CartItem, 'menu' | 'plan'> {
+  menu: Menu | PopulatedMenu; // Can be either populated or not
+  plan: Plan;
+}
+
+export interface Cart {
+  _id: string;
+  user: string; // User ID reference
+  items: string[] | CartItem[]; // Array of CartItem IDs or populated CartItems
+  totalItems: number;
+  cartTotalPrice: number;
+  lastUpdated: string;
+  createdAt: string;
+  __v?: number;
+}
+
+// ============================================
+// Order Schema
+// ============================================
+
+export type OrderStatus = "pending" | "confirmed" | "delivered" | "cancelled" | "failed";
+export type PaymentStatus = "SUCCESS" | "FAILED" | "PENDING";
+
+export interface OrderItem {
+  id: string; // Unique identifier for the order item
+  menu: string; // Menu ID reference
+  plan: string; // Plan ID reference
+  quantity: number;
+  personDetails?: PersonDetails[];
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
+  skippedDates?: string[]; // Array of ISO date strings
+  itemTotalPrice: number;
+  vendor: string; // Vendor ID reference
+}
+
+// Populated OrderItem (when references are populated)
+export interface PopulatedOrderItem extends Omit<OrderItem, 'menu' | 'plan' | 'vendor'> {
+  menu: Menu | PopulatedMenu;
+  plan: Plan;
+  vendor: Vendor;
+}
+
+export interface PaymentDetails {
+  cfPaymentId?: string;
+  status?: PaymentStatus;
+  paymentTime?: string;
+  bankReference?: string;
+  method?: string;
+}
+
+export interface Order {
+  _id: string;
+  user: string; // User ID reference
+  items: OrderItem[];
+  paymentMethod: string;
+  totalAmount: number;
+  currency: string;
+  orderDate: string; // ISO date string
+  status: OrderStatus;
+  paymentSessionId?: string;
+  paymentDetails?: PaymentDetails;
+  paymentConfirmedAt?: string;
+  deliveryAddresses: Record<MealCategory, DeliveryAddress>; // Map of meal category to delivery address
+  invoiceUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
+}
+
+// Populated Order (when user is populated)
+export interface PopulatedOrder extends Omit<Order, 'user' | 'items'> {
+  user: UserProfile;
+  items: PopulatedOrderItem[];
+}
+
+// ============================================
+// Payment Types
+// ============================================
+
+export type PaymentMethod = "COD" | "CC" | "UPI";
+
+export interface CreatePaymentPayload {
+  userId: string;
+  checkoutData: CheckoutData;
+  paymentMethod: PaymentMethod;
+  totalAmount: number; // Minimum 0
+  currency: string; // e.g., "INR"
+}
+
+// ============================================
+// Checkout Types
+// ============================================
+
+export interface CheckoutItemView {
+  id: string; // Unique ID from CartItem
+  menu: { id: string; name: string; coverImage?: string }; // Changed from meal to menu
+  plan: { id: string; name: string; durationDays?: number };
+  quantity: number;
+  personDetails?: PersonDetails[];
   startDate: string;
   endDate: string;
   itemTotalPrice: number;
-  vendor: {id: string, name: string}; // Include vendor details directly
+  vendor: { id: string; name: string };
+}
+
+export interface CheckoutItem {
+  id: string; // Unique ID from CartItem
+  menu: string; // Changed from meal to menu
+  plan: string;
+  quantity: number;
+  personDetails?: PersonDetails[];
+  startDate: string;
+  endDate: string;
+  itemTotalPrice: number;
+  vendor: string;
 }
 
 export interface CheckoutData {
-  id: string; // Unique ID for the checkout session/order
+  id: string; // Unique ID for checkout session/order
   userId: string;
   items: CheckoutItem[];
-  deliveryAddresses: { // Changed to an object keyed by MealCategory
+  deliveryAddresses: {
     Breakfast?: DeliveryAddress;
     Lunch?: DeliveryAddress;
     Dinner?: DeliveryAddress;
   };
   totalPrice: number;
-  checkoutDate: string; // Timestamp of when checkout data was finalized
+  checkoutDate: string; // Timestamp when checkout data was finalized
+}
+
+// ============================================
+// Store Types (Zustand/State Management)
+// ============================================
+
+export type MealType = "breakfast" | "lunch" | "dinner";
+
+export interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
+// ============================================
+// Contact Info Type
+// ============================================
+
+export interface ContactInfo {
+  phone: string;
+  email: string;
 }

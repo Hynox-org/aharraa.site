@@ -15,6 +15,10 @@ import {
   CreatePaymentPayload,
   Vendor,
   Cart,
+  CartItem,
+  Menu,
+  Plan,
+  CheckoutItemView,
 } from "@/lib/types"
 import { createOrder, updateProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
@@ -79,22 +83,46 @@ export default function CheckoutPage() {
   }
 
   const userCartItems = useMemo(
-    () => cartData?.items.filter((item) => item.userId === user?.id) || [],
+    () =>
+      cartData?.items.filter(
+        (item): item is CartItem & { menu: Menu; plan: Plan } =>
+          typeof item !== "string" &&
+          item.user === user?.id &&
+          typeof item.menu === "object" &&
+          typeof item.plan === "object"
+      ) || [],
     [cartData?.items, user?.id]
-    
-  )
+  );
 console.log("userCartItems:", userCartItems);
 
-  const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
+const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItem | null => {
         console.log("cartItem:", cartItem);
         return {
           id: cartItem._id,
-          meal: {
-            id: cartItem.meal._id,
-            name: cartItem.meal.name,
-            image: cartItem.meal.image || "/defaults/default-meal.jpg",
+          menu: cartItem.menu._id,
+          plan: cartItem.plan._id,
+          quantity: cartItem.quantity,
+          personDetails: cartItem.personDetails,
+          startDate: cartItem.startDate,
+          endDate: cartItem.endDate,
+          itemTotalPrice: cartItem.itemTotalPrice,
+          vendor: cartItem.vendor
+        }
+      })
+      .filter((item): item is CheckoutItem => item !== null)
+  }, [userCartItems])
+  const displayCheckoutItemsView: CheckoutItemView[] = useMemo(() => {
+    return userCartItems
+      .map((cartItem): CheckoutItemView | null => {
+        console.log("cartItem:", cartItem);
+        return {
+          id: cartItem._id,
+          menu: {
+            id: cartItem.menu._id,
+            name: cartItem.menu.name,
+            coverImage: cartItem.menu.coverImage || "/defaults/default-meal.jpg",
           },
           plan: { id: cartItem.plan._id, name: cartItem.plan.name , durationDays: cartItem.plan.durationDays },
           quantity: cartItem.quantity,
@@ -102,13 +130,13 @@ console.log("userCartItems:", userCartItems);
           startDate: cartItem.startDate,
           endDate: cartItem.endDate,
           itemTotalPrice: cartItem.itemTotalPrice,
-          vendor: { 
-          id: cartItem.meal.vendorId._id, 
-          name: cartItem.meal.vendorId.name ,
-        },        
+          vendor: {
+            id: cartItem.vendor,
+            name: "Vendor", // Placeholder, as vendor name is not directly available
+          },
         }
       })
-      .filter((item): item is CheckoutItem => item !== null)
+      .filter((item): item is CheckoutItemView => item !== null)
   }, [userCartItems])
   console.log("displayCheckoutItems:", displayCheckoutItems);
    const totalPrice = useMemo(
@@ -117,9 +145,16 @@ console.log("userCartItems:", userCartItems);
   )
 
   const uniqueMealCategories = useMemo(
-    () => Array.from(new Set(userCartItems.map((item) => item.meal.category))),
+    () =>
+      Array.from(
+        new Set(
+          userCartItems.flatMap((item) =>
+            item.menu.menuItems.map((menuItem) => menuItem.category)
+          )
+        )
+      ),
     [userCartItems]
-  )
+  );
 
   const totalPlanDays = useMemo(
     () => userCartItems.reduce((sum, item) => sum + item.plan.durationDays, 0),
@@ -166,19 +201,18 @@ console.log("userCartItems:", userCartItems);
   }, [loading, isAuthenticated, userCartItems.length, router])
 
   useEffect(() => {
-    if (userCartItems.length > 0) {
-      const initialAddresses: Partial<Record<MealCategory, DeliveryAddress>> =
-        {}
-      uniqueMealCategories.forEach((category) => {
-        initialAddresses[category] = {
-          street: "",
-          city: "Coimbatore",
-          zip: "",
-        }
-      })
-      setDeliveryAddresses(initialAddresses)
-    }
-  }, [userCartItems, uniqueMealCategories])
+    const allMealCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"];
+    const initialAddresses: Partial<Record<MealCategory, DeliveryAddress>> = {};
+
+    allMealCategories.forEach((category) => {
+      initialAddresses[category] = {
+        street: "",
+        city: "Coimbatore",
+        zip: "",
+      };
+    });
+    setDeliveryAddresses(initialAddresses);
+  }, []); // Empty dependency array to run once on mount
 
   if (loading) {
     return (
@@ -255,8 +289,9 @@ console.log("userCartItems:", userCartItems);
       return
     }
 
-    for (const category of uniqueMealCategories) {
-      const address = deliveryAddresses[category]
+    const allMealCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"];
+    for (const category of allMealCategories) {
+      const address = deliveryAddresses[category];
       if (
         !address ||
         !address.street ||
@@ -265,8 +300,8 @@ console.log("userCartItems:", userCartItems);
       ) {
         toast.error(
           `Please fill in all delivery details for ${category} and ensure city is Coimbatore.`
-        )
-        return
+        );
+        return;
       }
     }
 
@@ -336,14 +371,6 @@ console.log("userCartItems:", userCartItems);
       const checkoutDataForBackend: CheckoutData = JSON.parse(
         JSON.stringify(finalizedCheckoutData)
       )
-      checkoutDataForBackend.items.forEach((item) => {
-        if (item.meal.image) {
-          delete item.meal.image 
-        }
-        if(item.plan.durationDays){
-          delete item.plan.durationDays
-        }
-      })
 
       const paymentPayload: CreatePaymentPayload = {
         userId: user.id,
@@ -408,17 +435,17 @@ console.log("userCartItems:", userCartItems);
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Forms */}
           <div className="lg:col-span-2 space-y-6">
-            {uniqueMealCategories.map((category) => (
+            {["Breakfast", "Lunch", "Dinner"].map((category) => (
               <DeliveryAddressCard
-                key={category}
-                category={category}
-                address={deliveryAddresses[category]}
+                key={category as MealCategory}
+                category={category as MealCategory}
+                address={deliveryAddresses[category as MealCategory]}
                 onAddressChange={handleAddressChange}
                 onGeolocation={handleGeolocation}
               />
             ))}
 
-            <CheckoutItemCard items={displayCheckoutItems} />
+            <CheckoutItemCard items={displayCheckoutItemsView} />
           </div>
 
           {/* Right Column - Summary */}
