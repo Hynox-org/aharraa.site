@@ -147,7 +147,7 @@ export async function createOrder(
 export async function getOrderDetails(
   orderId: string,
   token: string
-): Promise<Order> {
+): Promise<any> {
   const response = await apiRequest<any>(
     `/api/orders/details/${orderId}`,
     "GET",
@@ -155,9 +155,9 @@ export async function getOrderDetails(
     token
   );
   if (response && response.order) {
-    return response.order as Order;
+    return response.order as any;
   }
-  return response as Order;
+  return response as any;
 }
 
 export async function getProfileDetails(

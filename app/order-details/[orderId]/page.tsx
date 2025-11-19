@@ -7,7 +7,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { toast } from "sonner";
 import { getOrderDetails, updateOrder } from "@/lib/api";
-import { Order, DeliveryAddress } from "@/lib/types";
+import { Order, PopulatedOrder, DeliveryAddress } from "@/lib/types";
 import {
   Package,
   Calendar,
@@ -35,7 +35,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const { orderId } = useParams();
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<PopulatedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -417,7 +417,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
             </h3>
             <div className="space-y-3 sm:space-y-4">
               {Object.entries(order.deliveryAddresses).map(
-                ([mealType, address], index) => (
+                ([menuType, address], index) => (
                   <div
                     key={index}
                     className="p-3 sm:p-4 rounded-lg sm:rounded-xl"
@@ -432,7 +432,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                         className="text-base sm:text-lg font-semibold capitalize"
                         style={{ color: "#283618" }}
                       >
-                        {mealType} Delivery
+                        {menuType} Delivery
                       </p>
                     </div>
                     <p
@@ -481,10 +481,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                     <div className="flex flex-col sm:flex-row gap-4 mb-4">
                       <img
                         src={
-                          item.meal?._id?.image ||
+                          item.menu?.coverImage ||
                           "/public/defaults/default-meal.jpg"
                         }
-                        alt={item.meal?.name}
+                        alt={item.menu?.name}
                         className="w-full sm:w-20 h-48 sm:h-20 object-cover rounded-lg"
                       />
                       <div className="flex-grow min-w-0 space-y-1">
@@ -492,7 +492,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                           className="text-base sm:text-lg font-bold"
                           style={{ color: "#283618" }}
                         >
-                          {item.meal?.name}
+                          {item.menu?.name}
                         </p>
                         <p
                           className="text-xs sm:text-sm"

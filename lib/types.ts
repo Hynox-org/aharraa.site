@@ -269,22 +269,22 @@ export type PaymentStatus = "SUCCESS" | "FAILED" | "PENDING";
 
 export interface OrderItem {
   id: string; // Unique identifier for the order item
-  menu: string; // Menu ID reference
-  plan: string; // Plan ID reference
+  menu: string | Menu; // Menu ID reference
+  plan: string | Plan; // Plan ID reference
   quantity: number;
   personDetails?: PersonDetails[];
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   skippedDates?: string[]; // Array of ISO date strings
   itemTotalPrice: number;
-  vendor: string; // Vendor ID reference
+  vendor: string | Vendor; // Vendor ID reference
 }
 
 // Populated OrderItem (when references are populated)
 export interface PopulatedOrderItem extends Omit<OrderItem, 'menu' | 'plan' | 'vendor'> {
-  menu: Menu | PopulatedMenu;
-  plan: Plan;
-  vendor: Vendor;
+  menu: { id: string; name?: string; coverImage?: string | null };
+  plan: { id: string; name?: string };
+  vendor: { id: string; name?: string };
 }
 
 export interface PaymentDetails {

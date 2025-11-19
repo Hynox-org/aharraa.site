@@ -6,7 +6,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useAuth } from "@/app/context/auth-context"
 import { getOrderDetails, verifyPayment } from "@/lib/api"
-import { Order } from "@/lib/types"
+import { Order, PopulatedOrderItem } from "@/lib/types"
 import { IoCheckmarkCircle, IoHome, IoReceipt, IoCalendar, IoWallet, IoLocation, IoCart } from "react-icons/io5"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -48,10 +48,12 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
             }
             const orderDetails = await getOrderDetails(currentOrderId, token)
             setOrder(orderDetails)
-            console.log("Order details:", orderDetails)
+
             // Verify payment after fetching order details
             const verificationResponse = await verifyPayment(currentOrderId, token)
-            setOrder(verificationResponse.order)
+            if (verificationResponse && verificationResponse.order) {
+              // setOrder(verificationResponse.order)
+            }
 
           } catch (err: any) {
             console.error("Error fetching order details or verifying payment:", err)
@@ -111,6 +113,8 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
       </main>
     )
   }
+
+  console.log("Before !order check: order =", order, "pageLoading =", pageLoading, "loading =", loading);
 
   if (!order) {
     return (
@@ -236,15 +240,17 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
                 <IoCart className="w-5 h-5" />
                 Items
               </h2>
-              {order.items.map((item) => (
+              {(order.items as unknown as PopulatedOrderItem[]).map((item) => (
                 <div key={item.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 p-3 rounded-lg" 
                   style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}>
                   <div className="flex-1">
                     <p className="font-bold text-sm sm:text-base" style={{ color: "#283618" }}>
-                      {item.menu.name}
+                      {/* Displaying menu id as name is not populated by API */}
+                      {item.menu?.name || 'N/A'} 
                     </p>
                     <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
-                      {item.plan.name} from {item.vendor.name}
+                      {/* Displaying plan id and vendor id as names are not populated by API */}
+                      {(item.plan?.name || 'N/A')} from {(item.vendor?.name || 'N/A')}
                     </p>
                     <p className="text-xs" style={{ color: "#606C38" }}>
                       Qty: {item.quantity}
