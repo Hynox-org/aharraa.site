@@ -34,12 +34,11 @@ export function Header() {
   const navLinks = [
     { href: "/", label: "Home", icon: HiHome },
     { href: "/about", label: "About Us", icon: HiInformationCircle },
+    { href: "/pricing", label: "Pricing", icon: HiInformationCircle },
     { href: "/contact", label: "Contact", icon: HiMail },
   ]
 
-  const authLinks = [
-    { href: "/profile", label: "Profile", icon: HiUser },
-  ]
+  const authLinks = []
 
   return (
     <header className="sticky top-0 z-50 shadow-md backdrop-blur-sm" 
@@ -111,32 +110,8 @@ export function Header() {
             
             {isAuthenticated ? (
               <>
-                {authLinks.map((link) => {
-                  const Icon = link.icon
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="flex items-center gap-2 px-3 xl:px-4 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 transform hover:scale-105"
-                      style={{
-                        color: "#283618"
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = "#FEFAE0"
-                        e.currentTarget.style.backgroundColor = "#606C38"
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = "#283618"
-                        e.currentTarget.style.backgroundColor = "transparent"
-                      }}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {link.label}
-                    </Link>
-                  )
-                })}
                 <div className="flex items-center gap-2 ml-2">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                  <Link href="/profile" className="flex items-center gap-2 px-3 py-2 rounded-lg"
                     style={{
                       backgroundColor: "rgba(40, 54, 24, 0.1)",
                       border: "1px solid rgba(96, 108, 56, 0.2)"
@@ -146,7 +121,7 @@ export function Header() {
                       style={{ color: "#283618" }}>
                       {user?.email?.split('@')[0] || 'User'}
                     </span>
-                  </div>
+                  </Link>
                   <button
                     onClick={logout}
                     className="flex items-center gap-2 px-3 xl:px-4 py-2.5 text-sm font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300"
@@ -218,14 +193,14 @@ export function Header() {
           {/* Mobile/Tablet Actions */}
           <div className="lg:hidden flex items-center gap-2 sm:gap-3">
             {isAuthenticated && (
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg"
+              <Link href="/profile" className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg"
                 style={{ backgroundColor: "rgba(40, 54, 24, 0.1)" }}>
                 <HiUser className="w-4 h-4" style={{ color: "#606C38" }} />
                 <span className="text-xs font-medium hidden xs:inline max-w-[60px] truncate" 
                   style={{ color: "#283618" }}>
                   {user?.email?.split('@')[0] || 'User'}
                 </span>
-              </div>
+              </Link>
             )}
             <Link
               href="/cart"
@@ -307,36 +282,10 @@ export function Header() {
             
             {isAuthenticated ? (
               <>
-                {authLinks.map((link) => {
-                  const Icon = link.icon
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 sm:px-4 py-3 sm:py-3.5 text-sm font-semibold rounded-xl border shadow-sm transition-all duration-300 transform hover:translate-x-1"
-                      style={{
-                        color: "#283618",
-                        backgroundColor: "#ffffff",
-                        borderColor: "rgba(221, 161, 94, 0.2)"
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = "#FEFAE0"
-                        e.currentTarget.style.background = "linear-gradient(to right, #606C38, #283618)"
-                        e.currentTarget.style.borderColor = "transparent"
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = "#283618"
-                        e.currentTarget.style.backgroundColor = "#ffffff"
-                        e.currentTarget.style.borderColor = "rgba(221, 161, 94, 0.2)"
-                      }}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {link.label}
-                    </Link>
-                  )
-                })}
-                <div className="flex items-center gap-3 px-3 sm:px-4 py-3 rounded-xl border mb-2"
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 sm:px-4 py-3 rounded-xl border mb-2"
                   style={{
                     backgroundColor: "rgba(40, 54, 24, 0.05)",
                     borderColor: "rgba(96, 108, 56, 0.2)"
@@ -345,7 +294,7 @@ export function Header() {
                   <span className="text-sm font-medium truncate" style={{ color: "#283618" }}>
                     {user?.email || 'User'}
                   </span>
-                </div>
+                </Link>
                 <button
                   onClick={() => {
                     logout()
