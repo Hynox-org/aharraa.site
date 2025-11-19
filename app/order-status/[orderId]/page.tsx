@@ -241,7 +241,7 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
                   style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}>
                   <div className="flex-1">
                     <p className="font-bold text-sm sm:text-base" style={{ color: "#283618" }}>
-                      {item.meal.name}
+                      {item.menu.name}
                     </p>
                     <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
                       {item.plan.name} from {item.vendor.name}

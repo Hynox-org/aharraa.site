@@ -467,6 +467,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 );
                 const isTomorrowSkipped =
                   skippedDatesNormalized?.includes(tomorrowDateString);
+                  console.log(order);
                 return (
                   <div
                     key={index}

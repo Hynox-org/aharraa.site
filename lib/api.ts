@@ -267,6 +267,7 @@ export async function addToCartApi(
   },
   token: string
 ): Promise<Cart> {
+  console.log("Adding to cart:", cartItem ,"userId:", userId);
   const endpoint = `/api/cart/${userId}/add`;
   return apiRequest<Cart>(endpoint, "POST", cartItem, token);
 }

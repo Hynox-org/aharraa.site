@@ -108,7 +108,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           startDate: cartItem.startDate,
           endDate: cartItem.endDate,
           itemTotalPrice: cartItem.itemTotalPrice,
-          vendor: cartItem.vendor
+          vendor: cartItem.menu.vendor._id
         }
       })
       .filter((item): item is CheckoutItem => item !== null)
