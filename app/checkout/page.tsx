@@ -20,7 +20,7 @@ import {
   Plan,
   CheckoutItemView,
 } from "@/lib/types"
-import { createOrder, updateProfileDetails } from "@/lib/api"
+import { createOrder, updateProfileDetails, getProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
 
 import { CheckoutEmptyState } from "@/components/checkout-empty-state"
@@ -34,6 +34,7 @@ import {
   calculateGstCost,
 } from "@/lib/checkout-helpers"
 import { getCartItems , clearCart} from "@/lib/api"; 
+import { Button } from "@/components/ui/button" // Import Button component
 
 export default function CheckoutPage() {
   const { isAuthenticated, loading, user } = useAuth()
@@ -297,6 +298,68 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     }
   }
 
+  const handleFetchAddressesFromProfile = async () => {
+    if (!user?.id) {
+      toast.error("User not authenticated.")
+      return
+    }
+    const token = localStorage.getItem("aharraa-u-token")
+    if (!token) {
+      toast.error("Authentication token not found. Please log in again.")
+      router.push("/auth?returnUrl=/checkout")
+      return
+    }
+
+    try {
+      const userProfile = await getProfileDetails(token)
+      if (userProfile) {
+        const newDeliveryAddresses: Partial<Record<MealCategory, DeliveryAddress>> = {}
+
+        const mapLocationToAddress = (location: any): DeliveryAddress | undefined => {
+          if (!location) return undefined
+          return {
+            street: location.street || "",
+            city: "Coimbatore", // Hardcoding as per existing logic
+            zip: location.pincode || "",
+            lat: location.lat,
+            lon: location.lon,
+          }
+        }
+
+        if (userProfile.breakfastDeliveryLocation) {
+          newDeliveryAddresses.Breakfast = mapLocationToAddress(userProfile.breakfastDeliveryLocation)
+        }
+        if (userProfile.lunchDeliveryLocation) {
+          newDeliveryAddresses.Lunch = mapLocationToAddress(userProfile.lunchDeliveryLocation)
+        }
+        if (userProfile.dinnerDeliveryLocation) {
+          newDeliveryAddresses.Dinner = mapLocationToAddress(userProfile.dinnerDeliveryLocation)
+        }
+
+        // Only update if there's at least one address fetched
+        if (Object.keys(newDeliveryAddresses).length > 0) {
+          setDeliveryAddresses((prev) => {
+            const updatedAddresses = { ...prev };
+            (Object.keys(newDeliveryAddresses) as MealCategory[]).forEach((category) => {
+              if (newDeliveryAddresses[category]) {
+                updatedAddresses[category] = newDeliveryAddresses[category];
+              }
+            });
+            return updatedAddresses;
+          });
+          toast.success("Delivery addresses fetched from your profile!")
+        } else {
+          toast.info("No saved delivery addresses found in your profile.")
+        }
+      } else {
+        toast.info("Could not fetch user profile details.")
+      }
+    } catch (error) {
+      console.error("Error fetching profile addresses:", error)
+      toast.error("Failed to fetch addresses from profile.")
+    }
+  }
+
   const handleProceedToPayment = async () => {
     if (!user?.id || !user?.email) {
       toast.error("User not authenticated or user email not found.")
@@ -509,6 +572,18 @@ const handleAddressChangeWithSync = (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Forms */}
           <div className="lg:col-span-2 space-y-6">
+            <div className="rounded-xl p-4 sm:p-6 shadow-md flex justify-between items-center" style={{ backgroundColor: "#ffffff" }}>
+              <p className="text-base font-bold" style={{ color: "#283618" }}>
+                Fetch addresses from your profile
+              </p>
+              <Button
+                onClick={handleFetchAddressesFromProfile}
+                className="text-white px-4 py-2 rounded-lg"
+                style={{ backgroundColor: "#606C38" }}
+              >
+                Fetch Addresses
+              </Button>
+            </div>
             {/* Global "Use Same Address for All" Option */}
   <div className="rounded-xl p-4 sm:p-6 shadow-md" style={{ backgroundColor: "#ffffff" }}>
     <div className="flex items-start gap-3">
