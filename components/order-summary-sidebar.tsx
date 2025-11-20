@@ -2,17 +2,16 @@
 
 import { IoCart, IoCheckmarkCircle } from "react-icons/io5"
 import { GiMeal } from "react-icons/gi"
-import { Menu, Plan } from "@/lib/types" // Changed from Meal to Menu
+import { Menu, Plan, MenuWithPopulatedMeals } from "@/lib/types" // Updated import
 import { format } from "date-fns"
 
 interface OrderSummarySidebarProps {
-  selectedMenu: Menu | null // Changed from selectedMeal to selectedMenu
+  selectedMenu: MenuWithPopulatedMeals | null // Updated type
   selectedPlan: Plan | null
   quantity: number
   startDate: Date | undefined
   endDate: Date | undefined
   onAddToCart: () => void
-  onCheckout: () => void
 }
 
 export function OrderSummarySidebar({
@@ -22,7 +21,6 @@ export function OrderSummarySidebar({
   startDate,
   endDate,
   onAddToCart,
-  onCheckout,
 }: OrderSummarySidebarProps) {
   const totalAmount = selectedMenu && selectedPlan ? selectedMenu.perDayPrice * selectedPlan.durationDays * quantity : 0 // Changed from selectedMeal.price to selectedMenu.perDayPrice
   const isComplete = selectedMenu && selectedPlan && startDate && endDate && quantity >= 1 // Changed from selectedMeal
@@ -155,18 +153,6 @@ export function OrderSummarySidebar({
                     >
                       <IoCart className="w-4 h-4" />
                       Add to Cart
-                    </button>
-
-                    <button
-                      onClick={onCheckout}
-                      disabled={!isComplete}
-                      className="w-full py-3 rounded-lg font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{
-                        backgroundColor: "#DDA15E",
-                        color: "#283618"
-                      }}
-                    >
-                      Proceed to Checkout
                     </button>
                   </div>
                 </div>

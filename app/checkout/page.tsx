@@ -44,6 +44,8 @@ export default function CheckoutPage() {
   const [deliveryAddresses, setDeliveryAddresses] = useState<
     Partial<Record<MealCategory, DeliveryAddress>>
   >({})
+const [useDefaultForAll, setUseDefaultForAll] = useState(false)
+const [primaryAddress, setPrimaryAddress] = useState<MealCategory>("Breakfast")
 
 //  Fetch Cart Items from MongoDB
   useEffect(() => {
@@ -98,7 +100,19 @@ console.log("userCartItems:", userCartItems);
 const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItem | null => {
-        console.log("cartItem:", cartItem);
+        // Ensure menu is an object before accessing properties
+        if (typeof cartItem.menu === 'string' || !cartItem.menu) {
+          console.error("CartItem menu is not a populated object:", cartItem.menu);
+          return null;
+        }
+        // Ensure vendor is an object before accessing properties
+        // The type for cartItem.menu.vendor is 'string | Vendor' from Menu interface in types.ts.
+        // We need to ensure it's a Vendor object before accessing '_id'.
+        if (typeof cartItem.menu.vendor === 'string' || !cartItem.menu.vendor) {
+          console.error("CartItem menu vendor is not a populated object:", cartItem.menu.vendor);
+          return null;
+        }
+
         return {
           id: cartItem._id,
           menu: cartItem.menu._id,
@@ -108,7 +122,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           startDate: cartItem.startDate,
           endDate: cartItem.endDate,
           itemTotalPrice: cartItem.itemTotalPrice,
-          vendor: cartItem.menu.vendor._id
+          vendor: (cartItem.menu.vendor as Vendor)._id // Type assertion for vendor
         }
       })
       .filter((item): item is CheckoutItem => item !== null)
@@ -417,6 +431,66 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
   }
 }
 
+// Add this handler after your existing handlers
+const handleCopyAddress = (fromCategory: MealCategory, toCategory: MealCategory) => {
+  const sourceAddress = deliveryAddresses[fromCategory]
+  if (sourceAddress) {
+    setDeliveryAddresses((prev) => ({
+      ...prev,
+      [toCategory]: { ...sourceAddress },
+    }))
+    toast.success(`Address copied from ${fromCategory} to ${toCategory}`)
+  }
+}
+
+const handleUseDefaultForAll = (checked: boolean, category: MealCategory) => {
+  setUseDefaultForAll(checked)
+  setPrimaryAddress(category)
+  
+  if (checked) {
+    const sourceAddress = deliveryAddresses[category]
+    if (sourceAddress) {
+      const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
+      const newAddresses = { ...deliveryAddresses }
+      
+      allCategories.forEach((cat) => {
+        if (cat !== category) {
+          newAddresses[cat] = { ...sourceAddress }
+        }
+      })
+      
+      setDeliveryAddresses(newAddresses)
+      toast.success(`Using ${category} address for all deliveries`)
+    }
+  }
+}
+
+// Update the address change handler to sync when "use for all" is active
+const handleAddressChangeWithSync = (
+  category: MealCategory,
+  field: keyof DeliveryAddress,
+  value: string
+) => {
+  handleAddressChange(category, field, value)
+  
+  // If "use for all" is active and this is the primary address, sync to others
+  if (useDefaultForAll && category === primaryAddress) {
+    const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
+    allCategories.forEach((cat) => {
+      if (cat !== category) {
+        setDeliveryAddresses((prev) => ({
+          ...prev,
+          [cat]: {
+            ...prev[cat],
+            [field]: value,
+          } as DeliveryAddress,
+        }))
+      }
+    })
+  }
+}
+
+
   return (
     <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
       <Header />
@@ -435,15 +509,47 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Forms */}
           <div className="lg:col-span-2 space-y-6">
-            {["Breakfast", "Lunch", "Dinner"].map((category) => (
-              <DeliveryAddressCard
-                key={category as MealCategory}
-                category={category as MealCategory}
-                address={deliveryAddresses[category as MealCategory]}
-                onAddressChange={handleAddressChange}
-                onGeolocation={handleGeolocation}
-              />
-            ))}
+            {/* Global "Use Same Address for All" Option */}
+  <div className="rounded-xl p-4 sm:p-6 shadow-md" style={{ backgroundColor: "#ffffff" }}>
+    <div className="flex items-start gap-3">
+      <input
+        type="checkbox"
+        id="use-same-address"
+        checked={useDefaultForAll}
+        onChange={(e) => handleUseDefaultForAll(e.target.checked, primaryAddress)}
+        className="mt-1 w-5 h-5 rounded cursor-pointer"
+        style={{ accentColor: "#606C38" }}
+      />
+      <div className="flex-1">
+        <label
+          htmlFor="use-same-address"
+          className="text-base font-bold cursor-pointer block"
+          style={{ color: "#283618" }}
+        >
+          Use same address for all deliveries
+        </label>
+        <p className="text-sm mt-1" style={{ color: "#606C38" }}>
+          Check this to use your primary address for Breakfast, Lunch, and Dinner deliveries
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {/* Address Cards */}
+  {["Breakfast", "Lunch", "Dinner"].map((category, index) => (
+    <DeliveryAddressCard
+      key={category as MealCategory}
+      category={category as MealCategory}
+      address={deliveryAddresses[category as MealCategory]}
+      onAddressChange={handleAddressChangeWithSync}
+      onGeolocation={handleGeolocation}
+      onCopyAddress={handleCopyAddress}
+      isPrimary={useDefaultForAll && category === primaryAddress}
+      isDisabled={useDefaultForAll && category !== primaryAddress}
+      allCategories={["Breakfast", "Lunch", "Dinner"]}
+      showCopyOptions={!useDefaultForAll}
+    />
+  ))}
 
             <CheckoutItemCard items={displayCheckoutItemsView} />
           </div>

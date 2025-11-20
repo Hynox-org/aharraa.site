@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Menu, MenuItem, MealCategory, DayOfWeek, Meal } from "@/lib/types"
+import { Menu, MenuItem, MealCategory, DayOfWeek, Meal, MenuItemWithPopulatedMeal, MenuWithPopulatedMeals } from "@/lib/types" // Updated imports
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
@@ -7,31 +7,17 @@ import Image from "next/image"
 import { Check, Calendar, UtensilsCrossed } from "lucide-react"
 
 interface MenuGridProps {
-  menus: Menu[];
-  selectedMenu: Menu | null;
-  onMenuSelect: (menu: Menu) => void;
-}
-
-// Extended MenuItem type to handle populated meal data
-interface PopulatedMenuItem extends Omit<MenuItem, 'meal'> {
-  meal: {
-    _id: string;
-    name: string;
-    description?: string;
-    image?: string;
-  } | string;
-}
-
-interface PopulatedMenu extends Omit<Menu, 'menuItems'> {
-  menuItems: PopulatedMenuItem[];
+  menus: MenuWithPopulatedMeals[];
+  selectedMenu: MenuWithPopulatedMeals | null;
+  onMenuSelect: (menu: MenuWithPopulatedMeals) => void;
 }
 
 const DAYS_ORDER: DayOfWeek[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const MEAL_CATEGORIES: MealCategory[] = ["Breakfast", "Lunch", "Dinner"];
 
 export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
-  const getMealsByDay = (menu: Menu | PopulatedMenu) => {
-    const mealsByDay: Record<DayOfWeek, Record<MealCategory, PopulatedMenuItem | null>> = {} as any;
+  const getMealsByDay = (menu: MenuWithPopulatedMeals) => { // Changed type to MenuWithPopulatedMeals
+    const mealsByDay: Record<DayOfWeek, Record<MealCategory, MenuItemWithPopulatedMeal | null>> = {} as any;
     
     DAYS_ORDER.forEach(day => {
       mealsByDay[day] = { Breakfast: null, Lunch: null, Dinner: null };
@@ -46,7 +32,7 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
     return mealsByDay;
   };
 
-  const getTotalDays = (menu: Menu) => {
+  const getTotalDays = (menu: MenuWithPopulatedMeals) => { // Changed type to MenuWithPopulatedMeals
     const uniqueDays = new Set(menu.menuItems.map(item => item.day));
     return uniqueDays.size;
   };
@@ -61,19 +47,19 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
   };
 
   // Helper to get meal name from either string ID or populated object
-  const getMealName = (meal: PopulatedMenuItem['meal'] | string): string => {
+  const getMealName = (meal: MenuItemWithPopulatedMeal['meal'] | string): string => {
     if (typeof meal === 'string') return 'Meal Item';
     return (meal as Meal)?.name || 'Meal Item';
   };
 
-  const getMealDescription = (meal: PopulatedMenuItem['meal'] | string): string | undefined => {
+  const getMealDescription = (meal: MenuItemWithPopulatedMeal['meal'] | string): string | undefined => {
     if (typeof meal === 'object' && (meal as Meal)?.description) {
       return (meal as Meal).description;
     }
     return undefined;
   };
 
-  const getMealImage = (meal: PopulatedMenuItem['meal'] | string): string => {
+  const getMealImage = (meal: MenuItemWithPopulatedMeal['meal'] | string): string => {
     if (typeof meal === 'object' && (meal as Meal)?.image) {
       return (meal as Meal).image;
     }
@@ -234,12 +220,12 @@ function WeeklyCalendarView({
   getMealDescription,
   getMealImage
 }: { 
-  menu: Menu | PopulatedMenu;
-  mealsByDay: Record<DayOfWeek, Record<MealCategory, PopulatedMenuItem | null>>;
+  menu: MenuWithPopulatedMeals; // Changed type to MenuWithPopulatedMeals
+  mealsByDay: Record<DayOfWeek, Record<MealCategory, MenuItemWithPopulatedMeal | null>>;
   getMealIcon: (category: MealCategory) => string;
-  getMealName: (meal: PopulatedMenuItem['meal'] | string) => string;
-  getMealDescription: (meal: PopulatedMenuItem['meal'] | string) => string | undefined;
-  getMealImage: (meal: PopulatedMenuItem['meal'] | string) => string;
+  getMealName: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string; // Changed type
+  getMealDescription: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string | undefined; // Changed type
+  getMealImage: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string; // Changed type
 }) {
   const activeDays = DAYS_ORDER.filter(day => 
     Object.values(mealsByDay[day]).some(meal => meal !== null)

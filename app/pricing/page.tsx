@@ -3,8 +3,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Plan, CartItem, PersonDetails, Vendor, Menu, PopulatedMenu } from "@/lib/types"
-import { getPlans, getVendors, getMenusByVendor } from "@/lib/api"
+import { Plan, CartItem, PersonDetails, Vendor, Menu, MenuWithPopulatedMeals } from "@/lib/types"
+import { getPlans, getAllMenus, getVendorById } from "@/lib/api"
 import { format, addDays } from "date-fns"
 import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
@@ -18,8 +18,8 @@ import { PersonDetailsInput } from "@/components/person-details-input"
 import { DateSelection } from "@/components/date-selection"
 import { OrderSummarySidebar } from "@/components/order-summary-sidebar"
 import { addToCartApi } from "@/lib/api"
-import { VendorSelection } from "@/components/vendor-selection" // New component
-import { MenuGrid } from "@/components/menu-grid" // New component
+import { VendorSelection } from "@/components/vendor-selection" 
+import { MenuGrid } from "@/components/menu-grid" 
 
 export default function PricingPage() {
   const { user, isAuthenticated, token } = useAuth()
@@ -27,13 +27,12 @@ export default function PricingPage() {
   const { addToCart } = useStore()
 
   const [plans, setPlans] = useState<Plan[]>([])
-  const [vendors, setVendors] = useState<Vendor[]>([])
-  const [menus, setMenus] = useState<Menu[]>([])
+  const [menus, setMenus] = useState<MenuWithPopulatedMeals[]>([]) // Menus now come with populated meals
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null)
-  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null)
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null) // This will be set from selectedMenu's vendor
+  const [selectedMenu, setSelectedMenu] = useState<MenuWithPopulatedMeals | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [quantity, setQuantity] = useState<number>(1)
   const [personDetails, setPersonDetails] = useState<PersonDetails[]>(
@@ -46,10 +45,12 @@ export default function PricingPage() {
     async function fetchData() {
       try {
         setLoading(true)
-        const fetchedPlans = await getPlans()
-        const fetchedVendors = await getVendors()
+        const [fetchedPlans, fetchedMenus] = await Promise.all([
+          getPlans(),
+          getAllMenus(), // Assuming this now returns Menu[] or similar
+        ])
         setPlans(fetchedPlans)
-        setVendors(fetchedVendors)
+        setMenus(fetchedMenus)
       } catch (err: any) {
         setError(err.message || "Failed to fetch data")
         toast.error("Error", {
@@ -62,42 +63,31 @@ export default function PricingPage() {
     fetchData()
   }, [])
 
-  useEffect(() => {
-    async function fetchMenusForVendor() {
-      if (selectedVendor) {
-        try {
-          setLoading(true)
-          const fetchedMenus = await getMenusByVendor(selectedVendor._id)
-          setMenus(fetchedMenus)
-        } catch (err: any) {
-          setError(err.message || "Failed to fetch menus")
-          toast.error("Error", {
-            description: err.message || "Failed to fetch menus.",
-          })
-        } finally {
-          setLoading(false)
-        }
-      } else {
-        setMenus([])
-      }
-    }
-    fetchMenusForVendor()
-  }, [selectedVendor])
-
-  const handleVendorSelect = (vendor: Vendor) => {
-    setSelectedVendor(vendor)
-    setSelectedMenu(null) // Reset menu when vendor changes
-    setSelectedPlan(null)
-    setStartDate(undefined)
-    setEndDate(undefined)
-  }
-
-  const handleMenuSelect = (menu: Menu) => {
+  const handleMenuSelect = useCallback(async (menu: MenuWithPopulatedMeals) => {
     setSelectedMenu(menu)
     setSelectedPlan(null)
     setStartDate(undefined)
     setEndDate(undefined)
-  }
+    
+    // Fetch vendor details when a menu is selected using the vendor ID string
+    if (menu?.vendor) { // menu.vendor is expected to be a string (ID)
+      try {
+        const vendorDetails = await getVendorById(menu.vendor) // Pass the string ID
+        setSelectedVendor(vendorDetails)
+        // console.log("Selected Vendor after fetch:", vendorDetails); // Removed Debugging line
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch vendor details")
+        toast.error("Error", {
+          description: err.message || "Failed to fetch vendor details.",
+        })
+        setSelectedVendor(null)
+        // console.error("Failed to fetch vendor details:", err); // Removed Debugging line
+      }
+    } else {
+      setSelectedVendor(null)
+      // console.log("menu.vendor ID was not available, selectedVendor set to null."); // Removed Debugging line
+    }
+  }, [])
 
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan)
@@ -163,12 +153,12 @@ export default function PricingPage() {
       return
     }
 
-  if (!selectedVendor) {
-    toast.error("Cannot add to cart", { description: "Please select a vendor." });
-    return;
-  }
   if (!selectedMenu) {
     toast.error("Cannot add to cart", { description: "Please select a menu." });
+    return;
+  }
+  if (!selectedVendor) { // Ensure selectedVendor is populated from menu
+    toast.error("Cannot add to cart", { description: "Vendor details not loaded for selected menu." });
     return;
   }
   if (!selectedPlan) {
@@ -228,50 +218,6 @@ export default function PricingPage() {
     setEndDate(undefined)
   }
 
-  const handleCheckout = async () => {
-    if (!isAuthenticated) {
-      router.push("/auth?returnUrl=/pricing")
-      return
-    }
-
-    if (!arePersonDetailsValid()) {
-      toast.error("Invalid Details", {
-        description: "Please fill all person details correctly.",
-      })
-      return
-    }
-
-    if (selectedVendor && selectedMenu && selectedPlan && quantity > 0 && startDate && endDate && user?.id) {
-      const itemTotalPrice = selectedMenu.perDayPrice * selectedPlan.durationDays * quantity
-
-      const newCartItem: CartItem = {
-        _id: `cart-${Date.now()}-${selectedMenu._id}`,
-        user: user.id,
-        menu: selectedMenu,
-        plan: selectedPlan,
-        quantity: quantity,
-        personDetails: quantity >= 1 ? personDetails : undefined,
-        startDate: format(startDate, "yyyy-MM-dd"),
-        endDate: format(endDate, "yyyy-MM-dd"),
-        itemTotalPrice: itemTotalPrice,
-        addedDate: new Date().toISOString(),
-        vendor: selectedVendor._id,
-      }
-
-      addToCart(newCartItem)
-
-      toast("Added to Cart & Redirecting!", {
-        description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added to your cart.`,
-      })
-
-      router.push("/checkout")
-    } else {
-      toast.error("Cannot proceed to checkout", {
-        description: "Please complete all required fields.",
-      })
-    }
-  }
-
   return (
     <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
       <Header />
@@ -281,23 +227,17 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             {loading ? (
-              <div className="text-center text-gray-600">Loading vendors...</div>
+              <div className="text-center text-gray-600">Loading menus...</div>
             ) : error ? (
               <div className="text-center text-red-600">{error}</div>
             ) : (
-              <VendorSelection
-                vendors={vendors}
-                selectedVendor={selectedVendor}
-                onSelectVendor={handleVendorSelect}
-              />
-            )}
-
-            {selectedVendor && (
-              <MenuGrid
-                menus={menus}
-                selectedMenu={selectedMenu}
-                onMenuSelect={handleMenuSelect}
-              />
+              <>
+                <MenuGrid
+                  menus={menus}
+                  selectedMenu={selectedMenu}
+                  onMenuSelect={handleMenuSelect}
+                />
+              </>
             )}
 
             {selectedMenu && (
@@ -344,7 +284,6 @@ export default function PricingPage() {
               startDate={startDate}
               endDate={endDate}
               onAddToCart={handleAddToCart}
-              onCheckout={handleCheckout}
             />
           </div>
         </div>

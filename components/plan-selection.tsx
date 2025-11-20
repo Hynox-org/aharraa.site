@@ -1,11 +1,11 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { Menu, Plan } from "@/lib/types";
+import { Menu, Plan, MenuWithPopulatedMeals } from "@/lib/types"; // Updated import
 import { Check, Calendar, Sparkles, RotateCcw } from "lucide-react";
 
 interface PlanSelectionProps {
-  selectedMenu: Menu;
+  selectedMenu: MenuWithPopulatedMeals; // Updated type
   selectedPlan: Plan | null;
   plans: Plan[];
   onPlanSelect: (plan: Plan) => void;

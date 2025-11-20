@@ -163,15 +163,12 @@ export interface Menu {
 }
 
 // Populated Menu (when meal is populated)
-export interface PopulatedMenuItem {
-  day: DayOfWeek;
-  category: MealCategory;
+export interface MenuItemWithPopulatedMeal extends Omit<MenuItem, 'meal'> {
   meal: Meal; // Populated Meal object
 }
 
-export interface PopulatedMenu extends Omit<Menu, 'menuItems' | 'vendor'> {
-  vendor: Vendor; // Populated Vendor object
-  menuItems: PopulatedMenuItem[];
+export interface MenuWithPopulatedMeals extends Omit<Menu, 'menuItems'> {
+  menuItems: MenuItemWithPopulatedMeal[];
 }
 
 // ============================================
@@ -231,7 +228,7 @@ export interface DeliveryAddressDocument {
 export interface CartItem {
   _id: string;
   user: string; // User ID reference
-  menu: string | Menu; // Menu ID reference or populated Menu
+  menu: string | Menu | MenuWithPopulatedMeals; // Menu ID reference, Menu, or MenuWithPopulatedMeals
   plan: string | Plan; // Plan ID reference or populated Plan
   quantity: number;
   personDetails?: PersonDetails[];
@@ -245,7 +242,7 @@ export interface CartItem {
 
 // Populated CartItem (when menu and plan are populated)
 export interface PopulatedCartItem extends Omit<CartItem, 'menu' | 'plan'> {
-  menu: Menu | PopulatedMenu; // Can be either populated or not
+  menu: Menu | MenuWithPopulatedMeals; // Can be either populated or not
   plan: Plan;
 }
 

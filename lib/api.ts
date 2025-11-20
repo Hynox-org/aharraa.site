@@ -12,7 +12,8 @@ import {
   Cart,
   CartItem,
   PersonDetails,
-  Menu
+  Menu,
+  MenuWithPopulatedMeals // Changed from PopulatedMenu
 } from "./types";
 
 
@@ -246,6 +247,14 @@ export async function getVendors(): Promise<Vendor[]> {
 
 export async function getMenusByVendor(vendorId: string): Promise<Menu[]> {
   return apiRequest<Menu[]>(`/api/vendors/${vendorId}/menus`, "GET");
+}
+
+export async function getAllMenus(): Promise<MenuWithPopulatedMeals[]> {
+  return apiRequest<MenuWithPopulatedMeals[]>("/api/menus", "GET");
+}
+
+export async function getVendorById(id: string): Promise<Vendor> {
+  return apiRequest<Vendor>(`/api/vendors/${id}`, "GET");
 }
 
 export async function getCartItems(
