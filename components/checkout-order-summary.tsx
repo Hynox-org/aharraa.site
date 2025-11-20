@@ -14,6 +14,7 @@ interface CheckoutOrderSummaryProps {
   deliveryCostPerCategory: number
   uniqueCategoryCount: number
   onProceedToPayment: () => void
+  isProcessingPayment: boolean // New prop for loading state
 }
 
 
@@ -28,6 +29,7 @@ export function CheckoutOrderSummary({
   deliveryCostPerCategory,
   uniqueCategoryCount,
   onProceedToPayment,
+  isProcessingPayment, // Destructure new prop
 }: CheckoutOrderSummaryProps) {
   const [open, setOpen] = useState(false)
   return (
@@ -106,9 +108,21 @@ export function CheckoutOrderSummary({
         onClick={onProceedToPayment}
         className="w-full py-3 sm:py-4 rounded-lg font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mt-4 sm:mt-6"
         style={{ backgroundColor: "#DDA15E", color: "#283618" }}
+        disabled={isProcessingPayment} // Disable button when processing payment
       >
-        Proceed to Payment
-        <IoArrowForward className="w-5 h-5" />
+        {isProcessingPayment ? (
+          <>
+            <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
+              style={{ borderColor: "#283618", borderTopColor: "transparent" }}>
+            </div>
+            Processing...
+          </>
+        ) : (
+          <>
+            Proceed to Payment
+            <IoArrowForward className="w-5 h-5" />
+          </>
+        )}
       </button>
 
       {/* Trust indicators & info */}

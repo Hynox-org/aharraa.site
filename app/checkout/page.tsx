@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { useStore } from "@/lib/store"
 import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -39,14 +38,15 @@ import { Button } from "@/components/ui/button" // Import Button component
 export default function CheckoutPage() {
   const { isAuthenticated, loading, user } = useAuth()
   const router = useRouter()
-  const setCheckoutData = useStore((state) => state.setCheckoutData)
   const [cartData, setCartData] = useState<Cart | null>(null);
   const [cartLoading, setCartLoading] = useState(true);
   const [deliveryAddresses, setDeliveryAddresses] = useState<
     Partial<Record<MealCategory, DeliveryAddress>>
   >({})
-const [useDefaultForAll, setUseDefaultForAll] = useState(false)
-const [primaryAddress, setPrimaryAddress] = useState<MealCategory>("Breakfast")
+  const [useDefaultForAll, setUseDefaultForAll] = useState(false)
+  const [primaryAddress, setPrimaryAddress] = useState<MealCategory>("Breakfast")
+  const [isFetchingAddresses, setIsFetchingAddresses] = useState(false) // New state for fetching addresses
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false) // New state for processing payment
 
 //  Fetch Cart Items from MongoDB
   useEffect(() => {
@@ -209,11 +209,13 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
   }, [isAuthenticated, loading, router])
 
   useEffect(() => {
-  if (!loading && !cartLoading && isAuthenticated && userCartItems.length === 0) {
+    // Only redirect if authentication is loaded, cart loading is complete,
+    // and the user is authenticated but the cart is empty.
+    if (!loading && !cartLoading && isAuthenticated && userCartItems.length === 0) {
       toast.info("Your cart is empty. Redirecting to pricing page.")
       router.push("/pricing")
     }
-  }, [loading, isAuthenticated, userCartItems.length, router])
+  }, [loading, cartLoading, isAuthenticated, userCartItems.length, router])
 
   useEffect(() => {
     const allMealCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"];
@@ -229,7 +231,8 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     setDeliveryAddresses(initialAddresses);
   }, []); // Empty dependency array to run once on mount
 
-  if (loading) {
+  // Combine authentication loading and cart specific loading for initial page load
+  if (loading || cartLoading) {
     return (
       <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
         <Header />
@@ -244,12 +247,13 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
             </p>
           </div>
         </div>
+        <Footer />
       </main>
     )
   }
 
   if (!isAuthenticated || !user) {
-    return null
+    return null // Should already be redirected by useEffect
   }
   const handleAddressChange = (
     category: MealCategory,
@@ -310,6 +314,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       return
     }
 
+    setIsFetchingAddresses(true) // Start loading for fetching addresses
     try {
       const userProfile = await getProfileDetails(token)
       if (userProfile) {
@@ -356,7 +361,9 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       }
     } catch (error) {
       console.error("Error fetching profile addresses:", error)
-      toast.error("Failed to fetch addresses from profile.")
+        toast.error("Failed to fetch addresses from profile.")
+    } finally {
+      setIsFetchingAddresses(false) // End loading for fetching addresses
     }
   }
 
@@ -390,6 +397,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       return
     }
 
+    setIsProcessingPayment(true) // Start loading for processing payment
     try {
       // 1. Update user profile with meal-specific delivery addresses
       const profileUpdatePayload: any = {
@@ -442,7 +450,6 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       }
 
       console.log("Finalized Checkout Data:", finalizedCheckoutData)
-      setCheckoutData(finalizedCheckoutData)
 
       // Create a deep copy of finalizedCheckoutData and remove the image property from meal objects
       const checkoutDataForBackend: CheckoutData = JSON.parse(
@@ -491,6 +498,8 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
   } catch (error: any) {
     console.error("Error during checkout process:", error)
     toast.error(`Failed to complete checkout: ${error.message || "Unknown error"}`)
+  } finally {
+    setIsProcessingPayment(false) // End loading for processing payment
   }
 }
 
@@ -580,8 +589,9 @@ const handleAddressChangeWithSync = (
                 onClick={handleFetchAddressesFromProfile}
                 className="text-white px-4 py-2 rounded-lg"
                 style={{ backgroundColor: "#606C38" }}
+                disabled={isFetchingAddresses} // Disable button while fetching
               >
-                Fetch Addresses
+                {isFetchingAddresses ? "Fetching..." : "Fetch Addresses"}
               </Button>
             </div>
             {/* Global "Use Same Address for All" Option */}
@@ -643,6 +653,7 @@ const handleAddressChangeWithSync = (
                 totalPlanDays={totalPlanDays}
                 uniqueCategoryCount={uniqueMealCategories.length}
                 onProceedToPayment={handleProceedToPayment}
+                isProcessingPayment={isProcessingPayment} // Pass loading state to summary card
               />
             </div>
           </div>

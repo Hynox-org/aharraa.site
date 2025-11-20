@@ -14,11 +14,14 @@ import { HiSparkles, HiClock, HiShieldCheck, HiHeart } from "react-icons/hi";
 import { IoRestaurant } from "react-icons/io5";
 import { MdDeliveryDining } from "react-icons/md";
 import { Spinner } from "@/components/ui/spinner"; // Import the Spinner component
+import { useStore } from "@/lib/store";
 
 export default function Home() {
   const router = useRouter();
   const { login, loading: authLoading } = useAuth(); // Get authLoading from context
   const [isLoadingHashToken, setIsLoadingHashToken] = useState(true); // Local loading state for hash token
+
+  const { returnUrl: storedReturnUrl, setReturnUrl } = useStore();
 
   useEffect(() => {
     const handleOAuthRedirect = async () => {
@@ -38,7 +41,13 @@ export default function Home() {
     };
 
     handleOAuthRedirect();
-  }, [router, login]);
+
+    if (!authLoading && !isLoadingHashToken && storedReturnUrl) {
+      router.push(storedReturnUrl);
+      setReturnUrl(null); // Clear the return URL after redirecting
+    }
+
+  }, [router, login, authLoading, isLoadingHashToken, storedReturnUrl, setReturnUrl]);
 
   // Show a loading spinner if either auth is loading or we are processing a hash token
   if (authLoading || isLoadingHashToken) {

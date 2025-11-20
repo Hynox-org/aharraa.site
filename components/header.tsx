@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useStore } from "@/lib/store"
 import { HiShoppingCart, HiMenu, HiX, HiUser, HiLogout, HiHome, HiInformationCircle, HiMail } from "react-icons/hi"
 import { useState, useEffect } from "react"
 import { useAuth } from "@/app/context/auth-context"

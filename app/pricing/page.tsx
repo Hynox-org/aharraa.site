@@ -8,7 +8,6 @@ import { getPlans, getAllMenus, getVendorById } from "@/lib/api"
 import { format, addDays } from "date-fns"
 import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
-import { useStore } from "@/lib/store"
 import { toast } from "sonner"
 
 import { PricingHeroSection } from "@/components/pricing-hero-section"
@@ -24,7 +23,6 @@ import { MenuGrid } from "@/components/menu-grid"
 export default function PricingPage() {
   const { user, isAuthenticated, token } = useAuth()
   const router = useRouter()
-  const { addToCart } = useStore()
 
   const [plans, setPlans] = useState<Plan[]>([])
   const [menus, setMenus] = useState<MenuWithPopulatedMeals[]>([]) // Menus now come with populated meals

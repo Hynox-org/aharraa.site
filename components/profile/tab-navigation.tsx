@@ -16,7 +16,7 @@ export function TabNavigation({
   return (
     <div className="mb-6 sm:mb-8 overflow-x-auto">
       <div
-        className="inline-flex gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg min-w-full sm:min-w-0"
+        className="inline-flex gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg min-w-full sm:min-w-0 justify-center"
         style={{ backgroundColor: "#ffffff" }}
       >
         <button
@@ -33,7 +33,7 @@ export function TabNavigation({
           }}
         >
           <User className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="">Overview</span>
+          <span className="hidden sm:inline">Overview</span>
         </button>
 
         <button
@@ -50,7 +50,7 @@ export function TabNavigation({
           }}
         >
           <Package className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="">Orders</span>
+          <span className="hidden sm:inline">Orders</span>
           {pendingOrders > 0 && (
             <span
               className="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold"
@@ -75,7 +75,7 @@ export function TabNavigation({
           }}
         >
           <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="">Addresses</span>
+          <span className="hidden sm:inline">Addresses</span>
         </button>
       </div>
     </div>

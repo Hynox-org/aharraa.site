@@ -375,7 +375,10 @@ export interface CheckoutData {
 // ============================================
 // Store Types (Zustand/State Management)
 // ============================================
-
+export interface Store {
+  returnUrl: string;
+  setReturnUrl: (url: string) => void;
+}
 export type MealType = "breakfast" | "lunch" | "dinner";
 
 export interface DateRange {

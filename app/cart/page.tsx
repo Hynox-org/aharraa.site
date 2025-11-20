@@ -17,10 +17,6 @@ import { User } from "@/lib/types"
 export default function CartPage() {
   const { isAuthenticated, loading, user } = useAuth()
   const router = useRouter()
-  // const cart = useStore((state) => state.cart)
-  // const removeFromCart = useStore((state) => state.removeFromCart)
-  // const updateCartItemQuantityInStore = useStore((state) => state.updateCartItemQuantity) // Rename to avoid conflict
-  // const updateCartItemPersonDetails = useStore((state) => state.updateCartItemPersonDetails)
   const { toast } = useToast() // Initialize useToast
 
   const [isEditingPersonDetails, setIsEditingPersonDetails] = useState(false)
@@ -28,6 +24,7 @@ export default function CartPage() {
   const [editingPersonDetails, setEditingPersonDetails] = useState<PersonDetails[]>([])
   const [pendingNewQuantity, setPendingNewQuantity] = useState<number | null>(null)
   const [fetchedCart, setFetchedCart] = useState<any>(null)
+  const [isCartLoading, setIsCartLoading] = useState(true) // New state for cart loading
 
   // Helper function for person details validation
   const arePersonDetailsValidForQuantity = (details: PersonDetails[] | undefined, requiredQuantity: number) => {
@@ -59,19 +56,27 @@ useEffect(() => {
       if (!token) {
         console.error("No auth token found — user must log in first");
         router.push("/auth?returnUrl=/cart")
+        setIsCartLoading(false); // Ensure loading state is false if redirecting
+        return;
       }
       const fetchCart = async () => {
+        setIsCartLoading(true); // Start loading
         try {
-        const cartData = await getCartItems(user.id!, token!); // Use ! to assert user.id is not undefined
-        console.log("Fetched cart items:", cartData);
+          const cartData = await getCartItems(user.id!, token!); // Use ! to assert user.id is not undefined
+          console.log("Fetched cart items:", cartData);
           setFetchedCart(cartData);
         } catch (error) {
           console.error("Failed to fetch cart items:", error);
+          toast({ title: "Error", description: "Failed to fetch cart items." }); // Add toast for error
+        } finally {
+          setIsCartLoading(false); // End loading
         }
       };
       fetchCart();
+    } else if (!loading && !isAuthenticated) {
+      setIsCartLoading(false); // If not authenticated, cart is not loading
     }
-  }, [isAuthenticated, loading, user?.id]);
+  }, [isAuthenticated, loading, user?.id, toast, router]); // Add toast to dependency array
 
   const handleEditPersonDetails = (itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => {
     console.log("setting currentEditingCartItemId to", itemId);
@@ -181,7 +186,8 @@ useEffect(() => {
   }
   };
 
-  if (loading) {
+  // Combine authentication loading and cart specific loading
+  if (loading || isCartLoading) {
     return (
       <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
         <Header />
@@ -195,12 +201,13 @@ useEffect(() => {
             </p>
           </div>
         </div>
+        <Footer />
       </main>
     )
   }
 
   if (!isAuthenticated || !user) {
-    return null
+    return null // Should already be redirected by useEffect
   }
   console.log("User ID:", user?.id);
   console.log("Fetched Cart:", fetchedCart);
