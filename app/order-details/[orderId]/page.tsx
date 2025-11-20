@@ -23,6 +23,7 @@ import {
   Receipt,
   Timer,
   FastForward,
+  Download,
 } from "lucide-react";
 
 interface OrderDetailsPageProps {
@@ -285,6 +286,18 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
               >
                 {order.status}
               </span>
+              {order.status === "confirmed" && order.invoiceUrl && (
+                <a
+                  href={order.invoiceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap"
+                  style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
+                >
+                  <Download className="w-4 h-4 flex-shrink-0" />
+                  Download Invoice
+                </a>
+              )}
             </div>
           </div>
 
@@ -576,7 +589,9 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                             item.startDate,
                             item.endDate,
                             item.skippedDates
-                          ) || isTomorrowSkipped
+                          ) ||
+                          isTomorrowSkipped ||
+                          order.status === "cancelled"
                         }
                         className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap disabled:opacity-60"
                         style={{ backgroundColor: "#BC6C25", color: "#FEFAE0" }}
