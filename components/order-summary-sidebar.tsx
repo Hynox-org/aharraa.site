@@ -1,38 +1,32 @@
 "use client"
 
-import { useState } from "react" // Added useState
 import { IoCart, IoCheckmarkCircle } from "react-icons/io5"
 import { GiMeal } from "react-icons/gi"
-import { Menu, Plan, MenuWithPopulatedMeals } from "@/lib/types" // Updated import
+import { Menu, Plan, MenuWithPopulatedMeals } from "@/lib/types"
 import { format } from "date-fns"
-import { Spinner } from "./ui/spinner" // Added Spinner import
+import { Spinner } from "./ui/spinner"
 
 interface OrderSummarySidebarProps {
-  selectedMenu: MenuWithPopulatedMeals | null // Updated type
+  selectedMenu: MenuWithPopulatedMeals | null
   selectedPlan: Plan | null
   quantity: number
   startDate: Date | undefined
   endDate: Date | undefined
   onAddToCart: () => void
+  isAddingToCart: boolean
 }
 
 export function OrderSummarySidebar({
-  selectedMenu, // Changed from selectedMeal
+  selectedMenu,
   selectedPlan,
   quantity,
   startDate,
   endDate,
   onAddToCart,
+  isAddingToCart,
 }: OrderSummarySidebarProps) {
-  const [isLoading, setIsLoading] = useState(false) // Added loading state
-  const totalAmount = selectedMenu && selectedPlan ? selectedMenu.perDayPrice * selectedPlan.durationDays * quantity : 0 // Changed from selectedMeal.price to selectedMenu.perDayPrice
-  const isComplete = selectedMenu && selectedPlan && startDate && endDate && quantity >= 1 // Changed from selectedMeal
-
-  const handleAddToCartClick = async () => {
-    setIsLoading(true)
-    await onAddToCart() // Assuming onAddToCart can be awaited for async operations
-    setIsLoading(false)
-  }
+  const totalAmount = selectedMenu && selectedPlan ? selectedMenu.perDayPrice * selectedPlan.durationDays * quantity : 0
+  const isComplete = selectedMenu && selectedPlan && startDate && endDate && quantity >= 1
 
   return (
     <div className="sticky top-6">
@@ -152,16 +146,16 @@ export function OrderSummarySidebar({
                   {/* Buttons */}
                   <div className="space-y-3">
                     <button
-                      onClick={handleAddToCartClick}
-                      disabled={!isComplete || isLoading} // Disable when loading
+                      onClick={onAddToCart}
+                      disabled={!isComplete || isAddingToCart}
                       className="w-full py-3 rounded-lg font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       style={{
                         backgroundColor: "#606C38",
                         color: "#FEFAE0"
                       }}
                     >
-                      {isLoading ? (
-                        <Spinner className="w-4 h-4 text-white" /> // Show spinner when loading
+                      {isAddingToCart ? (
+                        <Spinner className="w-4 h-4 text-white" />
                       ) : (
                         <>
                           <IoCart className="w-4 h-4" />

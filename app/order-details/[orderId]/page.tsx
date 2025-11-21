@@ -8,6 +8,8 @@ import { Footer } from "@/components/footer";
 import { toast } from "sonner";
 import { getOrderDetails, updateOrder } from "@/lib/api";
 import { Order, PopulatedOrder, DeliveryAddress } from "@/lib/types";
+import LottieAnimation from "@/components/lottie-animation";
+import ItayCheffAnimation from "@/public/lottie/ItayCheff.json";
 import {
   Package,
   Calendar,
@@ -178,22 +180,9 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
 
   if (authLoading || loading) {
     return (
-      <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
-        <Header />
-        <div className="flex flex-col justify-center items-center min-h-[60vh] px-4">
-          <div
-            className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mb-4"
-            style={{ borderColor: "#606C38", borderTopColor: "transparent" }}
-          ></div>
-          <p
-            className="text-sm sm:text-base md:text-lg font-medium text-center"
-            style={{ color: "#283618" }}
-          >
-            Loading order details...
-          </p>
-        </div>
-        <Footer />
-      </main>
+      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+        <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
+      </div>
     );
   }
 

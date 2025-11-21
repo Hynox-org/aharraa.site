@@ -11,6 +11,8 @@ import { apiRequest, oauthLogin } from "@/lib/api"
 import { AuthApiResponse } from "@/lib/types"
 import { useStore } from "@/lib/store"
 import { Spinner } from "@/components/ui/spinner"
+import LottieAnimation from "@/components/lottie-animation"
+import ItayCheffAnimation from "../../public/lottie/ItayCheff.json";
 
 function AuthPageContent() {
   const [isSignInLoading, setIsSignInLoading] = useState(false)
@@ -36,17 +38,10 @@ function AuthPageContent() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#FEFAE0" }}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
-            style={{ borderColor: "#606C38", borderTopColor: "transparent" }}>
-          </div>
-          <p className="text-lg font-medium" style={{ color: "#283618" }}>
-            Loading...
-          </p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+        <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
       </div>
-    )
+    );
   }
 
   if (isAuthenticated) {
@@ -61,7 +56,7 @@ function AuthPageContent() {
         password: signInPassword,
       })
       if (data.accessToken) {
-        await login(data.accessToken, storedReturnUrl)
+        await login(data.accessToken, storedReturnUrl ?? undefined)
       }
       toast.success("Sign in successful!")
     } catch (error: any) {
@@ -85,7 +80,7 @@ function AuthPageContent() {
       })
 
       if (data.accessToken) {
-        await login(data.accessToken, storedReturnUrl)
+        await login(data.accessToken, storedReturnUrl ?? undefined)
       }
 
       toast.success("Signup successful!")

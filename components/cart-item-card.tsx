@@ -10,9 +10,11 @@ interface CartItemCardProps {
   onUpdateQuantity: (itemId: string, quantity: number) => void
   onRemoveItem: (itemId: string) => void
   onEditPersonDetails: (itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => void
+  isUpdatingQuantity: boolean
+  isRemovingItem: boolean
 }
 
-export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPersonDetails }: CartItemCardProps) {
+export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPersonDetails, isUpdatingQuantity, isRemovingItem }: CartItemCardProps) {
     console.log("CartItemCard rendering for item:", item);
   return (
     <div className="rounded-xl p-4 sm:p-6 shadow-md" style={{ backgroundColor: "#ffffff" }}>
@@ -49,7 +51,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
         <div className="hidden sm:flex items-start gap-2">
           <button
             onClick={() => onUpdateQuantity(item._id, Math.max(1, item.quantity - 1))}
-            disabled={item.quantity <= 1}
+            disabled={item.quantity <= 1 || isUpdatingQuantity}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-30"
             style={{ 
               backgroundColor: "#DDA15E",
@@ -65,6 +67,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
           
           <button
             onClick={() => onUpdateQuantity(item._id, item.quantity + 1)}
+            disabled={isUpdatingQuantity}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
             style={{ 
               backgroundColor: "#DDA15E",
@@ -76,6 +79,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
           
           <button
             onClick={() => onRemoveItem(item._id)}
+            disabled={isRemovingItem}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all ml-2"
             style={{ 
               backgroundColor: "#BC6C25",
@@ -95,7 +99,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
         <div className="flex items-center gap-3">
           <button
             onClick={() => onUpdateQuantity(item._id, Math.max(1, item.quantity - 1))}
-            disabled={item.quantity <= 1}
+            disabled={item.quantity <= 1 || isUpdatingQuantity}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-30"
             style={{ 
               backgroundColor: "#DDA15E",
@@ -111,6 +115,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
           
           <button
             onClick={() => onUpdateQuantity(item._id, item.quantity + 1)}
+            disabled={isUpdatingQuantity}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
             style={{ 
               backgroundColor: "#DDA15E",
@@ -122,6 +127,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
           
           <button
             onClick={() => onRemoveItem(item._id)}
+            disabled={isRemovingItem}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all ml-2"
             style={{ 
               backgroundColor: "#BC6C25",

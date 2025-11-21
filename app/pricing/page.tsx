@@ -40,6 +40,7 @@ export default function PricingPage() {
   )
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
+  const [isAddingToCart, setIsAddingToCart] = useState(false) // New loading state for add to cart
 
   useEffect(() => {
     async function fetchData() {
@@ -147,68 +148,73 @@ export default function PricingPage() {
     return isValid;
   }
 
-  const handleAddToCart = async() => {
+  const handleAddToCart = async () => {
+    if (isAddingToCart) return; // Prevent multiple clicks
+
     if (!isAuthenticated) {
       router.push("/auth?returnUrl=/pricing")
       return
     }
 
-  if (!selectedMenu) {
-    toast.error("Cannot add to cart", { description: "Please select a menu." });
-    return;
-  }
-  if (!selectedVendor) { // Ensure selectedVendor is populated from menu
-    toast.error("Cannot add to cart", { description: "Vendor details not loaded for selected menu." });
-    return;
-  }
-  if (!selectedPlan) {
-    toast.error("Cannot add to cart", { description: "Please select a plan." });
-    return;
-  }
-  if (quantity <= 0) {
-    toast.error("Cannot add to cart", { description: "Quantity must be greater than 0." });
-    return;
-  }
-  if (!startDate || !endDate) {
-    toast.error("Cannot add to cart", { description: "Please select a start date." });
-    return;
-  }
-  if (!arePersonDetailsValid()) {
-    toast.error("Invalid Details", { description: "Please fill all person details correctly." });
-    return;
-  }
-  if (!user?.id) {
-    toast.error("Cannot add to cart", { description: "User not authenticated. Please log in." });
-    return;
-  }
+    if (!selectedMenu) {
+      toast.error("Cannot add to cart", { description: "Please select a menu." });
+      return;
+    }
+    if (!selectedVendor) { // Ensure selectedVendor is populated from menu
+      toast.error("Cannot add to cart", { description: "Vendor details not loaded for selected menu." });
+      return;
+    }
+    if (!selectedPlan) {
+      toast.error("Cannot add to cart", { description: "Please select a plan." });
+      return;
+    }
+    if (quantity <= 0) {
+      toast.error("Cannot add to cart", { description: "Quantity must be greater than 0." });
+      return;
+    }
+    if (!startDate || !endDate) {
+      toast.error("Cannot add to cart", { description: "Please select a start date." });
+      return;
+    }
+    if (!arePersonDetailsValid()) {
+      toast.error("Invalid Details", { description: "Please fill all person details correctly." });
+      return;
+    }
+    if (!user?.id) {
+      toast.error("Cannot add to cart", { description: "User not authenticated. Please log in." });
+      return;
+    }
 
-  const token = localStorage.getItem("aharraa-u-token");
-  if (!token) {
-    router.push("/auth?returnUrl=/pricing");
-    return;
-  }
+    const token = localStorage.getItem("aharraa-u-token");
+    if (!token) {
+      router.push("/auth?returnUrl=/pricing");
+      return;
+    }
 
-  const cartItem = {
-    menuId: selectedMenu._id,
-    planId: selectedPlan._id,
-    quantity,
-    startDate: format(startDate, "yyyy-MM-dd"),
-    personDetails: quantity >= 1 ? personDetails : undefined,
-  };
+    const cartItem = {
+      menuId: selectedMenu._id,
+      planId: selectedPlan._id,
+      quantity,
+      startDate: format(startDate, "yyyy-MM-dd"),
+      personDetails: quantity >= 1 ? personDetails : undefined,
+    };
 
-  try {
-    const updatedCart = await addToCartApi(user.id!, cartItem, token);
-    toast.success("Added to Cart!", {
-      description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added successfully.`,
-    });
-    resetSelection();
-    router.push("/cart")
-  } catch (error: any) {
-    toast.error("Error", {
-      description: error.message || "Failed to add item to cart.",
-    });
+    try {
+      setIsAddingToCart(true); // Set loading state
+      const updatedCart = await addToCartApi(user.id!, cartItem, token);
+      toast.success("Added to Cart!", {
+        description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added successfully.`,
+      });
+      resetSelection();
+      router.push("/cart")
+    } catch (error: any) {
+      toast.error("Error", {
+        description: error.message || "Failed to add item to cart.",
+      });
+    } finally {
+      setIsAddingToCart(false); // Reset loading state
+    }
   }
-}
 
   const resetSelection = () => {
     setSelectedMenu(null)
@@ -257,7 +263,7 @@ export default function PricingPage() {
 
             {selectedMenu && (
               <PlanSelection
-                selectedMenu={selectedMenu} // Meal is no longer directly selected
+                selectedMenu={selectedMenu}
                 selectedPlan={selectedPlan}
                 plans={plans}
                 onPlanSelect={handlePlanSelect}
@@ -299,6 +305,7 @@ export default function PricingPage() {
               startDate={startDate}
               endDate={endDate}
               onAddToCart={handleAddToCart}
+              isAddingToCart={isAddingToCart}
             />
           </div>
         </div>

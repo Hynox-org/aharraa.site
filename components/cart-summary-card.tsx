@@ -1,24 +1,21 @@
 "use client"
 
-import { useState } from "react" // Added useState
-import { useRouter } from "next/navigation" // Added useRouter
+import { useRouter } from "next/navigation"
 import { IoCart, IoArrowForward } from "react-icons/io5"
 import Link from "next/link"
-import { Spinner } from "./ui/spinner" // Added Spinner import
+import { Spinner } from "./ui/spinner"
 
 interface CartSummaryCardProps {
   totalItems: number
   totalPrice: number
+  isUpdatingCart: boolean
 }
 
-export function CartSummaryCard({ totalItems, totalPrice }: CartSummaryCardProps) {
-  const [isLoading, setIsLoading] = useState(false)
+export function CartSummaryCard({ totalItems, totalPrice, isUpdatingCart }: CartSummaryCardProps) {
   const router = useRouter()
 
   const handleCheckoutClick = () => {
-    setIsLoading(true)
     router.push("/checkout")
-    // setIsLoading(false) // This might not be reached if the page navigates immediately
   }
 
   return (
@@ -57,16 +54,16 @@ export function CartSummaryCard({ totalItems, totalPrice }: CartSummaryCardProps
         {/* Checkout Button */}
         <div className="block mt-6">
           <button 
-            onClick={handleCheckoutClick} // Added onClick handler
-            disabled={isLoading} // Disable when loading
-            className="w-full py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed" // Added disabled styles
+            onClick={handleCheckoutClick}
+            disabled={isUpdatingCart}
+            className="w-full py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ 
               backgroundColor: "#DDA15E",
               color: "#283618"
             }}
           >
-            {isLoading ? (
-              <Spinner className="w-5 h-5 text-[#283618]" /> // Show spinner when loading
+            {isUpdatingCart ? (
+              <Spinner className="w-5 h-5 text-[#283618]" />
             ) : (
               <>
                 Proceed to Checkout

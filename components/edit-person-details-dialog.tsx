@@ -2,14 +2,16 @@
 
 import { IoClose, IoCheckmarkCircle } from "react-icons/io5"
 import { PersonDetails } from "@/lib/types"
+import { Spinner } from "./ui/spinner" // Import Spinner
 
 interface EditPersonDetailsDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   editingPersonDetails: PersonDetails[]
   onPersonDetailChange: (index: number, field: keyof PersonDetails, value: string) => void
-  onSave: (cartItemId: string) => void;  // expect id as argument
-  currentEditingCartItemId: string | null;  // add this new prop
+  onSave: (cartItemId: string) => void;
+  currentEditingCartItemId: string | null;
+  isSaving: boolean; // New prop for saving loading state
 }
 
 export function EditPersonDetailsDialog({
@@ -19,6 +21,7 @@ export function EditPersonDetailsDialog({
   onPersonDetailChange,
   onSave,
   currentEditingCartItemId,
+  isSaving, // Use the new prop
 }: EditPersonDetailsDialogProps) {
   if (!isOpen) return null
 
@@ -195,15 +198,21 @@ console.log("currentEditingCartItemId:", currentEditingCartItemId);
           </button>
           <button
             onClick={handleSave}
-            disabled={!areAllDetailsValid()}
+            disabled={!areAllDetailsValid() || isSaving}
             className="w-full sm:flex-1 py-3 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed order-1 sm:order-2"
             style={{ 
               backgroundColor: "#606C38",
               color: "#FEFAE0"
             }}
           >
-            <IoCheckmarkCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-            Save Changes
+            {isSaving ? (
+              <Spinner className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            ) : (
+              <>
+                <IoCheckmarkCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                Save Changes
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -33,6 +33,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "orders" | "addresses">("overview");
   const [orders, setOrders] = useState<Order[]>([]);
+  const [isCancellingOrder, setIsCancellingOrder] = useState(false); // New loading state
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // New loading state
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
@@ -136,7 +138,7 @@ export default function ProfilePage() {
       return;
     }
 
-    setLoading(true);
+    setIsCancellingOrder(true); // Start loading
     try {
       const updatedOrder = await updateOrder(orderId, { status: "cancelled" }, token);
       setOrders((prevOrders) =>
@@ -148,16 +150,17 @@ export default function ProfilePage() {
     } catch (error: any) {
       toast.error(`Failed to cancel order: ${error.message}`);
     } finally {
-      setLoading(false);
+      setIsCancellingOrder(false); // End loading
     }
   };
 
   const handleUpdateProfile = async () => {
-    setLoading(true);
+    setIsUpdatingProfile(true); // Start loading
     try {
       if (!token) {
         toast.error("Authentication token not found. Please log in again.");
         router.push("/auth");
+        setIsUpdatingProfile(false);
         return;
       }
 
@@ -171,7 +174,7 @@ export default function ProfilePage() {
         router.push("/auth");
       }
     } finally {
-      setLoading(false);
+      setIsUpdatingProfile(false); // End loading
     }
   };
 
@@ -253,6 +256,7 @@ export default function ProfilePage() {
             setIsEditing={setIsEditing}
             loading={loading}
             handleUpdateProfile={handleUpdateProfile}
+            isUpdatingProfile={isUpdatingProfile} // Pass loading state
             setActiveTab={setActiveTab}
             router={router}
           />
@@ -264,6 +268,7 @@ export default function ProfilePage() {
             tabLoading={tabLoading}
             loading={loading}
             handleCancelOrder={handleCancelOrder}
+            isCancellingOrder={isCancellingOrder} // Pass loading state
             router={router}
           />
         )}
@@ -277,6 +282,7 @@ export default function ProfilePage() {
             setIsEditing={setIsEditing}
             loading={loading}
             handleUpdateProfile={handleUpdateProfile}
+            isUpdatingProfile={isUpdatingProfile} // Pass loading state
           />
         )}
       </div>

@@ -12,15 +12,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner"; // Import Spinner
 
 interface CancelConfirmationModalProps {
   onConfirm: () => void;
   children: React.ReactNode;
+  isCancellingOrder: boolean; // New prop
 }
 
 export function CancelConfirmationModal({
   onConfirm,
   children,
+  isCancellingOrder, // Destructure new prop
 }: CancelConfirmationModalProps) {
   return (
     <AlertDialog>
@@ -36,8 +39,14 @@ export function CancelConfirmationModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Continue</AlertDialogAction>
+          <AlertDialogCancel disabled={isCancellingOrder}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} disabled={isCancellingOrder}>
+            {isCancellingOrder ? (
+              <Spinner className="w-4 h-4 text-white" />
+            ) : (
+              "Continue"
+            )}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

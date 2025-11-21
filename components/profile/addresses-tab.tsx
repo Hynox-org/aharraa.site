@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Spinner } from "../ui/spinner"; // Import Spinner
 
 interface AddressesTabProps {
   profile: UserProfile;
@@ -20,6 +21,7 @@ interface AddressesTabProps {
   setIsEditing: (editing: boolean) => void;
   loading: boolean;
   handleUpdateProfile: () => void;
+  isUpdatingProfile: boolean; // New prop
 }
 
 export function AddressesTab({
@@ -30,6 +32,7 @@ export function AddressesTab({
   setIsEditing,
   loading,
   handleUpdateProfile,
+  isUpdatingProfile, // Destructure new prop
 }: AddressesTabProps) {
   const [fetchingLocation, setFetchingLocation] = useState(false);
 
@@ -433,12 +436,16 @@ export function AddressesTab({
           </button>
           <button
             onClick={handleUpdateProfile}
-            disabled={loading}
+            disabled={isUpdatingProfile} // Use isUpdatingProfile
             className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 flex items-center justify-center gap-2 text-sm w-full sm:w-auto"
             style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
           >
-            <Save className="w-4 h-4 sm:w-5 sm:h-5" />
-            {loading ? "Saving..." : "Save All Addresses"}
+            {isUpdatingProfile ? (
+              <Spinner className="w-4 h-4 sm:w-5 sm:h-5 text-[#FEFAE0]" />
+            ) : (
+              <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
+            {isUpdatingProfile ? "Saving..." : "Save All Addresses"}
           </button>
         </div>
       )}

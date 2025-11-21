@@ -3,6 +3,7 @@
 import { IoLocation, IoCopy, IoCheckmarkCircle } from "react-icons/io5"
 import { DeliveryAddress, MealCategory } from "@/lib/types"
 import { useState } from "react"
+import { Spinner } from "./ui/spinner" // Import Spinner
 
 interface DeliveryAddressCardProps {
   category: MealCategory
@@ -28,6 +29,8 @@ export function DeliveryAddressCard({
   showCopyOptions = true
 }: DeliveryAddressCardProps) {
   const [showCopyMenu, setShowCopyMenu] = useState(false)
+  const [isGeolocationLoading, setIsGeolocationLoading] = useState(false) // New loading state for geolocation
+  const [isCopyingAddress, setIsCopyingAddress] = useState(false) // New loading state for copying address
   
   // Validation helpers
   const isStreetValid = (street: string) => street.trim().length >= 5
@@ -85,18 +88,45 @@ export function DeliveryAddressCard({
           </p>
         </div>
         
+        {/* Geolocation Button */}
+        <button
+          onClick={async () => {
+            setIsGeolocationLoading(true);
+            await onGeolocation(category);
+            setIsGeolocationLoading(false);
+          }}
+          disabled={isDisabled || isGeolocationLoading}
+          className="h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ 
+            backgroundColor: "#DDA15E",
+            color: "#FEFAE0"
+          }}
+        >
+          {isGeolocationLoading ? (
+            <Spinner className="w-4 h-4 text-[#FEFAE0]" />
+          ) : (
+            <IoLocation className="w-4 h-4" />
+          )}
+          <span>Get Location</span>
+        </button>
+
         {/* Copy Address Button */}
         {showCopyOptions && onCopyAddress && availableCopyTargets.length > 0 && (
           <div className="relative">
             <button
               onClick={() => setShowCopyMenu(!showCopyMenu)}
-              className="h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-medium transition-all"
+              disabled={isDisabled || isCopyingAddress}
+              className="h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ 
                 backgroundColor: "#DDA15E",
                 color: "#FEFAE0"
               }}
             >
-              <IoCopy className="w-4 h-4" />
+              {isCopyingAddress ? (
+                <Spinner className="w-4 h-4 text-[#FEFAE0]" />
+              ) : (
+                <IoCopy className="w-4 h-4" />
+              )}
               Copy to...
             </button>
             
@@ -109,11 +139,14 @@ export function DeliveryAddressCard({
                 {availableCopyTargets.map((targetCategory) => (
                   <button
                     key={targetCategory}
-                    onClick={() => {
-                      onCopyAddress(category, targetCategory)
-                      setShowCopyMenu(false)
+                    onClick={async () => {
+                      setIsCopyingAddress(true);
+                      setShowCopyMenu(false);
+                      await onCopyAddress(category, targetCategory);
+                      setIsCopyingAddress(false);
                     }}
-                    className="w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-all hover:bg-opacity-10"
+                    disabled={isCopyingAddress}
+                    className="w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-all hover:bg-opacity-10 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ 
                       color: "#283618",
                       backgroundColor: "transparent"

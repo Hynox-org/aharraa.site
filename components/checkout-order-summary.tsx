@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { IoCart, IoArrowForward, IoCheckmarkCircle } from "react-icons/io5"
+import { Spinner } from "./ui/spinner" // Import Spinner
 
 interface CheckoutOrderSummaryProps {
   totalPrice: number
@@ -103,9 +104,7 @@ export function CheckoutOrderSummary({
       >
         {isProcessingPayment ? (
           <>
-            <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
-              style={{ borderColor: "#283618", borderTopColor: "transparent" }}>
-            </div>
+            <Spinner className="w-5 h-5 text-[#283618]" />
             Processing...
           </>
         ) : (

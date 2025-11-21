@@ -1,5 +1,6 @@
 import { UserProfile } from "@/lib/types";
 import { User, Edit3, Save, X, Package, MapPin, CreditCard, ArrowRight } from "lucide-react";
+import { Spinner } from "../ui/spinner"; // Corrected Import Spinner path
 
 interface GeneralTabProps {
   profile: UserProfile;
@@ -9,6 +10,7 @@ interface GeneralTabProps {
   setIsEditing: (editing: boolean) => void;
   loading: boolean;
   handleUpdateProfile: () => void;
+  isUpdatingProfile: boolean; // New prop
   setActiveTab: (tab: "overview" | "orders" | "addresses") => void;
   router: any;
 }
@@ -21,6 +23,7 @@ export function GeneralTab({
   setIsEditing,
   loading,
   handleUpdateProfile,
+  isUpdatingProfile, // Destructure new prop
   setActiveTab,
   router,
 }: GeneralTabProps) {
@@ -95,12 +98,16 @@ export function GeneralTab({
                 </button>
                 <button
                   onClick={handleUpdateProfile}
-                  disabled={loading}
+                  disabled={isUpdatingProfile} // Use isUpdatingProfile
                   className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm flex-1 sm:flex-none"
                   style={{ backgroundColor: "#DDA15E", color: "#283618" }}
                 >
-                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>{loading ? "Saving..." : "Save"}</span>
+                  {isUpdatingProfile ? (
+                    <Spinner className="w-4 h-4 sm:w-5 sm:h-5 text-[#283618]" />
+                  ) : (
+                    <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+                  )}
+                  <span>{isUpdatingProfile ? "Saving..." : "Save"}</span>
                 </button>
               </>
             ) : (

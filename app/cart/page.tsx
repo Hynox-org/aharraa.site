@@ -6,6 +6,8 @@ import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { PersonDetails } from "@/lib/types"
+import LottieAnimation from "@/components/lottie-animation"
+import ItayCheffAnimation from "@/public/lottie/ItayCheff.json"
 import { useToast } from "@/components/ui/use-toast" // Import useToast
 
 import { CartEmptyState } from "@/components/cart-empty-state"
@@ -14,6 +16,7 @@ import { CartSummaryCard } from "@/components/cart-summary-card"
 import { EditPersonDetailsDialog } from "@/components/edit-person-details-dialog"
 import { getCartItems ,removeFromCart , updateCartItemQuantity ,updateCartItemPersonDetails} from "@/lib/api"
 import { User } from "@/lib/types"
+
 export default function CartPage() {
   const { isAuthenticated, loading, user } = useAuth()
   const router = useRouter()
@@ -25,6 +28,9 @@ export default function CartPage() {
   const [pendingNewQuantity, setPendingNewQuantity] = useState<number | null>(null)
   const [fetchedCart, setFetchedCart] = useState<any>(null)
   const [isCartLoading, setIsCartLoading] = useState(true) // New state for cart loading
+  const [isUpdatingQuantity, setIsUpdatingQuantity] = useState(false) // New loading state
+  const [isRemovingItem, setIsRemovingItem] = useState(false) // New loading state
+  const [isSavingPersonDetails, setIsSavingPersonDetails] = useState(false) // New loading state
 
   // Helper function for person details validation
   const arePersonDetailsValidForQuantity = (details: PersonDetails[] | undefined, requiredQuantity: number) => {
@@ -37,17 +43,19 @@ export default function CartPage() {
       return nameValid && phoneValid;
     });
   };
- const User= user;
+  const User = user;
+
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/auth?returnUrl=/cart")
     }
   }, [isAuthenticated, loading, router])
-useEffect(() => {
-  if (currentEditingCartItemId !== null) {
-    setIsEditingPersonDetails(true);
-  }
-}, [currentEditingCartItemId]);
+
+  useEffect(() => {
+    if (currentEditingCartItemId !== null) {
+      setIsEditingPersonDetails(true);
+    }
+  }, [currentEditingCartItemId]);
 
   useEffect(() => {
     if (!loading && isAuthenticated && user?.id) {
@@ -91,13 +99,17 @@ useEffect(() => {
   };
 
   const handleSavePersonDetails = async () => {
+    if (isSavingPersonDetails) return; // Prevent multiple clicks
+    setIsSavingPersonDetails(true);
+
     console.log("handleSavePersonalDetails called")
-    const currentItem=currentEditingCartItemId;
+    const currentItem = currentEditingCartItemId;
     if (currentEditingCartItemId) {
       // Validation is handled within EditPersonDetailsDialog before onSave is called
       const token = localStorage.getItem("aharraa-u-token");
       if (!token || !user?.id) {
         router.push("/auth?returnUrl=/cart");
+        setIsSavingPersonDetails(false);
         return;
       }
       console.log("verified token and user");
@@ -115,20 +127,22 @@ useEffect(() => {
           const updatedCartWithQuantity = await updateCartItemQuantity(user.id, currentEditingCartItemId, pendingNewQuantity, token);
           setFetchedCart(updatedCartWithQuantity);
           toast({ title: "Quantity updated successfully!" });
-        
-        setPendingNewQuantity(null);
-      }
-      console.log("Closing edit dialog");
-      setIsEditingPersonDetails(false);
-      setCurrentEditingCartItemId(null);
-      setEditingPersonDetails([]);
-    }
-    catch (error) {
+
+          setPendingNewQuantity(null);
+        }
+        console.log("Closing edit dialog");
+        setIsEditingPersonDetails(false);
+        setCurrentEditingCartItemId(null);
+        setEditingPersonDetails([]);
+      } catch (error) {
         console.error("Failed to update person details:", error);
-        toast({ title: "Error", description: "Failed to save person details." });      
+        toast({ title: "Error", description: "Failed to save person details." });
+      } finally {
+        setIsSavingPersonDetails(false);
       }
-    }else{
+    } else {
       console.error("currentEditingCartItemId is null");
+      setIsSavingPersonDetails(false);
     }
   };
 
@@ -143,66 +157,80 @@ useEffect(() => {
 
   // New handler for updating quantity
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
+    if (isUpdatingQuantity) return; // Prevent multiple clicks
+    setIsUpdatingQuantity(true);
+
     const currentItem = (fetchedCart?.items || []).find((item: any) => item._id === itemId);
-    if (!currentItem || !user?.id) return;
+    if (!currentItem || !user?.id) {
+      setIsUpdatingQuantity(false);
+      return;
+    }
     const token = localStorage.getItem("aharraa-u-token");
     if (!token) {
       router.push("/auth?returnUrl=/cart");
+      setIsUpdatingQuantity(false);
       return;
     }
-    if (newQuantity > currentItem.quantity) {
-      setPendingNewQuantity(newQuantity);
-      handleEditPersonDetails(itemId, currentItem.personDetails, newQuantity);
-      return;
-    } else if (newQuantity < currentItem.quantity) {
-      const updatedDetails = currentItem.personDetails?.slice(0, newQuantity) || [];
-      try {
-        const updatedCart = await updateCartItemPersonDetails(user.id, itemId, updatedDetails, token);
-        setFetchedCart(updatedCart);
-        toast({ title: "Person details updated!" });
-      } catch (error) {
-        toast({ title: "Failed to update person details", variant: "destructive" });
-      }
-    } 
+
     try {
+      if (newQuantity > currentItem.quantity) {
+        setPendingNewQuantity(newQuantity);
+        handleEditPersonDetails(itemId, currentItem.personDetails, newQuantity);
+        // Note: isUpdatingQuantity will be set to false after person details are saved.
+        return;
+      } else if (newQuantity < currentItem.quantity) {
+        const updatedDetails = currentItem.personDetails?.slice(0, newQuantity) || [];
+        await updateCartItemPersonDetails(user.id, itemId, updatedDetails, token);
+        toast({ title: "Person details updated!" });
+      }
+
       const updatedCart = await updateCartItemQuantity(user.id, itemId, newQuantity, token);
       setFetchedCart(updatedCart);
       toast({ title: "Quantity updated successfully!" });
     } catch (error) {
+      console.error("Failed to update quantity:", error);
       toast({ title: "Failed to update quantity", variant: "destructive" });
+    } finally {
+      setIsUpdatingQuantity(false);
     }
   };
 
-  const handleRemoveItem = async(itemId: string) => {
+  const handleRemoveItem = async (itemId: string) => {
+    if (isRemovingItem) return; // Prevent multiple clicks
+    setIsRemovingItem(true);
+
     const token = localStorage.getItem("aharraa-u-token");
-    if(!token){       
-      router.push("/auth?returnUrl=/cart")
+    if (!token) {
+      router.push("/auth?returnUrl=/cart");
+      setIsRemovingItem(false);
+      return;
     }
-    
-    if (!User?.id) return;
-    const updatedCart = await removeFromCart(User.id, itemId , token! );
-    if (updatedCart) {
-    setFetchedCart(updatedCart);
-  }
+
+    if (!user?.id) {
+      setIsRemovingItem(false);
+      return;
+    }
+
+    try {
+      const updatedCart = await removeFromCart(user.id, itemId, token!);
+      if (updatedCart) {
+        setFetchedCart(updatedCart);
+        toast({ title: "Item removed successfully!" });
+      }
+    } catch (error) {
+      console.error("Failed to remove item:", error);
+      toast({ title: "Error", description: "Failed to remove item from cart." });
+    } finally {
+      setIsRemovingItem(false);
+    }
   };
 
   // Combine authentication loading and cart specific loading
   if (loading || isCartLoading) {
     return (
-      <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
-              style={{ borderColor: "#606C38", borderTopColor: "transparent" }}>
-            </div>
-            <p className="text-lg font-medium" style={{ color: "#283618" }}>
-              Loading your cart...
-            </p>
-          </div>
-        </div>
-        <Footer />
-      </main>
+      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+        <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
+      </div>
     )
   }
 
@@ -243,9 +271,11 @@ useEffect(() => {
                 <CartItemCard
                   key={item._id}
                   item={item}
-                  onUpdateQuantity={handleUpdateQuantity} // Use the new handler
+                  onUpdateQuantity={handleUpdateQuantity}
                   onRemoveItem={() => handleRemoveItem(item._id!)}
                   onEditPersonDetails={handleEditPersonDetails}
+                  isUpdatingQuantity={isUpdatingQuantity}
+                  isRemovingItem={isRemovingItem}
                 />
               ))}
             </div>
@@ -256,6 +286,7 @@ useEffect(() => {
                 <CartSummaryCard
                   totalItems={totalItems}
                   totalPrice={totalPrice}
+                  isUpdatingCart={isUpdatingQuantity || isRemovingItem || isSavingPersonDetails}
                 />
               </div>
             </div>
@@ -272,6 +303,7 @@ useEffect(() => {
         onPersonDetailChange={handlePersonDetailChange}
         onSave={handleSavePersonDetails}
         currentEditingCartItemId={currentEditingCartItemId}
+        isSaving={isSavingPersonDetails}
       />
     </main>
   )

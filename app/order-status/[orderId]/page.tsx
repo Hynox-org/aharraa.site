@@ -7,9 +7,12 @@ import { Footer } from "@/components/footer"
 import { useAuth } from "@/app/context/auth-context"
 import { getOrderDetails, verifyPayment } from "@/lib/api"
 import { Order, PopulatedOrderItem } from "@/lib/types"
-import { IoCheckmarkCircle, IoHome, IoReceipt, IoCalendar, IoWallet, IoLocation, IoCart } from "react-icons/io5"
+import LottieAnimation from "@/components/lottie-animation"
+import ItayCheffAnimation from "@/public/lottie/ItayCheff.json"
+import { IoCheckmarkCircle, IoHome, IoReceipt, IoCalendar, IoWallet, IoLocation, IoCart, IoRefresh } from "react-icons/io5"
 import Link from "next/link"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 
 export default function OrderStatusPage({ params }: { params: { orderId: string } | Promise<{ orderId: string }> }) {
   const { isAuthenticated, loading, user } = useAuth()
@@ -19,6 +22,45 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
   const [order, setOrder] = useState<Order | null>(null)
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false) // New state for refresh button loading
+
+  const fetchOrder = async (currentOrderId: string) => {
+    try {
+      setPageLoading(true) // Set pageLoading to true when fetching for initial load or refresh
+      const token = localStorage.getItem("aharraa-u-token")
+      if (!token) {
+        toast.error("Authentication token not found. Please log in again.")
+        router.push("/auth?returnUrl=/order-status/" + currentOrderId)
+        return
+      }
+      const orderDetails = await getOrderDetails(currentOrderId, token)
+      setOrder(orderDetails)
+
+      // Verify payment after fetching order details
+      const verificationResponse = await verifyPayment(currentOrderId, token)
+      if (verificationResponse && verificationResponse.order) {
+        // setOrder(verificationResponse.order)
+      }
+
+    } catch (err: any) {
+      console.error("Error fetching order details or verifying payment:", err)
+      setError(err.message || "Failed to fetch order details or verify payment.")
+      toast.error(err.message || "Failed to fetch order details or verify payment.")
+    } finally {
+      setPageLoading(false)
+    }
+  }
+
+  const handleRefresh = async () => {
+    if (!orderId) {
+      toast.error("Order ID not available for refresh.")
+      return
+    }
+    setIsRefreshing(true)
+    await fetchOrder(orderId)
+    setIsRefreshing(false)
+    toast.success("Order status refreshed!")
+  }
 
   useEffect(() => {
     const resolveParams = async () => {
@@ -71,17 +113,9 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
 
   if (loading || pageLoading) {
     return (
-      <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <div className="w-12 h-12 mx-auto mb-6 border-4 border-t-transparent rounded-full animate-spin"
-            style={{ borderColor: "#606C38", borderTopColor: "transparent" }}>
-          </div>
-          <p className="text-base sm:text-lg font-medium" style={{ color: "#283618" }}>
-            Loading order details...
-          </p>
-        </div>
-      </main>
+      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+        <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
+      </div>
     )
   }
 
@@ -173,10 +207,21 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
           <div className="space-y-6">
             {/* Order Details */}
             <div className="p-4 sm:p-5 rounded-xl space-y-3" style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}>
-              <h2 className="text-lg sm:text-xl font-bold mb-3 flex items-center gap-2" style={{ color: "#283618" }}>
-                <IoReceipt className="w-5 h-5" />
-                Order Details
-              </h2>
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2" style={{ color: "#283618" }}>
+                  <IoReceipt className="w-5 h-5" />
+                  Order Details
+                </h2>
+                <Button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg"
+                  style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
+                >
+                  <IoRefresh className="w-4 h-4" />
+                  {isRefreshing ? "Refreshing..." : "Refresh Status"}
+                </Button>
+              </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm sm:text-base">
                 <div>

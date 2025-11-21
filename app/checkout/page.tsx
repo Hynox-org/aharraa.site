@@ -21,6 +21,8 @@ import {
 } from "@/lib/types"
 import { createOrder, updateProfileDetails, getProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
+import LottieAnimation from "@/components/lottie-animation"
+import ItayCheffAnimation from "@/public/lottie/ItayCheff.json"
 
 import { CheckoutEmptyState } from "@/components/checkout-empty-state"
 import { DeliveryAddressCard } from "@/components/delivery-address-card"
@@ -229,21 +231,9 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
   // Combine authentication loading and cart specific loading for initial page load
   if (loading || cartLoading) {
     return (
-      <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <div className="flex flex-col items-center gap-4">
-            <div
-              className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
-              style={{ borderColor: "#606C38", borderTopColor: "transparent" }}
-            ></div>
-            <p className="text-lg font-medium" style={{ color: "#283618" }}>
-              Loading checkout...
-            </p>
-          </div>
-        </div>
-        <Footer />
-      </main>
+      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+        <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
+      </div>
     )
   }
 
