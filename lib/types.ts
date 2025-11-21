@@ -156,6 +156,12 @@ export interface Menu {
   coverImage?: string | null;
   description?: string;
   perDayPrice: number;
+  availableMealTimes: MealCategory[];
+  price: {
+    breakfast?: number;
+    lunch?: number;
+    dinner?: number;
+  };
   menuItems: MenuItem[];
   createdAt: string;
   updatedAt: string;
@@ -235,6 +241,7 @@ export interface CartItem {
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   itemTotalPrice: number;
+  selectedMealTimes?: MealCategory[];
   addedDate: string;
   vendor: string; // Vendor ID reference
   __v?: number;
@@ -273,6 +280,7 @@ export interface OrderItem {
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   skippedDates?: string[]; // Array of ISO date strings
+  selectedMealTimes?: MealCategory[];
   itemTotalPrice: number;
   vendor: string | Vendor; // Vendor ID reference
 }
