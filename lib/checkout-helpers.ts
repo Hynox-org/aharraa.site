@@ -25,18 +25,15 @@ export function calculateDeliveryCost(
   let totalDeliveryCost = 0;
 
   for (const item of cartItems) {
-    if (item.plan && item.menu && (item.menu as any).menuItems && (item.menu as any).menuItems.length > 0) {
+    if (item.plan && item.menu) {
       const planDays = item.plan.durationDays;
-      
-      // Get the first day from the menu items to count meals per day
-      const firstDay = (item.menu as any).menuItems[0].day;
-      const mealsPerDay = new Set(
-        (item.menu as any).menuItems
-          .filter((menuItem: any) => menuItem.day === firstDay)
-          .map((menuItem: any) => menuItem.category)
-      ).size;
+      const numberOfSelectedMealTimes = item.selectedMealTimes ? item.selectedMealTimes.length : 0;
+      const quantity = item.quantity;
 
-      totalDeliveryCost += planDays * mealsPerDay * deliveryCostPerMealPerDay;
+      // Only add delivery cost if meal times are selected
+      if (numberOfSelectedMealTimes > 0) {
+        totalDeliveryCost += planDays * numberOfSelectedMealTimes * quantity * deliveryCostPerMealPerDay;
+      }
     }
   }
 

@@ -125,7 +125,8 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           startDate: cartItem.startDate,
           endDate: cartItem.endDate,
           itemTotalPrice: cartItem.itemTotalPrice,
-          vendor: (cartItem.menu.vendor as Vendor)._id // Type assertion for vendor
+          vendor: (cartItem.menu.vendor as Vendor)._id, // Type assertion for vendor
+          selectedMealTimes: cartItem.selectedMealTimes, // Include selected meal times
         }
       })
       .filter((item): item is CheckoutItem => item !== null)
@@ -151,11 +152,12 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
             id: cartItem.vendor,
             name: "Vendor", // Placeholder, as vendor name is not directly available
           },
+          selectedMealTimes: cartItem.selectedMealTimes, // Include selected meal times
         }
       })
       .filter((item): item is CheckoutItemView => item !== null)
   }, [userCartItems])
-  console.log("displayCheckoutItems:", displayCheckoutItems);
+  
    const totalPrice = useMemo(
     () => userCartItems.reduce((sum, item) => sum + item.itemTotalPrice, 0),
     [userCartItems]

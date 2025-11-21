@@ -273,10 +273,11 @@ export async function addToCartApi(
     quantity: number;
     startDate: string;
     personDetails?: PersonDetails[];
+    selectedMealTimes?: string[]; // Add mealTimes
   },
   token: string
 ): Promise<Cart> {
-  console.log("Adding to cart:", cartItem ,"userId:", userId);
+  console.log("Adding to cart:", cartItem, "userId:", userId);
   const endpoint = `/api/cart/${userId}/add`;
   return apiRequest<Cart>(endpoint, "POST", cartItem, token);
 }

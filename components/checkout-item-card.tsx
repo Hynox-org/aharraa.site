@@ -56,6 +56,11 @@ export function CheckoutItemCard({ items }: CheckoutItemCardProps) {
                 <p className="text-xs sm:text-sm mb-1" style={{ color: "#606C38" }}>
                   {item.plan.name} ({item.plan.durationDays} days)
                 </p>
+                {item.selectedMealTimes && item.selectedMealTimes.length > 0 && (
+                  <p className="text-xs sm:text-sm mb-1" style={{ color: "#606C38" }}>
+                    Meal Times: <span className="font-bold">{item.selectedMealTimes.join(", ")}</span>
+                  </p>
+                )}
                 <p className="text-xs" style={{ color: "#606C38" }}>
                   Quantity: <span className="font-bold">{item.quantity}</span>
                 </p>

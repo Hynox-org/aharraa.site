@@ -161,6 +161,7 @@ export interface Menu {
     breakfast?: number;
     lunch?: number;
     dinner?: number;
+    [key: string]: number | undefined; // Add index signature
   };
   menuItems: MenuItem[];
   createdAt: string;
@@ -241,7 +242,7 @@ export interface CartItem {
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   itemTotalPrice: number;
-  selectedMealTimes?: MealCategory[];
+  selectedMealTimes?: MealCategory[]; // Array of selected meal times
   addedDate: string;
   vendor: string; // Vendor ID reference
   __v?: number;
@@ -280,7 +281,7 @@ export interface OrderItem {
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   skippedDates?: string[]; // Array of ISO date strings
-  selectedMealTimes?: MealCategory[];
+  selectedMealTimes?: MealCategory[]; // Array of selected meal times
   itemTotalPrice: number;
   vendor: string | Vendor; // Vendor ID reference
 }
@@ -353,6 +354,7 @@ export interface CheckoutItemView {
   endDate: string;
   itemTotalPrice: number;
   vendor: { id: string; name: string };
+  selectedMealTimes?: MealCategory[]; // Add selected meal times
 }
 
 export interface CheckoutItem {
@@ -365,6 +367,7 @@ export interface CheckoutItem {
   endDate: string;
   itemTotalPrice: number;
   vendor: string;
+  selectedMealTimes?: MealCategory[]; // Add selected meal times
 }
 
 export interface CheckoutData {

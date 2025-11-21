@@ -20,7 +20,8 @@ import { DateSelection } from "@/components/date-selection"
 import { OrderSummarySidebar } from "@/components/order-summary-sidebar"
 import { addToCartApi } from "@/lib/api"
 import { VendorSelection } from "@/components/vendor-selection" 
-import { MenuGrid } from "@/components/menu-grid" 
+import { MenuGrid } from "@/components/menu-grid"
+import { MealTimeSelection } from "@/components/meal-time-selection" 
 
 export default function PricingPage() {
   const { user, isAuthenticated, token } = useAuth()
@@ -40,6 +41,7 @@ export default function PricingPage() {
   )
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
+  const [selectedMealTimes, setSelectedMealTimes] = useState<string[]>([]) // New state for selected meal times
   const [isAddingToCart, setIsAddingToCart] = useState(false) // New loading state for add to cart
 
   useEffect(() => {
@@ -69,6 +71,7 @@ export default function PricingPage() {
     setSelectedPlan(null)
     setStartDate(undefined)
     setEndDate(undefined)
+    setSelectedMealTimes([]) // Reset selected meal times when menu changes
     
     // Fetch vendor details when a menu is selected using the vendor ID string
     if (menu?.vendor) { // menu.vendor is expected to be a string (ID)
@@ -160,6 +163,10 @@ export default function PricingPage() {
       toast.error("Cannot add to cart", { description: "Please select a menu." });
       return;
     }
+    if (selectedMealTimes.length === 0) {
+      toast.error("Cannot add to cart", { description: "Please select at least one meal time." });
+      return;
+    }
     if (!selectedVendor) { // Ensure selectedVendor is populated from menu
       toast.error("Cannot add to cart", { description: "Vendor details not loaded for selected menu." });
       return;
@@ -197,6 +204,7 @@ export default function PricingPage() {
       quantity,
       startDate: format(startDate, "yyyy-MM-dd"),
       personDetails: quantity >= 1 ? personDetails : undefined,
+      selectedMealTimes: selectedMealTimes, // Add selected meal times
     };
 
     try {
@@ -223,7 +231,18 @@ export default function PricingPage() {
     setPersonDetails([])
     setStartDate(undefined)
     setEndDate(undefined)
+    setSelectedMealTimes([]) // Reset selected meal times
   }
+
+  const handleMealTimeSelect = useCallback((mealTime: string, isSelected: boolean) => {
+    setSelectedMealTimes((prev) => {
+      if (isSelected) {
+        return [...prev, mealTime];
+      } else {
+        return prev.filter((item) => item !== mealTime);
+      }
+    });
+  }, []);
 
   if (loading) {
     return (
@@ -260,6 +279,14 @@ export default function PricingPage() {
                 onMenuSelect={handleMenuSelect}
               />
             </>
+
+            {selectedMenu && (
+              <MealTimeSelection
+                selectedMenu={selectedMenu}
+                selectedMealTimes={selectedMealTimes}
+                onMealTimeSelect={handleMealTimeSelect}
+              />
+            )}
 
             {selectedMenu && (
               <PlanSelection
@@ -306,6 +333,7 @@ export default function PricingPage() {
               endDate={endDate}
               onAddToCart={handleAddToCart}
               isAddingToCart={isAddingToCart}
+              selectedMealTimes={selectedMealTimes}
             />
           </div>
         </div>

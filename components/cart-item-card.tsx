@@ -39,6 +39,11 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onEditPerso
           <p className="text-sm mb-1" style={{ color: "#606C38" }}>
             {item.plan.name} ({item.plan.durationDays} days)
           </p>
+          {item.selectedMealTimes && item.selectedMealTimes.length > 0 && (
+            <p className="text-xs mb-1" style={{ color: "#DDA15E" }}>
+              Meal Times: {item.selectedMealTimes.join(", ")}
+            </p>
+          )}
           <p className="text-sm mb-2" style={{ color: "#606C38" }}>
             {format(new Date(item.startDate), "MMM d")} - {format(new Date(item.endDate), "MMM d, yyyy")}
           </p>

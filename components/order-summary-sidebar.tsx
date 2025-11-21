@@ -14,6 +14,7 @@ interface OrderSummarySidebarProps {
   endDate: Date | undefined
   onAddToCart: () => void
   isAddingToCart: boolean
+  selectedMealTimes: string[]
 }
 
 export function OrderSummarySidebar({
@@ -24,9 +25,21 @@ export function OrderSummarySidebar({
   endDate,
   onAddToCart,
   isAddingToCart,
+  selectedMealTimes,
 }: OrderSummarySidebarProps) {
-  const totalAmount = selectedMenu && selectedPlan ? selectedMenu.perDayPrice * selectedPlan.durationDays * quantity : 0
-  const isComplete = selectedMenu && selectedPlan && startDate && endDate && quantity >= 1
+  let mealTimePricesSum = 0;
+  if (selectedMenu && selectedMealTimes && selectedMealTimes.length > 0 && selectedMenu.price) {
+    selectedMealTimes.forEach(mealTime => {
+      if (selectedMenu.price[mealTime.toLowerCase()]) {
+        mealTimePricesSum += selectedMenu.price[mealTime.toLowerCase()]!;
+      }
+    });
+  } else if (selectedMenu) {
+    mealTimePricesSum = selectedMenu.perDayPrice;
+  }
+
+  const totalAmount = selectedMenu && selectedPlan ? mealTimePricesSum * selectedPlan.durationDays * quantity : 0
+  const isComplete = selectedMenu && selectedPlan && startDate && endDate && quantity >= 1 && selectedMealTimes.length > 0
 
   return (
     <div className="sticky top-6">
