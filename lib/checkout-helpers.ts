@@ -1,4 +1,4 @@
-import { MealCategory } from "./types";
+import { PopulatedCartItem, MealCategory } from "./types";
 
 interface CalculateGrandTotalParams {
   subtotal: number;
@@ -15,18 +15,32 @@ export function calculateGrandTotal({
   gstCost,
   environment,
 }: CalculateGrandTotalParams): number {
-  if (environment === "development") {
-    return 1; // Set total to 1 Rs for development environment
-  }
   return subtotal + deliveryCost + platformCost + gstCost;
 }
 
 export function calculateDeliveryCost(
-  uniqueMealCategories: MealCategory[],
-  totalPlanDays: number,
-  deliveryCostPerCategory: number
+  cartItems: PopulatedCartItem[],
+  deliveryCostPerMealPerDay: number
 ): number {
-  return uniqueMealCategories.length * deliveryCostPerCategory * totalPlanDays;
+  let totalDeliveryCost = 0;
+
+  for (const item of cartItems) {
+    if (item.plan && item.menu && (item.menu as any).menuItems && (item.menu as any).menuItems.length > 0) {
+      const planDays = item.plan.durationDays;
+      
+      // Get the first day from the menu items to count meals per day
+      const firstDay = (item.menu as any).menuItems[0].day;
+      const mealsPerDay = new Set(
+        (item.menu as any).menuItems
+          .filter((menuItem: any) => menuItem.day === firstDay)
+          .map((menuItem: any) => menuItem.category)
+      ).size;
+
+      totalDeliveryCost += planDays * mealsPerDay * deliveryCostPerMealPerDay;
+    }
+  }
+
+  return totalDeliveryCost;
 }
 
 export function calculatePlatformCost(subtotal: number): number {

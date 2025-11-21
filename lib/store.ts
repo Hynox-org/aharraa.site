@@ -5,5 +5,5 @@ import {
 
 export const useStore = create<Store>((set) => ({
   returnUrl: "/",
-  setReturnUrl: (url: string) => set({ returnUrl: url }),
+  setReturnUrl: (url: string | null) => set({ returnUrl: url }),
 }));

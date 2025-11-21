@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react" // Added useState
 import { IoCart, IoCheckmarkCircle } from "react-icons/io5"
 import { GiMeal } from "react-icons/gi"
 import { Menu, Plan, MenuWithPopulatedMeals } from "@/lib/types" // Updated import
 import { format } from "date-fns"
+import { Spinner } from "./ui/spinner" // Added Spinner import
 
 interface OrderSummarySidebarProps {
   selectedMenu: MenuWithPopulatedMeals | null // Updated type
@@ -22,8 +24,15 @@ export function OrderSummarySidebar({
   endDate,
   onAddToCart,
 }: OrderSummarySidebarProps) {
+  const [isLoading, setIsLoading] = useState(false) // Added loading state
   const totalAmount = selectedMenu && selectedPlan ? selectedMenu.perDayPrice * selectedPlan.durationDays * quantity : 0 // Changed from selectedMeal.price to selectedMenu.perDayPrice
   const isComplete = selectedMenu && selectedPlan && startDate && endDate && quantity >= 1 // Changed from selectedMeal
+
+  const handleAddToCartClick = async () => {
+    setIsLoading(true)
+    await onAddToCart() // Assuming onAddToCart can be awaited for async operations
+    setIsLoading(false)
+  }
 
   return (
     <div className="sticky top-6">
@@ -143,16 +152,22 @@ export function OrderSummarySidebar({
                   {/* Buttons */}
                   <div className="space-y-3">
                     <button
-                      onClick={onAddToCart}
-                      disabled={!isComplete}
+                      onClick={handleAddToCartClick}
+                      disabled={!isComplete || isLoading} // Disable when loading
                       className="w-full py-3 rounded-lg font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       style={{
                         backgroundColor: "#606C38",
                         color: "#FEFAE0"
                       }}
                     >
-                      <IoCart className="w-4 h-4" />
-                      Add to Cart
+                      {isLoading ? (
+                        <Spinner className="w-4 h-4 text-white" /> // Show spinner when loading
+                      ) : (
+                        <>
+                          <IoCart className="w-4 h-4" />
+                          Add to Cart
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

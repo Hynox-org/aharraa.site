@@ -1,7 +1,10 @@
 "use client"
 
+import { useState } from "react" // Added useState
+import { useRouter } from "next/navigation" // Added useRouter
 import { IoCart, IoArrowForward } from "react-icons/io5"
 import Link from "next/link"
+import { Spinner } from "./ui/spinner" // Added Spinner import
 
 interface CartSummaryCardProps {
   totalItems: number
@@ -9,6 +12,15 @@ interface CartSummaryCardProps {
 }
 
 export function CartSummaryCard({ totalItems, totalPrice }: CartSummaryCardProps) {
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+
+  const handleCheckoutClick = () => {
+    setIsLoading(true)
+    router.push("/checkout")
+    // setIsLoading(false) // This might not be reached if the page navigates immediately
+  }
+
   return (
     <div className="rounded-xl p-6 shadow-xl" style={{ backgroundColor: "#283618" }}>
       {/* Header */}
@@ -43,18 +55,26 @@ export function CartSummaryCard({ totalItems, totalPrice }: CartSummaryCardProps
         </div>
 
         {/* Checkout Button */}
-        <Link href="/checkout" className="block mt-6">
+        <div className="block mt-6">
           <button 
-            className="w-full py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            onClick={handleCheckoutClick} // Added onClick handler
+            disabled={isLoading} // Disable when loading
+            className="w-full py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed" // Added disabled styles
             style={{ 
               backgroundColor: "#DDA15E",
               color: "#283618"
             }}
           >
-            Proceed to Checkout
-            <IoArrowForward className="w-5 h-5" />
+            {isLoading ? (
+              <Spinner className="w-5 h-5 text-[#283618]" /> // Show spinner when loading
+            ) : (
+              <>
+                Proceed to Checkout
+                <IoArrowForward className="w-5 h-5" />
+              </>
+            )}
           </button>
-        </Link>
+        </div>
 
         {/* Info Text */}
         <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(221, 161, 94, 0.3)" }}>

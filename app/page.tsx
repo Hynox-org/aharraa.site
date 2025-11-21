@@ -15,7 +15,8 @@ import { IoRestaurant } from "react-icons/io5";
 import { MdDeliveryDining } from "react-icons/md";
 import { Spinner } from "@/components/ui/spinner"; // Import the Spinner component
 import { useStore } from "@/lib/store";
-
+import LottieAnimation from "@/components/lottie-animation"; // Import LottieAnimation component
+import ItayCheffAnimation from "../public/lottie/ItayCheff.json"; // Import your Lottie JSON animation data
 export default function Home() {
   const router = useRouter();
   const { login, loading: authLoading } = useAuth(); // Get authLoading from context
@@ -49,11 +50,11 @@ export default function Home() {
 
   }, [router, login, authLoading, isLoadingHashToken, storedReturnUrl, setReturnUrl]);
 
-  // Show a loading spinner if either auth is loading or we are processing a hash token
+  // Show a loading Lottie animation if either auth is loading or we are processing a hash token
   if (authLoading || isLoadingHashToken) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
-        <Spinner className="size-8" />
+        <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
       </div>
     );
   }

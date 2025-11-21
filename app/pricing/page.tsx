@@ -9,6 +9,8 @@ import { format, addDays } from "date-fns"
 import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import LottieAnimation from "@/components/lottie-animation"; // Import LottieAnimation component
+import ItayCheffAnimation from "../../public/lottie/ItayCheff.json"; // Import your Lottie JSON animation data
 
 import { PricingHeroSection } from "@/components/pricing-hero-section"
 import { PlanSelection } from "@/components/plan-selection"
@@ -200,6 +202,7 @@ export default function PricingPage() {
       description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added successfully.`,
     });
     resetSelection();
+    router.push("/cart")
   } catch (error: any) {
     toast.error("Error", {
       description: error.message || "Failed to add item to cart.",
@@ -216,6 +219,26 @@ export default function PricingPage() {
     setEndDate(undefined)
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+        <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
+        <Header />
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)] text-red-600 text-lg">
+          {error}
+        </div>
+        <Footer />
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
       <Header />
@@ -224,19 +247,13 @@ export default function PricingPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            {loading ? (
-              <div className="text-center text-gray-600">Loading menus...</div>
-            ) : error ? (
-              <div className="text-center text-red-600">{error}</div>
-            ) : (
-              <>
-                <MenuGrid
-                  menus={menus}
-                  selectedMenu={selectedMenu}
-                  onMenuSelect={handleMenuSelect}
-                />
-              </>
-            )}
+            <>
+              <MenuGrid
+                menus={menus}
+                selectedMenu={selectedMenu}
+                onMenuSelect={handleMenuSelect}
+              />
+            </>
 
             {selectedMenu && (
               <PlanSelection

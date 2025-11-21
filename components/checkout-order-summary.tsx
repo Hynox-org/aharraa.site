@@ -10,9 +10,6 @@ interface CheckoutOrderSummaryProps {
   gstCost: number
   grandTotal: number
   itemCount: number
-  totalPlanDays: number
-  deliveryCostPerCategory: number
-  uniqueCategoryCount: number
   onProceedToPayment: () => void
   isProcessingPayment: boolean // New prop for loading state
 }
@@ -25,9 +22,6 @@ export function CheckoutOrderSummary({
   gstCost,
   grandTotal,
   itemCount,
-  totalPlanDays,
-  deliveryCostPerCategory,
-  uniqueCategoryCount,
   onProceedToPayment,
   isProcessingPayment, // Destructure new prop
 }: CheckoutOrderSummaryProps) {
@@ -68,9 +62,6 @@ export function CheckoutOrderSummary({
           <div className="flex justify-between items-start text-sm sm:text-base">
             <span className="flex-1 pr-2" style={{ color: "rgba(254, 250, 224, 0.8)" }}>
               Delivery Fee
-              <span className="block text-xs mt-0.5" style={{ color: "rgba(254, 250, 224, 0.6)" }}>
-                ({uniqueCategoryCount} {uniqueCategoryCount === 1 ? 'delivery' : 'deliveries'} × ₹{deliveryCostPerCategory} × {totalPlanDays} days)
-              </span>
             </span>
             <span className="font-bold flex-shrink-0" style={{ color: "#FEFAE0" }}>
               ₹{deliveryCost.toFixed(0)}

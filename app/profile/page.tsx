@@ -21,6 +21,8 @@ import { OrdersTab } from "@/components/profile/orders-tab";
 import { AddressesTab } from "@/components/profile/addresses-tab";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { TabNavigation } from "@/components/profile/tab-navigation";
+import LottieAnimation from "@/components/lottie-animation"; // Import LottieAnimation component
+import ItayCheffAnimation from "../../public/lottie/ItayCheff.json"; // Import your Lottie JSON animation data
 
 export default function ProfilePage() {
   const { user, token, loading: authLoading } = useAuth();
@@ -175,28 +177,17 @@ export default function ProfilePage() {
 
   if (authLoading || loading) {
     return (
-      <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
-        <div className="flex flex-col justify-center items-center min-h-screen px-4">
-          <div
-            className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-t-transparent rounded-full animate-spin mb-4"
-            style={{ borderColor: "#606C38", borderTopColor: "transparent" }}
-          ></div>
-          <p
-            className="text-base sm:text-lg font-semibold animate-pulse text-center"
-            style={{ color: "#283618" }}
-          >
-            Loading your profile...
-          </p>
-        </div>
-        <Footer />
-      </main>
+      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+        <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
+      </div>
     );
   }
 
   if (!profile) {
     return (
       <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
-        <div className="flex justify-center items-center min-h-[60vh] px-4">
+        <Header /> {/* Keeping header for error page as per pricing page */}
+        <div className="flex justify-center items-center min-h-[calc(100vh-80px)] px-4">
           <div className="text-center max-w-md mx-auto">
             <AlertCircle
               className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6"

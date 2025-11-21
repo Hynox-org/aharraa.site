@@ -171,19 +171,14 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     [userCartItems]
   );
 
-  const totalPlanDays = useMemo(
-    () => userCartItems.reduce((sum, item) => sum + item.plan.durationDays, 0),
-    [userCartItems]
-  )
-  const deliveryCostPerCategory = 33.33
+  const deliveryCostPerMealPerDay = 33.33
   const deliveryCost = useMemo(
     () =>
       calculateDeliveryCost(
-        uniqueMealCategories,
-        totalPlanDays,
-        deliveryCostPerCategory
+        userCartItems,
+        deliveryCostPerMealPerDay
       ),
-    [uniqueMealCategories, totalPlanDays, deliveryCostPerCategory]
+    [userCartItems, deliveryCostPerMealPerDay]
   )
   const platformCost = useMemo(
     () => calculatePlatformCost(totalPrice),
@@ -649,9 +644,6 @@ const handleAddressChangeWithSync = (
                 gstCost={gstCost}
                 grandTotal={grandTotal}
                 itemCount={userCartItems.length}
-                deliveryCostPerCategory={deliveryCostPerCategory}
-                totalPlanDays={totalPlanDays}
-                uniqueCategoryCount={uniqueMealCategories.length}
                 onProceedToPayment={handleProceedToPayment}
                 isProcessingPayment={isProcessingPayment} // Pass loading state to summary card
               />

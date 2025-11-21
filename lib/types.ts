@@ -376,8 +376,8 @@ export interface CheckoutData {
 // Store Types (Zustand/State Management)
 // ============================================
 export interface Store {
-  returnUrl: string;
-  setReturnUrl: (url: string) => void;
+  returnUrl: string | null;
+  setReturnUrl: (url: string | null) => void;
 }
 export type MealType = "breakfast" | "lunch" | "dinner";
 
