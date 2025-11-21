@@ -175,7 +175,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     [userCartItems]
   );
 
-  const deliveryCostPerMealPerDay = 33.33
+  const deliveryCostPerMealPerDay = 33
   const deliveryCost = useMemo(
     () =>
       calculateDeliveryCost(
