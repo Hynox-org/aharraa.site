@@ -14,6 +14,8 @@ interface OrderSummarySidebarProps {
   endDate: Date | undefined
   onAddToCart: () => void
   isAddingToCart: boolean
+  onDirectCheckout: () => void; // New prop for direct checkout
+  isDirectCheckingOut: boolean; // New prop for direct checkout loading state
   selectedMealTimes: string[]
 }
 
@@ -25,6 +27,8 @@ export function OrderSummarySidebar({
   endDate,
   onAddToCart,
   isAddingToCart,
+  onDirectCheckout, // Destructure new prop
+  isDirectCheckingOut, // Destructure new prop
   selectedMealTimes,
 }: OrderSummarySidebarProps) {
   let mealTimePricesSum = 0;
@@ -149,7 +153,7 @@ export function OrderSummarySidebar({
                 <div className="pt-4 mt-4" style={{ borderTop: "1px solid rgba(221, 161, 94, 0.3)" }}>
                   <div className="flex justify-between items-baseline mb-4">
                     <span className="text-sm font-bold" style={{ color: "#DDA15E" }}>
-                      Total Amount
+                    Total Amount
                     </span>
                     <span className="text-3xl font-bold" style={{ color: "#FEFAE0" }}>
                       ₹{totalAmount.toFixed(0)}
@@ -158,9 +162,30 @@ export function OrderSummarySidebar({
 
                   {/* Buttons */}
                   <div className="space-y-3">
+                    {/* Direct Checkout Button */}
+                    <button
+                      onClick={onDirectCheckout}
+                      disabled={!isComplete || isDirectCheckingOut || isAddingToCart}
+                      className="w-full py-3 rounded-lg font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      style={{
+                        backgroundColor: "#DDA15E", // Different color for direct checkout
+                        color: "#283618"
+                      }}
+                    >
+                      {isDirectCheckingOut ? (
+                        <Spinner className="w-4 h-4 text-white" />
+                      ) : (
+                        <>
+                          <IoCheckmarkCircle className="w-4 h-4" />
+                          Direct Checkout
+                        </>
+                      )}
+                    </button>
+
+                    {/* Add to Cart Button */}
                     <button
                       onClick={onAddToCart}
-                      disabled={!isComplete || isAddingToCart}
+                      disabled={!isComplete || isAddingToCart || isDirectCheckingOut}
                       className="w-full py-3 rounded-lg font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       style={{
                         backgroundColor: "#606C38",

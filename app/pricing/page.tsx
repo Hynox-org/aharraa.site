@@ -43,6 +43,7 @@ export default function PricingPage() {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [selectedMealTimes, setSelectedMealTimes] = useState<string[]>([]) // New state for selected meal times
   const [isAddingToCart, setIsAddingToCart] = useState(false) // New loading state for add to cart
+  const [isDirectCheckingOut, setIsDirectCheckingOut] = useState(false) // New loading state for direct checkout
 
   useEffect(() => {
     async function fetchData() {
@@ -151,50 +152,63 @@ export default function PricingPage() {
     return isValid;
   }
 
-  const handleAddToCart = async () => {
-    if (isAddingToCart) return; // Prevent multiple clicks
+  const handleCheckoutProcess = async (
+    redirectTo: string,
+    setLoadingState: (loading: boolean) => void
+  ) => {
+    setLoadingState(true);
 
     if (!isAuthenticated) {
-      router.push("/auth?returnUrl=/pricing")
-      return
+      router.push("/auth?returnUrl=/pricing");
+      setLoadingState(false);
+      return;
     }
 
     if (!selectedMenu) {
-      toast.error("Cannot add to cart", { description: "Please select a menu." });
+      toast.error("Cannot proceed", { description: "Please select a menu." });
+      setLoadingState(false);
       return;
     }
     if (selectedMealTimes.length === 0) {
-      toast.error("Cannot add to cart", { description: "Please select at least one meal time." });
+      toast.error("Cannot proceed", { description: "Please select at least one meal time." });
+      setLoadingState(false);
       return;
     }
-    if (!selectedVendor) { // Ensure selectedVendor is populated from menu
-      toast.error("Cannot add to cart", { description: "Vendor details not loaded for selected menu." });
+    if (!selectedVendor) {
+      toast.error("Cannot proceed", { description: "Vendor details not loaded for selected menu." });
+      setLoadingState(false);
       return;
     }
     if (!selectedPlan) {
-      toast.error("Cannot add to cart", { description: "Please select a plan." });
+      toast.error("Cannot proceed", { description: "Please select a plan." });
+      setLoadingState(false);
       return;
     }
     if (quantity <= 0) {
-      toast.error("Cannot add to cart", { description: "Quantity must be greater than 0." });
+      toast.error("Cannot proceed", { description: "Quantity must be greater than 0." });
+      setLoadingState(false);
       return;
     }
     if (!startDate || !endDate) {
-      toast.error("Cannot add to cart", { description: "Please select a start date." });
+      toast.error("Cannot proceed", { description: "Please select a start date." });
+      setLoadingState(false);
       return;
     }
     if (!arePersonDetailsValid()) {
       toast.error("Invalid Details", { description: "Please fill all person details correctly." });
+      setLoadingState(false);
       return;
     }
     if (!user?.id) {
-      toast.error("Cannot add to cart", { description: "User not authenticated. Please log in." });
+      toast.error("Cannot proceed", { description: "User not authenticated. Please log in." });
+      setLoadingState(false);
       return;
     }
 
     const token = localStorage.getItem("aharraa-u-token");
     if (!token) {
       router.push("/auth?returnUrl=/pricing");
+      setLoadingState(false);
       return;
     }
 
@@ -204,25 +218,34 @@ export default function PricingPage() {
       quantity,
       startDate: format(startDate, "yyyy-MM-dd"),
       personDetails: quantity >= 1 ? personDetails : undefined,
-      selectedMealTimes: selectedMealTimes, // Add selected meal times
+      selectedMealTimes: selectedMealTimes,
     };
 
     try {
-      setIsAddingToCart(true); // Set loading state
-      const updatedCart = await addToCartApi(user.id!, cartItem, token);
-      toast.success("Added to Cart!", {
-        description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added successfully.`,
+      await addToCartApi(user.id!, cartItem, token);
+      toast.success("Success!", {
+        description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added to cart.`,
       });
       resetSelection();
-      router.push("/cart")
+      router.push(redirectTo);
     } catch (error: any) {
       toast.error("Error", {
-        description: error.message || "Failed to add item to cart.",
+        description: error.message || "Failed to process order.",
       });
     } finally {
-      setIsAddingToCart(false); // Reset loading state
+      setLoadingState(false);
     }
-  }
+  };
+
+  const handleAddToCart = async () => {
+    if (isAddingToCart || isDirectCheckingOut) return;
+    await handleCheckoutProcess("/cart", setIsAddingToCart);
+  };
+
+  const handleDirectCheckout = async () => {
+    if (isDirectCheckingOut || isAddingToCart) return;
+    await handleCheckoutProcess("/checkout", setIsDirectCheckingOut);
+  };
 
   const resetSelection = () => {
     setSelectedMenu(null)
@@ -333,6 +356,8 @@ export default function PricingPage() {
               endDate={endDate}
               onAddToCart={handleAddToCart}
               isAddingToCart={isAddingToCart}
+              onDirectCheckout={handleDirectCheckout} // Pass the new prop
+              isDirectCheckingOut={isDirectCheckingOut} // Pass the new loading state
               selectedMealTimes={selectedMealTimes}
             />
           </div>

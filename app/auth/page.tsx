@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { IoMail, IoLockClosed } from "react-icons/io5"
+import { IoMail, IoLockClosed, IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
 import Image from "next/image"
 import Link from "next/link" // Import Link
 import { useAuth } from "@/app/context/auth-context"
@@ -21,8 +21,10 @@ function AuthPageContent() {
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin")
   const [signInEmail, setSignInEmail] = useState("")
   const [signInPassword, setSignInPassword] = useState("")
+  const [showSignInPassword, setShowSignInPassword] = useState(false)
   const [signUpEmail, setSignUpEmail] = useState("")
   const [signUpPassword, setSignUpPassword] = useState("")
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -238,11 +240,11 @@ function AuthPageContent() {
                   <div className="relative">
                     <IoLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#606C38" }} />
                     <input
-                      type="password"
+                      type={showSignInPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
-                      className="w-full h-11 sm:h-12 pl-10 pr-4 rounded-lg text-sm sm:text-base transition-all"
+                      className="w-full h-11 sm:h-12 pl-10 pr-10 rounded-lg text-sm sm:text-base transition-all"
                       style={{
                         border: "2px solid #DDA15E",
                         color: "#283618",
@@ -251,6 +253,18 @@ function AuthPageContent() {
                       onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
                       onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignInPassword(!showSignInPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none"
+                      style={{ color: "#606C38" }}
+                    >
+                      {showSignInPassword ? (
+                        <IoEyeOffOutline className="w-5 h-5" />
+                      ) : (
+                        <IoEyeOutline className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
                 </div>
 
@@ -373,11 +387,11 @@ function AuthPageContent() {
                   <div className="relative">
                     <IoLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#606C38" }} />
                     <input
-                      type="password"
+                      type={showSignUpPassword ? "text" : "password"}
                       placeholder="Create a strong password"
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
-                      className="w-full h-11 sm:h-12 pl-10 pr-4 rounded-lg text-sm sm:text-base transition-all"
+                      className="w-full h-11 sm:h-12 pl-10 pr-10 rounded-lg text-sm sm:text-base transition-all"
                       style={{
                         border: "2px solid #DDA15E",
                         color: "#283618",
@@ -386,6 +400,18 @@ function AuthPageContent() {
                       onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
                       onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none"
+                      style={{ color: "#606C38" }}
+                    >
+                      {showSignUpPassword ? (
+                        <IoEyeOffOutline className="w-5 h-5" />
+                      ) : (
+                        <IoEyeOutline className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
                 </div>
 

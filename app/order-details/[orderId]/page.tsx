@@ -553,6 +553,20 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       </div>
                     )}
 
+                    {/* Selected Meal Times */}
+                    {item.selectedMealTimes && item.selectedMealTimes.length > 0 && (
+                      <div
+                        className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t flex items-center gap-2 text-xs sm:text-sm"
+                        style={{ borderColor: "#e5e5e5", color: "#606C38" }}
+                      >
+                        <Clock className="w-4 h-4 flex-shrink-0" />
+                        <span className="font-medium">Meal Times:</span>
+                        <span className="break-words capitalize">
+                          {item.selectedMealTimes.join(", ")}
+                        </span>
+                      </div>
+                    )}
+
                     {/* Date Range */}
                     <div
                       className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t flex items-center gap-2 text-xs sm:text-sm"

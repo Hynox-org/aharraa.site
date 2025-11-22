@@ -79,33 +79,16 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
       }
 
       if (isAuthenticated && user && currentOrderId) {
-        const fetchOrder = async () => {
-          try {
-            setPageLoading(true)
-            const token = localStorage.getItem("aharraa-u-token")
-            if (!token) {
-              toast.error("Authentication token not found. Please log in again.")
-              router.push("/auth?returnUrl=/order-status/" + currentOrderId)
-              return
-            }
-            const orderDetails = await getOrderDetails(currentOrderId, token)
-            setOrder(orderDetails)
+        // Initial fetch
+        fetchOrder(currentOrderId);
 
-            // Verify payment after fetching order details
-            const verificationResponse = await verifyPayment(currentOrderId, token)
-            if (verificationResponse && verificationResponse.order) {
-              // setOrder(verificationResponse.order)
-            }
+        // Set up automatic refresh
+        const intervalId = setInterval(() => {
+          handleRefresh();
+        }, 60000); // Refresh every minute (60000 milliseconds)
 
-          } catch (err: any) {
-            console.error("Error fetching order details or verifying payment:", err)
-            setError(err.message || "Failed to fetch order details or verify payment.")
-            toast.error(err.message || "Failed to fetch order details or verify payment.")
-          } finally {
-            setPageLoading(false)
-          }
-        }
-        fetchOrder()
+        // Clean up the interval on component unmount
+        return () => clearInterval(intervalId);
       }
     }
     resolveParams()
