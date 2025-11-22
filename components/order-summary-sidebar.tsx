@@ -46,7 +46,7 @@ export function OrderSummarySidebar({
   const isComplete = selectedMenu && selectedPlan && startDate && endDate && quantity >= 1 && selectedMealTimes.length > 0
 
   return (
-    <div className="sticky top-6">
+    <div className="sticky top-25">
       <div className="rounded-xl p-6 shadow-lg" style={{ backgroundColor: "#283618" }}>
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">

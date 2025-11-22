@@ -1,10 +1,8 @@
-import React, { useState } from "react"
-import { Menu, MenuItem, MealCategory, DayOfWeek, Meal, MenuItemWithPopulatedMeal, MenuWithPopulatedMeals } from "@/lib/types" // Updated imports
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import React from "react"
+import { Menu, MenuItem, MealCategory, DayOfWeek, Meal, MenuItemWithPopulatedMeal, MenuWithPopulatedMeals } from "@/lib/types"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
-import { Check, Calendar, UtensilsCrossed } from "lucide-react"
+import { Check, Eye } from "lucide-react"
 
 interface MenuGridProps {
   menus: MenuWithPopulatedMeals[];
@@ -16,7 +14,7 @@ const DAYS_ORDER: DayOfWeek[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "
 const MEAL_CATEGORIES: MealCategory[] = ["Breakfast", "Lunch", "Dinner"];
 
 export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
-  const getMealsByDay = (menu: MenuWithPopulatedMeals) => { // Changed type to MenuWithPopulatedMeals
+  const getMealsByDay = (menu: MenuWithPopulatedMeals) => {
     const mealsByDay: Record<DayOfWeek, Record<MealCategory, MenuItemWithPopulatedMeal | null>> = {} as any;
     
     DAYS_ORDER.forEach(day => {
@@ -32,7 +30,7 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
     return mealsByDay;
   };
 
-  const getTotalDays = (menu: MenuWithPopulatedMeals) => { // Changed type to MenuWithPopulatedMeals
+  const getTotalDays = (menu: MenuWithPopulatedMeals) => {
     const uniqueDays = new Set(menu.menuItems.map(item => item.day));
     return uniqueDays.size;
   };
@@ -46,7 +44,6 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
     }
   };
 
-  // Helper to get meal name from either string ID or populated object
   const getMealName = (meal: MenuItemWithPopulatedMeal['meal'] | string): string => {
     if (typeof meal === 'string') return 'Meal Item';
     return (meal as Meal)?.name || 'Meal Item';
@@ -63,152 +60,171 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
     if (typeof meal === 'object' && (meal as Meal)?.image) {
       return (meal as Meal).image;
     }
-    return '/public/defaults/default-meal.jpg'; // Default image path
+    return '/public/defaults/default-meal.jpg';
   };
 
   return (
-    <Card className="w-full border-none shadow-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-xl font-semibold">Select a Menu Plan</CardTitle>
-        <p className="text-sm text-muted-foreground mt-1">
-          Choose a weekly menu that fits your preferences
-        </p>
-      </CardHeader>
-      <CardContent>
-        {menus.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-              <span className="text-2xl">📋</span>
-            </div>
-            <p className="text-center text-gray-500 text-sm">
-              No menus available for this vendor.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {menus.map((menu) => {
-              const isSelected = selectedMenu?._id === menu._id;
-              const totalDays = getTotalDays(menu);
-              
-              return (
-                <Dialog key={menu._id}>
-                  <div
-                    className={`
-                      relative group rounded-lg border-2 overflow-hidden
-                      transition-all duration-200 hover:shadow-md hover:-translate-y-0.5
-                      ${isSelected 
-                        ? 'border-primary bg-primary/5 shadow-sm' 
-                        : 'border-gray-200 bg-white hover:border-gray-300'
-                      }
-                    `}
-                  >
-                    {isSelected && (
-                      <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-primary flex items-center justify-center z-10">
-                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                      </div>
-                    )}
+    <div className="w-full py-4 md:py-6">
+      {/* Minimal Header - Reduced sizes */}
+      <div className="text-center mb-6 md:mb-8 px-4">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 md:mb-2">Select Your Menu</h2>
+        <p className="text-xs md:text-sm text-gray-500">Choose your weekly meal plan</p>
+      </div>
 
-                    {menu.coverImage && (
-                      <div className="relative w-full h-36 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                        <Image
-                          src={menu.coverImage}
-                          alt={menu.name}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                        
-                        <div className="absolute bottom-3 left-3 px-2.5 py-1 bg-white rounded-full shadow-md">
-                          <span className="text-sm font-bold text-gray-900">₹{menu.perDayPrice}/day</span>
+      {menus.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 md:py-16 text-gray-400">
+          <span className="text-3xl md:text-4xl mb-2">📋</span>
+          <p className="text-xs md:text-sm">No menus available</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10 px-4">
+          {menus.map((menu) => {
+            const isSelected = selectedMenu?._id === menu._id;
+            const totalDays = getTotalDays(menu);
+            
+            return (
+              <Dialog key={menu._id}>
+                {/* Floating Card Container - Reduced scale */}
+                <div
+                  className={`
+                    relative cursor-pointer group
+                    transition-all duration-500 ease-out
+                    ${isSelected ? 'scale-[1.03]' : 'hover:scale-[1.01]'}
+                  `}
+                  onClick={() => onMenuSelect(menu)}
+                >
+                  {/* Glow Effect Background - Smaller blur */}
+                  {isSelected && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-full blur-2xl opacity-60 animate-pulse" />
+                  )}
+
+                  {/* Floating Content */}
+                  <div className="relative flex flex-col items-center">
+                    
+                    {/* Floating Image - Reduced sizes */}
+                    <div className="relative mb-3 md:mb-4">
+                      {menu.coverImage && (
+                        <div className="relative w-40 h-40">
+                          <Image
+                            src={menu.coverImage}
+                            alt={menu.name}
+                            fill
+                            className={`
+                              object-contain rounded-full
+                              transition-all duration-700 ease-out
+                              filter
+                              ${
+                                isSelected 
+                                  ? 'drop-shadow-2xl scale-110 rotate-6' 
+                                  : 'drop-shadow-xl group-hover:drop-shadow-2xl group-hover:scale-105 group-hover:-rotate-3'
+                              }
+                            `}
+                          />
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    <div className="p-4">
-                      <div className="mb-3">
-                        <h3 className="font-semibold text-base text-gray-900 mb-1 line-clamp-1">
-                          {menu.name}
-                        </h3>
-                        {menu.description && (
-                          <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                            {menu.description}
-                          </p>
-                        )}
+                      {/* Price Badge - Smaller on mobile */}
+                      <div className="absolute bottom-1 md:bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1.5 md:px-4 md:py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg md:shadow-xl">
+                        <span className="text-xs sm:text-sm md:text-base font-bold text-gray-900">
+                          ₹{menu.perDayPrice}
+                          <span className="text-[10px] sm:text-xs font-normal text-gray-600">/day</span>
+                        </span>
                       </div>
 
-                      <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        <Badge variant="secondary" className="text-xs font-normal">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {totalDays} Days
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs font-normal">
-                          <UtensilsCrossed className="w-3 h-3 mr-1" />
-                          {menu.menuItems.length} Meals
-                        </Badge>
+                      {/* Selected Badge - Smaller */}
+                      {isSelected && (
+                        <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 z-20">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-emerald-400 rounded-full blur-md opacity-60 animate-pulse" />
+                            <div className="relative bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full p-1.5 md:p-2 shadow-xl">
+                              <Check className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Text Content - Reduced sizes */}
+                    <div className="text-center space-y-1 md:space-y-2 px-2 md:px-4 w-full">
+                      {/* Title - Smaller font sizes */}
+                      <h3
+                        className={`
+                          font-bold text-base sm:text-lg md:text-xl lg:text-2xl
+                          transition-all duration-300
+                          ${
+                            isSelected
+                              ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-green-700'
+                              : 'text-gray-800 group-hover:text-gray-900'
+                          }
+                        `}
+                      >
+                        {menu.name}
+                      </h3>
+
+                      {/* Meta Info - Smaller */}
+                      <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs md:text-sm text-gray-500 pt-1">
+                        <span>{totalDays} Days</span>
+                        <span>•</span>
+                        <span>{menu.menuItems.length} Meals</span>
                       </div>
 
-                      <div className="flex gap-2">
+                      {/* Action Buttons - Reduced padding and text */}
+                      <div className="pt-2 md:pt-3 flex flex-col xs:flex-row gap-2 justify-center">
                         <button
                           onClick={() => onMenuSelect(menu)}
                           className={`
-                            flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors
-                            ${isSelected 
-                              ? 'bg-primary text-white' 
-                              : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                            px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold
+                            transition-all duration-300
+                            ${
+                              isSelected
+                                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 text-white shadow-md md:shadow-lg shadow-emerald-200'
+                                : 'bg-transparent border-2 border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                             }
                           `}
                         >
-                          {isSelected ? 'Selected' : 'Select Menu'}
+                          {isSelected ? 'Selected ✓' : 'Select'}
                         </button>
                         
                         <DialogTrigger asChild>
-                          <button className="px-3 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span className="hidden sm:inline">View</span>
+                          <button className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all border-2 border-transparent hover:border-blue-200">
+                            View
                           </button>
                         </DialogTrigger>
                       </div>
                     </div>
-
-                    <div className={`
-                      absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent opacity-0 
-                      group-hover:opacity-100 transition-opacity duration-200 pointer-events-none
-                      ${isSelected ? 'opacity-100' : ''}
-                    `} />
                   </div>
+                </div>
 
-                  <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                {/* Dialog */}
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+                  <div className="sticky top-0 bg-white border-b p-3 md:p-4 lg:p-6 z-10">
                     <DialogHeader>
-                      <DialogTitle className="text-xl font-semibold flex items-center gap-2">
-                        <Calendar className="w-5 h-5" />
-                        {menu.name} - Weekly Meal Plan
-                      </DialogTitle>
-                      <div className="flex items-center gap-3 mt-2">
-                        <Badge variant="outline" className="text-xs">
-                          ₹{menu.perDayPrice} per day
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {totalDays} days • {menu.menuItems.length} meals
-                        </Badge>
+                      <DialogTitle className="text-base md:text-lg lg:text-xl font-bold">{menu.name}</DialogTitle>
+                      <div className="flex items-center gap-2 md:gap-3 mt-1 md:mt-2 text-[10px] md:text-xs lg:text-sm text-gray-600">
+                        <span>₹{menu.perDayPrice}/day</span>
+                        <span>•</span>
+                        <span>{totalDays} days</span>
+                        <span>•</span>
+                        <span>{menu.menuItems.length} meals</span>
                       </div>
                     </DialogHeader>
+                  </div>
 
-                    <WeeklyCalendarView 
-                      menu={menu} 
-                      mealsByDay={getMealsByDay(menu)} 
-                      getMealIcon={getMealIcon}
-                      getMealName={getMealName}
-                      getMealDescription={getMealDescription}
-                      getMealImage={getMealImage}
-                    />
-                  </DialogContent>
-                </Dialog>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                  <WeeklyCalendarView 
+                    menu={menu} 
+                    mealsByDay={getMealsByDay(menu)} 
+                    getMealIcon={getMealIcon}
+                    getMealName={getMealName}
+                    getMealDescription={getMealDescription}
+                    getMealImage={getMealImage}
+                  />
+                </DialogContent>
+              </Dialog>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -220,98 +236,82 @@ function WeeklyCalendarView({
   getMealDescription,
   getMealImage
 }: { 
-  menu: MenuWithPopulatedMeals; // Changed type to MenuWithPopulatedMeals
+  menu: MenuWithPopulatedMeals;
   mealsByDay: Record<DayOfWeek, Record<MealCategory, MenuItemWithPopulatedMeal | null>>;
   getMealIcon: (category: MealCategory) => string;
-  getMealName: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string; // Changed type
-  getMealDescription: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string | undefined; // Changed type
-  getMealImage: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string; // Changed type
+  getMealName: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string;
+  getMealDescription: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string | undefined;
+  getMealImage: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string;
 }) {
   const activeDays = DAYS_ORDER.filter(day => 
     Object.values(mealsByDay[day]).some(meal => meal !== null)
   );
 
   return (
-    <div className="mt-4">
-      <div className="space-y-3">
-        {activeDays.map((day) => {
-          const dayMeals = mealsByDay[day];
-          const hasMeals = Object.values(dayMeals).some(meal => meal !== null);
-          
-          if (!hasMeals) return null;
+    <div className="p-3 md:p-4 lg:p-6 space-y-3 md:space-y-4">
+      {activeDays.map((day) => {
+        const dayMeals = mealsByDay[day];
+        const hasMeals = Object.values(dayMeals).some(meal => meal !== null);
+        
+        if (!hasMeals) return null;
 
-          return (
-            <div key={day} className="border rounded-lg overflow-hidden bg-white">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2.5 border-b">
-                <h4 className="font-semibold text-sm text-gray-900">{day}</h4>
-              </div>
+        return (
+          <div key={day} className="border rounded-lg overflow-hidden">
+            {/* Day Header - Smaller */}
+            <div className="bg-gray-50 px-3 md:px-4 py-2 border-b">
+              <h4 className="font-semibold text-xs md:text-sm lg:text-base text-gray-900">{day}</h4>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x">
-                {MEAL_CATEGORIES.map((category) => {
-                  const mealItem = dayMeals[category];
-                  const mealName = mealItem ? getMealName(mealItem.meal) : null;
-                  const mealDesc = mealItem ? getMealDescription(mealItem.meal) : null;
-                  const mealImage = mealItem ? getMealImage(mealItem.meal) : null;
-                  
-                  return (
-                    <div key={category} className="p-4 hover:bg-gray-50 transition-colors min-h-[100px]">
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl flex-shrink-0">{getMealIcon(category)}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                            {category}
-                          </p>
-                          {mealItem ? (
-                            <>
-                              {mealImage && (
-                                <div className="relative w-full h-24 mb-2 overflow-hidden rounded-md">
-                                  <Image
-                                    src={mealImage}
-                                    alt={mealName || 'Meal image'}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                  />
-                                </div>
-                              )}
-                              <p className="text-sm text-gray-900 font-semibold mb-1">
-                                {mealName}
+            {/* Meals Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
+              {MEAL_CATEGORIES.map((category) => {
+                const mealItem = dayMeals[category];
+                const mealName = mealItem ? getMealName(mealItem.meal) : null;
+                const mealDesc = mealItem ? getMealDescription(mealItem.meal) : null;
+                const mealImage = mealItem ? getMealImage(mealItem.meal) : null;
+                
+                return (
+                  <div key={category} className="p-2.5 md:p-3 lg:p-4">
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg md:text-xl lg:text-2xl flex-shrink-0">{getMealIcon(category)}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] md:text-[10px] lg:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 md:mb-2">
+                          {category}
+                        </p>
+                        {mealItem ? (
+                          <>
+                            {mealImage && (
+                              <div className="relative w-full h-16 md:h-20 lg:h-24 mb-1.5 md:mb-2 rounded-md overflow-hidden bg-gray-100">
+                                <Image
+                                  src={mealImage}
+                                  alt={mealName || 'Meal'}
+                                  fill
+                                  className="object-cover"
+                                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                />
+                              </div>
+                            )}
+                            <p className="text-[10px] md:text-xs lg:text-sm font-semibold text-gray-900 mb-0.5 md:mb-1 line-clamp-1">
+                              {mealName}
+                            </p>
+                            {mealDesc && (
+                              <p className="text-[9px] md:text-[10px] lg:text-xs text-gray-600 line-clamp-2">
+                                {mealDesc}
                               </p>
-                              {mealDesc && (
-                                <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                                  {mealDesc}
-                                </p>
-                              )}
-                            </>
-                          ) : (
-                            <p className="text-xs text-gray-400 italic">Not scheduled</p>
-                          )}
-                        </div>
+                            )}
+                          </>
+                        ) : (
+                          <p className="text-[10px] md:text-xs text-gray-400">Not scheduled</p>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <UtensilsCrossed className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="flex-1">
-            <h5 className="text-sm font-semibold text-gray-900 mb-1">Weekly Plan Summary</h5>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              This menu includes {menu.menuItems.length} carefully planned meals across {activeDays.length} days. 
-              Daily cost: <span className="font-semibold">₹{menu.perDayPrice}</span> • 
-              Weekly total: <span className="font-semibold">₹{menu.perDayPrice * activeDays.length}</span>
-            </p>
-          </div>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }

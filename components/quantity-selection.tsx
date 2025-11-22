@@ -18,91 +18,120 @@ export function QuantitySelection({
   const isMinQuantity = quantity <= 1;
 
   return (
-    <div className="px-4 py-6 max-w-md mx-auto">
-      {/* Header */}
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold text-[#283618] mb-1">Select Quantity</h2>
-        <p className="text-xs text-gray-600">
-          How many meal plans would you like to order?
+    <div className="px-4 py-4 md:py-6 max-w-md mx-auto">
+      {/* Minimal Header */}
+      <div className="text-center mb-6 md:mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Select Quantity</h2>
+        <p className="text-xs md:text-sm text-gray-500">
+          How many meal plans?
         </p>
       </div>
 
-      {/* Quantity Controls */}
-      <div className="flex items-center justify-center gap-3 mb-5">
+      {/* Floating Quantity Controls */}
+      <div className="flex items-center justify-center gap-4 md:gap-6 mb-6 md:mb-8">
+        {/* Decrease Button */}
         <button
           onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
           disabled={isMinQuantity}
           aria-label="Decrease quantity"
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#DDA15E] border border-[#BC6C25] text-white flex items-center justify-center text-2xl font-bold hover:bg-[#BC6C25] disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className={`
+            w-12 h-12 md:w-14 md:h-14 rounded-full
+            flex items-center justify-center
+            transition-all duration-300 filter
+            ${
+              isMinQuantity
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed drop-shadow-md"
+                : "bg-gradient-to-br from-emerald-500 to-teal-600 text-white drop-shadow-xl hover:drop-shadow-2xl hover:scale-105"
+            }
+          `}
         >
-          <Minus className="w-5 h-5 stroke-[3]" />
+          <Minus className="w-5 h-5 md:w-6 md:h-6 stroke-[3]" />
         </button>
 
-        <div className="flex flex-col items-center gap-1">
-          <div className="w-20 h-16 sm:w-24 sm:h-20 rounded-lg bg-[#606C38] border-2 border-[#283618] flex items-center justify-center shadow-lg">
-            <span className="text-3xl sm:text-4xl font-black text-[#FEFAE0]">{quantity}</span>
+        {/* Quantity Display - Floating Circle */}
+        <div className="relative">
+          {/* Glow Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-full blur-xl opacity-60" />
+          
+          <div className="relative flex flex-col items-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl">
+              <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white">
+                {quantity}
+              </span>
+            </div>
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+              <span className="text-[10px] md:text-xs font-bold text-gray-700 whitespace-nowrap">
+                PLAN{quantity !== 1 ? "S" : ""}
+              </span>
+            </div>
           </div>
-          <span className="text-xs font-medium text-[#606C38]">
-            meal plan{quantity !== 1 ? "s" : ""}
-          </span>
         </div>
 
+        {/* Increase Button */}
         <button
           onClick={() => onQuantityChange(quantity + 1)}
           aria-label="Increase quantity"
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#DDA15E] border border-[#BC6C25] text-white flex items-center justify-center text-2xl font-bold hover:bg-[#BC6C25] transition"
+          className="
+            w-12 h-12 md:w-14 md:h-14 rounded-full
+            bg-gradient-to-br from-emerald-500 to-teal-600 text-white
+            flex items-center justify-center
+            transition-all duration-300 filter
+            drop-shadow-xl hover:drop-shadow-2xl hover:scale-105
+          "
         >
-          <Plus className="w-5 h-5 stroke-[3]" />
+          <Plus className="w-5 h-5 md:w-6 md:h-6 stroke-[3]" />
         </button>
       </div>
 
-      {/* Summary Info */}
-      <div className="bg-[#FEFAE0] rounded-xl border-2 border-[#DDA15E] p-4 shadow-sm text-center text-[#606C38] text-sm space-y-3">
-        <p>
-          Ordering{" "}
-          <span className="font-bold text-[#283618]">{quantity}</span>{" "}
-          meal plan{quantity !== 1 ? "s" : ""} for{" "}
-          <span className="font-bold text-[#283618]">{selectedPlan.durationDays} days</span>.
-        </p>
-        <div className="flex justify-between gap-3">
-          {/* Total Meals */}
-          <div className="flex-1 bg-white rounded-lg p-2 border border-[#DDA15E]/30 flex flex-col items-center">
-            <div className="w-7 h-7 rounded-full bg-[#606C38] flex items-center justify-center mb-1">
-              <ShoppingCart className="w-4 h-4 text-white" />
+      {/* Summary Cards - Minimal Floating */}
+      <div className="flex gap-3 md:gap-4 mb-4 md:mb-6">
+        {/* Total Meals */}
+        <div className="flex-1 text-center">
+          <div className="relative group">
+            <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-2 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center transition-all duration-300 filter drop-shadow-md group-hover:drop-shadow-lg">
+              <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
             </div>
-            <span className="uppercase text-[9px] font-semibold text-[#606C38]">
+            <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-500 mb-1 tracking-wide">
               Total Meals
-            </span>
-            <p className="text-lg font-bold text-[#283618]">{totalMeals}</p>
+            </p>
+            <p className="text-lg md:text-xl font-black text-gray-900">{totalMeals}</p>
           </div>
-          {/* Duration */}
-          <div className="flex-1 bg-white rounded-lg p-2 border border-[#DDA15E]/30 flex flex-col items-center">
-            <div className="w-7 h-7 rounded-full bg-[#606C38] flex items-center justify-center mb-1">
-              <Calendar className="w-4 h-4 text-white" />
+        </div>
+
+        {/* Duration */}
+        <div className="flex-1 text-center">
+          <div className="relative group">
+            <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-2 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center transition-all duration-300 filter drop-shadow-md group-hover:drop-shadow-lg">
+              <Calendar className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
             </div>
-            <span className="uppercase text-[9px] font-semibold text-[#606C38]">
+            <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-500 mb-1 tracking-wide">
               Duration
-            </span>
-            <p className="text-lg font-bold text-[#283618]">{selectedPlan.durationDays} days</p>
+            </p>
+            <p className="text-lg md:text-xl font-black text-gray-900">{selectedPlan.durationDays}</p>
+            <p className="text-[10px] md:text-xs text-gray-500">days</p>
           </div>
-          {/* People */}
-          <div className="flex-1 bg-white rounded-lg p-2 border border-[#DDA15E]/30 flex flex-col items-center">
-            <div className="w-7 h-7 rounded-full bg-[#606C38] flex items-center justify-center mb-1">
-              <Users className="w-4 h-4 text-white" />
+        </div>
+
+        {/* People */}
+        <div className="flex-1 text-center">
+          <div className="relative group">
+            <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-2 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center transition-all duration-300 filter drop-shadow-md group-hover:drop-shadow-lg">
+              <Users className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
             </div>
-            <span className="uppercase text-[9px] font-semibold text-[#606C38]">
+            <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-500 mb-1 tracking-wide">
               Serving
-            </span>
-            <p className="text-lg font-bold text-[#283618]">
-              {quantity} {quantity === 1 ? "person" : "people"}
+            </p>
+            <p className="text-lg md:text-xl font-black text-gray-900">{quantity}</p>
+            <p className="text-[10px] md:text-xs text-gray-500">
+              {quantity === 1 ? "person" : "people"}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Helper Text */}
-      <p className="mt-3 text-center text-[10px] text-gray-500 select-none">
-        Need to order for more people? Increase the quantity above.
+      {/* Minimal Helper Text */}
+      <p className="text-center text-[10px] md:text-xs text-gray-400">
+        Need more? Just increase the quantity
       </p>
     </div>
   );

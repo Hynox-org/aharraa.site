@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Check, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { Calendar, Clock, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Plan } from "@/lib/types";
 
 interface DateSelectionProps {
@@ -29,7 +29,6 @@ export function DateSelection({
     }
   }, [isDisabled, showCalendar]);
 
-  // Get days in current month view
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -41,8 +40,7 @@ export function DateSelection({
     return { daysInMonth, startingDayOfWeek, year, month };
   };
 
-  const { daysInMonth, startingDayOfWeek, year, month } =
-    getDaysInMonth(currentMonth);
+  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -75,101 +73,109 @@ export function DateSelection({
   };
 
   return (
-    <div className="py-4 sm:py-8 px-2 sm:px-4 lg:px-8">
-      {/* Header */}
-      <div className="mb-4 sm:mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-[#283618] mb-1 sm:mb-2">
+    <div className="py-4 md:py-6 px-4">
+      {/* Minimal Header */}
+      <div className="text-center mb-6 md:mb-8">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 md:mb-2">
           Select Start Date
         </h2>
-        <p className="text-xs sm:text-sm text-gray-600">
-          Choose when you'd like your meal deliveries to begin
+        <p className="text-xs md:text-sm text-gray-500">
+          When should your meals begin?
         </p>
       </div>
 
       {/* Date Selection Container */}
-      <div className="max-w-2xl mx-auto bg-[#FEFAE0] rounded-xl sm:rounded-2xl border-2 border-[#DDA15E] p-4 sm:p-6 shadow-sm">
-        {/* Date Trigger Button */}
-        <button
-          onClick={() => !isDisabled && setShowCalendar(!showCalendar)}
-          disabled={isDisabled}
-          className={`w-full h-12 sm:h-14 px-3 sm:px-5 rounded-lg sm:rounded-xl font-semibold 
-                     flex items-center justify-between gap-2 sm:gap-3 
-                     transition-all duration-200 hover:shadow-md 
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     ${startDate 
-                       ? 'bg-[#606C38] text-[#FEFAE0] border-2 border-[#283618]' 
-                       : 'bg-white text-[#606C38] border-2 border-[#DDA15E] hover:border-[#BC6C25]'
-                     }`}
-        >
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" strokeWidth={2.5} />
-            <span className="text-xs sm:text-sm md:text-base truncate">
-              {startDate
-                ? format(startDate, window.innerWidth < 640 ? "MMM d, yyyy" : "EEEE, MMMM do, yyyy")
-                : "Select start date"}
-            </span>
-          </div>
+      <div className="max-w-lg mx-auto">
+        {/* Date Display - Floating Circle Style */}
+        <div className="relative mb-6 md:mb-8">
           {startDate && (
-            <Check className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" strokeWidth={3} />
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl opacity-60" />
           )}
-        </button>
+          
+          <button
+            onClick={() => !isDisabled && setShowCalendar(!showCalendar)}
+            disabled={isDisabled}
+            className={`
+              relative w-full px-6 md:px-8 py-4 md:py-5 rounded-2xl md:rounded-3xl
+              flex items-center justify-between gap-3
+              transition-all duration-300 filter
+              disabled:opacity-50 disabled:cursor-not-allowed
+              ${
+                startDate 
+                  ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white drop-shadow-2xl scale-[1.02]' 
+                  : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-gray-300 drop-shadow-lg hover:drop-shadow-xl'
+              }
+            `}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Calendar className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" strokeWidth={2.5} />
+              <div className="text-left min-w-0">
+                <p className={`text-[10px] md:text-xs font-semibold uppercase tracking-wide ${startDate ? 'text-white/80' : 'text-gray-500'}`}>
+                  Start Date
+                </p>
+                <p className="text-sm md:text-base lg:text-lg font-bold truncate">
+                  {startDate ? format(startDate, "EEEE, MMM d, yyyy") : "Choose a date"}
+                </p>
+              </div>
+            </div>
+            {startDate && (
+              <div className="flex-shrink-0">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Check className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
+                </div>
+              </div>
+            )}
+          </button>
+        </div>
 
         {/* Calendar Dropdown */}
         {showCalendar && (
-          <div className="mt-3 sm:mt-4 bg-white rounded-lg sm:rounded-xl border-2 border-[#DDA15E] p-3 sm:p-4 md:p-5 shadow-lg">
-            {/* Month Navigation Header */}
-            <div className="flex items-center justify-between mb-4 sm:mb-5 pb-3 sm:pb-4 border-b border-[#DDA15E]/30">
+          <div className="bg-white rounded-2xl md:rounded-3xl border-2 border-gray-200 p-4 md:p-6 shadow-2xl mb-6 md:mb-8">
+            {/* Month Navigation */}
+            <div className="flex items-center justify-between mb-5 md:mb-6">
               <button
                 onClick={() => changeMonth(-1)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#DDA15E] text-white 
-                         flex items-center justify-center
-                         transition-all duration-200 hover:bg-[#BC6C25] 
-                         active:scale-95 touch-manipulation"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gray-100 hover:bg-gray-200 
+                         flex items-center justify-center transition-all active:scale-95"
                 aria-label="Previous month"
               >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-700" strokeWidth={2.5} />
               </button>
               
-              <h3 className="text-sm sm:text-base md:text-lg font-bold text-[#283618]">
+              <h3 className="text-base md:text-lg font-bold text-gray-900">
                 {format(currentMonth, "MMMM yyyy")}
               </h3>
               
               <button
                 onClick={() => changeMonth(1)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#DDA15E] text-white 
-                         flex items-center justify-center
-                         transition-all duration-200 hover:bg-[#BC6C25] 
-                         active:scale-95 touch-manipulation"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gray-100 hover:bg-gray-200 
+                         flex items-center justify-center transition-all active:scale-95"
                 aria-label="Next month"
               >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-700" strokeWidth={2.5} />
               </button>
             </div>
 
             {/* Day Headers */}
-            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 mb-2 sm:mb-3">
-              {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => {
-                const fullDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-                return (
-                  <div
-                    key={day + i}
-                    className="text-center text-[10px] sm:text-xs font-bold text-[#606C38] py-1 sm:py-2"
-                  >
-                    <span className="hidden sm:inline">{fullDays[i]}</span>
-                    <span className="sm:hidden">{day}</span>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2 md:mb-3">
+              {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
+                <div
+                  key={day + i}
+                  className="text-center text-[10px] md:text-xs font-bold text-gray-500 py-1 md:py-2"
+                >
+                  {day}
+                </div>
+              ))}
             </div>
 
-            {/* Calendar Days Grid */}
-            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2">
-              {/* Empty cells for days before month starts */}
+            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 gap-1 md:gap-2">
+              {/* Empty cells */}
               {Array.from({ length: startingDayOfWeek }).map((_, i) => (
                 <div key={`empty-${i}`} className="aspect-square" />
               ))}
 
-              {/* Days of the month */}
+              {/* Days */}
               {Array.from({ length: daysInMonth }).map((_, i) => {
                 const day = i + 1;
                 const disabled = isDateDisabled(day);
@@ -181,96 +187,69 @@ export function DateSelection({
                     key={day}
                     onClick={() => handleDateClick(day)}
                     disabled={disabled || isDisabled}
-                    className={`aspect-square rounded-md sm:rounded-lg 
-                               text-[11px] sm:text-sm font-semibold 
-                               transition-all duration-200
-                               flex items-center justify-center relative
-                               touch-manipulation
-                               ${selected
-                                 ? 'bg-[#606C38] text-white shadow-md scale-105 ring-1 sm:ring-2 ring-[#283618] ring-offset-1 sm:ring-offset-2'
-                                 : disabled || isDisabled
-                                 ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                                 : 'bg-[#FEFAE0] text-[#283618] hover:bg-[#DDA15E] hover:text-white active:scale-95 border border-[#DDA15E]/40'
-                               }`}
+                    className={`
+                      aspect-square rounded-lg md:rounded-xl
+                      text-xs md:text-sm font-semibold
+                      transition-all duration-200
+                      flex items-center justify-center relative
+                      ${
+                        selected
+                          ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg scale-105'
+                          : disabled || isDisabled
+                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                          : 'bg-gray-50 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 active:scale-95'
+                      }
+                    `}
                   >
                     {day}
                     {todayDate && !selected && (
-                      <div className="absolute bottom-0.5 sm:bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 sm:w-1 sm:h-1 rounded-full bg-[#BC6C25]" />
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-500" />
                     )}
                   </button>
                 );
               })}
             </div>
-
-            {/* Calendar Legend */}
-            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[#DDA15E]/30">
-              <div className="flex items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-600 flex-wrap justify-center sm:justify-start">
-                <div className="flex items-center gap-1 sm:gap-1.5">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#606C38]" />
-                  <span>Selected</span>
-                </div>
-                <div className="flex items-center gap-1 sm:gap-1.5">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#FEFAE0] border border-[#DDA15E]/40" />
-                  <span>Available</span>
-                </div>
-                <div className="flex items-center gap-1 sm:gap-1.5">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-gray-100" />
-                  <span>Past</span>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
-        {/* Delivery Period Info */}
+        {/* Delivery Info - Minimal */}
         {startDate && endDate && (
-          <div className="mt-3 sm:mt-4 bg-[#606C38] rounded-lg sm:rounded-xl p-4 sm:p-5 shadow-md">
-            <div className="flex items-start gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#DDA15E] flex items-center justify-center flex-shrink-0">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={2.5} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-[#FEFAE0] mb-1 text-sm sm:text-base">
-                  Daily Deliveries Scheduled
-                </h4>
-                <p className="text-xs sm:text-sm text-[#FEFAE0]/90 leading-relaxed">
-                  Your meals will be delivered daily from{" "}
-                  <span className="font-bold text-white">
-                    {format(startDate, "MMM d")}
-                  </span>{" "}
-                  to{" "}
-                  <span className="font-bold text-white">
-                    {format(endDate, "MMM d, yyyy")}
-                  </span>
-                </p>
-                <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/20">
-                  <p className="text-[10px] sm:text-xs text-[#FEFAE0]/80">
-                    Total duration: <span className="font-semibold">{selectedPlan.durationDays} days</span>
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-2xl opacity-60" />
+            
+            <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl md:rounded-3xl p-5 md:p-6 text-white shadow-2xl">
+              <div className="flex items-start gap-3 md:gap-4">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold mb-1 md:mb-2 text-sm md:text-base">
+                    Deliveries Scheduled
+                  </h4>
+                  <p className="text-xs md:text-sm text-white/90 leading-relaxed">
+                    Daily meals from{" "}
+                    <span className="font-bold">{format(startDate, "MMM d")}</span>
+                    {" "}to{" "}
+                    <span className="font-bold">{format(endDate, "MMM d, yyyy")}</span>
                   </p>
+                  <div className="mt-2 md:mt-3 flex items-center gap-2">
+                    <div className="px-2.5 md:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
+                      <p className="text-[10px] md:text-xs font-semibold">
+                        {selectedPlan.durationDays} days
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Helper Info */}
+        {/* Helper Text */}
         {!startDate && (
-          <div className="mt-3 sm:mt-4 bg-blue-50 border-2 border-blue-200 rounded-lg sm:rounded-xl p-3 sm:p-4">
-            <div className="flex items-start gap-2 sm:gap-3">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" strokeWidth={2.5} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h5 className="text-xs sm:text-sm font-bold text-blue-900 mb-0.5 sm:mb-1">
-                  Choose Your Start Date
-                </h5>
-                <p className="text-[10px] sm:text-xs text-blue-800 leading-relaxed">
-                  Select any future date to begin your {selectedPlan.durationDays}-day meal plan. 
-                  Deliveries will arrive daily at your chosen time.
-                </p>
-              </div>
-            </div>
-          </div>
+          <p className="text-center text-xs md:text-sm text-gray-400">
+            Select any future date to begin
+          </p>
         )}
       </div>
     </div>

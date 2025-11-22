@@ -1,34 +1,33 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { Menu, Plan, MenuWithPopulatedMeals } from "@/lib/types"; // Updated import
-import { Check, Calendar, Sparkles, RotateCcw } from "lucide-react";
+import { Menu, Plan, MenuWithPopulatedMeals } from "@/lib/types";
+import { Check, Sparkles } from "lucide-react";
 
 interface PlanSelectionProps {
-  selectedMenu: MenuWithPopulatedMeals; // Updated type
+  selectedMenu: MenuWithPopulatedMeals;
   selectedPlan: Plan | null;
   plans: Plan[];
   onPlanSelect: (plan: Plan) => void;
 }
 
 export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect }: PlanSelectionProps) {
-  // Find the most popular plan (you can customize this logic)
   const popularPlanIndex = Math.floor(plans.length / 2);
 
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8">
-      {/* Header Section */}
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-[#283618] mb-2">
-          Choose Your Perfect Plan
+    <div className="py-4 md:py-6 px-4">
+      {/* Minimal Header */}
+      <div className="text-center mb-6 md:mb-8">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 md:mb-2">
+          Choose Your Plan
         </h2>
-        <p className="text-sm text-gray-600 max-w-2xl mx-auto">
-          Select a subscription plan that works best for you. All plans include daily fresh delivery and flexible cancellation.
+        <p className="text-xs md:text-sm text-gray-500 max-w-2xl mx-auto">
+          Select a subscription that works best for you
         </p>
       </div>
 
-      {/* Plans Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+      {/* Floating Plans Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10 max-w-6xl mx-auto">
         {plans.map((plan, index) => {
           const isSelected = selectedPlan?._id === plan._id;
           const isPopular = index === popularPlanIndex;
@@ -41,192 +40,184 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
               key={plan._id}
               onClick={() => onPlanSelect(plan)}
               className={cn(
-                "relative p-6 rounded-2xl text-left transition-all duration-200",
-                "border-2 hover:shadow-lg hover:-translate-y-1",
-                isSelected
-                  ? "bg-[#606C38] border-[#606C38] text-white shadow-xl scale-[1.02]"
-                  : "bg-[#FEFAE0] border-[#DDA15E] text-[#283618] hover:border-[#BC6C25]",
-                isPopular && !isSelected && "ring-2 ring-[#DDA15E] ring-offset-2"
+                "relative group transition-all duration-500 ease-out",
+                isSelected ? "scale-[1.03]" : "hover:scale-[1.01]"
               )}
             >
-              {/* Popular Badge */}
-              {isPopular && !isSelected && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#DDA15E] text-white text-xs font-bold rounded-full shadow-md">
-                    <Sparkles className="w-3 h-3" />
-                    MOST POPULAR
-                  </span>
-                </div>
-              )}
-
-              {/* Selected Indicator */}
+              {/* Glow Effect Background */}
               {isSelected && (
-                <div className="absolute top-4 right-4 w-7 h-7 bg-[#DDA15E] rounded-full flex items-center justify-center shadow-md">
-                  <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-full blur-2xl opacity-60 animate-pulse" />
               )}
 
-              {/* Plan Name */}
-              <div className="mb-4">
-                <h3 className={cn(
-                  "text-xl font-bold mb-1",
-                  isSelected ? "text-white" : "text-[#283618]"
-                )}>
-                  {plan.name}
-                </h3>
-                <p className={cn(
-                  "text-xs",
-                  isSelected ? "text-white/80" : "text-gray-600"
-                )}>
-                  {plan.durationDays} days subscription
-                </p>
-              </div>
-
-              {/* Price Section */}
-              <div className="mb-5">
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className={cn(
-                    "text-4xl font-black",
-                    isSelected ? "text-white" : "text-[#283618]"
-                  )}>
-                    ₹{totalPrice}
-                  </span>
-                  <span className={cn(
-                    "text-sm font-medium",
-                    isSelected ? "text-white/70" : "text-gray-500"
-                  )}>
-                    total
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={cn(
-                    "text-sm font-medium px-2 py-0.5 rounded-full",
-                    isSelected 
-                      ? "bg-white/20 text-white" 
-                      : "bg-[#DDA15E]/20 text-[#BC6C25]"
-                  )}>
-                    ₹{dailyPrice}/day
-                  </span>
-                  {savingsPercent > 0 && (
-                    <span className={cn(
-                      "text-xs font-bold px-2 py-0.5 rounded-full",
-                      isSelected 
-                        ? "bg-[#DDA15E] text-white" 
-                        : "bg-[#606C38] text-white"
-                    )}>
-                      Save {savingsPercent}%
+              {/* Floating Content */}
+              <div className="relative flex flex-col items-center text-center">
+                
+                {/* Popular Badge */}
+                {isPopular && !isSelected && (
+                  <div className="absolute -top-2 md:-top-3 left-1/2 -translate-x-1/2 z-10">
+                    <span className="inline-flex items-center gap-1 px-2.5 md:px-3 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] md:text-xs font-bold rounded-full shadow-lg">
+                      <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                      POPULAR
                     </span>
-                  )}
+                  </div>
+                )}
+
+                {/* Selected Badge */}
+                {isSelected && (
+                  <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 z-20">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-emerald-400 rounded-full blur-md opacity-60 animate-pulse" />
+                      <div className="relative bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full p-1.5 md:p-2 shadow-xl">
+                        <Check className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Plan Icon/Visual */}
+                <div className="relative mb-3 md:mb-4">
+                  <div 
+                    className={cn(
+                      "w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center",
+                      "transition-all duration-700 ease-out filter",
+                      isSelected 
+                        ? "bg-gradient-to-br from-emerald-500 to-teal-600 drop-shadow-2xl scale-110" 
+                        : "bg-gradient-to-br from-gray-100 to-gray-200 drop-shadow-xl group-hover:drop-shadow-2xl group-hover:scale-105"
+                    )}
+                  >
+                    <span className={cn(
+                      "text-2xl sm:text-3xl md:text-4xl font-black",
+                      isSelected ? "text-white" : "text-gray-700"
+                    )}>
+                      {plan.durationDays}
+                    </span>
+                  </div>
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 px-2.5 md:px-3 py-1 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+                    <span className="text-[10px] md:text-xs font-bold text-gray-700">DAYS</span>
+                  </div>
+                </div>
+
+                {/* Plan Details */}
+                <div className="space-y-1 md:space-y-2 px-2 md:px-4 w-full">
+                  {/* Plan Name */}
+                  <h3
+                    className={cn(
+                      "font-bold text-base sm:text-lg md:text-xl transition-all duration-300",
+                      isSelected
+                        ? "text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-green-700"
+                        : "text-gray-800 group-hover:text-gray-900"
+                    )}
+                  >
+                    {plan.name}
+                  </h3>
+
+                  {/* Price */}
+                  <div className="py-2">
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className={cn(
+                        "text-2xl sm:text-3xl md:text-4xl font-black",
+                        isSelected ? "text-emerald-600" : "text-gray-900"
+                      )}>
+                        ₹{totalPrice}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 mt-1 flex-wrap">
+                      <span className={cn(
+                        "text-[10px] md:text-xs font-semibold px-2 py-0.5 rounded-full",
+                        isSelected 
+                          ? "bg-emerald-100 text-emerald-700" 
+                          : "bg-gray-100 text-gray-600"
+                      )}>
+                        ₹{dailyPrice}/day
+                      </span>
+                      {savingsPercent > 0 && (
+                        <span className="text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500 text-white">
+                          Save {savingsPercent}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Features - Simplified */}
+                  <div className="space-y-1.5 md:space-y-2 pt-2 md:pt-3">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <div className={cn(
+                        "w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center",
+                        isSelected ? "bg-emerald-500" : "bg-gray-400"
+                      )}>
+                        <Check className="w-2 h-2 md:w-2.5 md:h-2.5 text-white" strokeWidth={3} />
+                      </div>
+                      <p className={cn(
+                        "text-[10px] md:text-xs font-medium",
+                        isSelected ? "text-teal-600" : "text-gray-600"
+                      )}>
+                        Daily fresh delivery
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-1.5">
+                      <div className={cn(
+                        "w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center",
+                        isSelected ? "bg-emerald-500" : "bg-gray-400"
+                      )}>
+                        <Check className="w-2 h-2 md:w-2.5 md:h-2.5 text-white" strokeWidth={3} />
+                      </div>
+                      <p className={cn(
+                        "text-[10px] md:text-xs font-medium",
+                        isSelected ? "text-teal-600" : "text-gray-600"
+                      )}>
+                        Cancel anytime
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-1.5">
+                      <div className={cn(
+                        "w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center",
+                        isSelected ? "bg-emerald-500" : "bg-gray-400"
+                      )}>
+                        <Check className="w-2 h-2 md:w-2.5 md:h-2.5 text-white" strokeWidth={3} />
+                      </div>
+                      <p className={cn(
+                        "text-[10px] md:text-xs font-medium",
+                        isSelected ? "text-teal-600" : "text-gray-600"
+                      )}>
+                        Full menu included
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Selection Button */}
+                  <div className="pt-3 md:pt-4">
+                    <div
+                      className={cn(
+                        "inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold",
+                        "transition-all duration-300",
+                        isSelected
+                          ? "bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 text-white shadow-md md:shadow-lg shadow-emerald-200"
+                          : "bg-transparent border-2 border-gray-200 text-gray-600 group-hover:border-gray-300 group-hover:bg-gray-50"
+                      )}
+                    >
+                      {isSelected ? (
+                        <>
+                          <Check className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={3} />
+                          <span>Selected</span>
+                        </>
+                      ) : (
+                        <span>Select Plan</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Divider */}
-              <div className={cn(
-                "h-px w-full mb-5",
-                isSelected ? "bg-white/30" : "bg-[#DDA15E]/30"
-              )} />
-
-              {/* Features List */}
-              <div className="space-y-3">
-                <div className="flex items-start gap-2.5">
-                  <div className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5",
-                    isSelected ? "bg-[#DDA15E]" : "bg-[#606C38]"
-                  )}>
-                    <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                  </div>
-                  <div>
-                    <p className={cn(
-                      "text-sm font-medium",
-                      isSelected ? "text-white" : "text-[#283618]"
-                    )}>
-                      Daily fresh delivery
-                    </p>
-                    <p className={cn(
-                      "text-xs",
-                      isSelected ? "text-white/70" : "text-gray-600"
-                    )}>
-                      Delivered at your preferred time
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2.5">
-                  <div className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5",
-                    isSelected ? "bg-[#DDA15E]" : "bg-[#606C38]"
-                  )}>
-                    <RotateCcw className="w-3 h-3 text-white" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <p className={cn(
-                      "text-sm font-medium",
-                      isSelected ? "text-white" : "text-[#283618]"
-                    )}>
-                      Cancel anytime
-                    </p>
-                    <p className={cn(
-                      "text-xs",
-                      isSelected ? "text-white/70" : "text-gray-600"
-                    )}>
-                      No long-term commitment
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2.5">
-                  <div className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5",
-                    isSelected ? "bg-[#DDA15E]" : "bg-[#606C38]"
-                  )}>
-                    <Calendar className="w-3 h-3 text-white" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <p className={cn(
-                      "text-sm font-medium",
-                      isSelected ? "text-white" : "text-[#283618]"
-                    )}>
-                      {plan.durationDays} days meal plan
-                    </p>
-                    <p className={cn(
-                      "text-xs",
-                      isSelected ? "text-white/70" : "text-gray-600"
-                    )}>
-                      Full weekly menu included
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Selection Prompt */}
-              {isSelected ? (
-                <div className="mt-5 pt-4 border-t border-white/20">
-                  <p className="text-xs text-white/90 text-center font-medium">
-                    ✓ Currently selected
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-5 pt-4 border-t border-[#DDA15E]/30">
-                  <p className="text-xs text-gray-600 text-center font-medium">
-                    Click to select this plan
-                  </p>
-                </div>
-              )}
-
-              {/* Hover Gradient Overlay */}
-              <div className={cn(
-                "absolute inset-0 bg-gradient-to-br from-transparent to-black/5 rounded-2xl opacity-0 transition-opacity duration-200 pointer-events-none",
-                "group-hover:opacity-100"
-              )} />
             </button>
           );
         })}
       </div>
 
-      {/* Bottom Note */}
-      <div className="mt-8 text-center">
-        <p className="text-xs text-gray-500 max-w-xl mx-auto">
-          All plans automatically renew. You can change or cancel your subscription at any time from your account settings.
+      {/* Bottom Note - Minimal */}
+      <div className="mt-6 md:mt-8 text-center">
+        <p className="text-[10px] md:text-xs text-gray-400 max-w-xl mx-auto">
+          Auto-renews • Cancel anytime from settings
         </p>
       </div>
     </div>
