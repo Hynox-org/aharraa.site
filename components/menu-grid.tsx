@@ -3,6 +3,7 @@ import { Menu, MenuItem, MealCategory, DayOfWeek, Meal, MenuItemWithPopulatedMea
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import Image from "next/image"
 import { Check, Eye, X } from "lucide-react"
+import { IoSunnyOutline, IoPartlySunnyOutline, IoMoonOutline, IoRestaurantOutline } from "react-icons/io5"
 
 interface MenuGridProps {
   menus: MenuWithPopulatedMeals[];
@@ -37,10 +38,10 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
 
   const getMealIcon = (category: MealCategory) => {
     switch(category) {
-      case "Breakfast": return "☀️";
-      case "Lunch": return "🌤️";
-      case "Dinner": return "🌙";
-      default: return "🍽️";
+      case "Breakfast": return IoSunnyOutline;
+      case "Lunch": return IoPartlySunnyOutline;
+      case "Dinner": return IoMoonOutline;
+      default: return IoRestaurantOutline;
     }
   };
 
@@ -66,13 +67,13 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
   return (
     <div className="w-full py-4 md:py-6">
       <div className="text-center mb-6 md:mb-8 px-4">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 md:mb-2">Select Your Menu</h2>
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-1 md:mb-2">Select Your Menu</h2>
         <p className="text-xs md:text-sm text-gray-500">Choose your weekly meal plan</p>
       </div>
 
       {menus.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 md:py-16 text-gray-400">
-          <span className="text-3xl md:text-4xl mb-2">📋</span>
+          <IoRestaurantOutline className="w-12 h-12 md:w-16 md:h-16 mb-2" />
           <p className="text-xs md:text-sm">No menus available</p>
         </div>
       ) : (
@@ -92,7 +93,7 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                   onClick={() => onMenuSelect(menu)}
                 >
                   {isSelected && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-full blur-2xl opacity-60 animate-pulse" />
+                    <div className="absolute inset-0 bg-[#3CB371] opacity-20 rounded-full blur-2xl animate-pulse" />
                   )}
 
                   <div className="relative flex flex-col items-center">
@@ -118,7 +119,7 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                       )}
 
                       <div className="absolute bottom-1 md:bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1.5 md:px-4 md:py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg md:shadow-xl">
-                        <span className="text-xs sm:text-sm md:text-base font-bold text-gray-900">
+                        <span className="text-xs sm:text-sm md:text-base font-bold text-black">
                           ₹{menu.perDayPrice}
                           <span className="text-[10px] sm:text-xs font-normal text-gray-600">/day</span>
                         </span>
@@ -127,8 +128,8 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                       {isSelected && (
                         <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 z-20">
                           <div className="relative">
-                            <div className="absolute inset-0 bg-emerald-400 rounded-full blur-md opacity-60 animate-pulse" />
-                            <div className="relative bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full p-1.5 md:p-2 shadow-xl">
+                            <div className="absolute inset-0 bg-[#3CB371] rounded-full blur-md opacity-60 animate-pulse" />
+                            <div className="relative bg-[#3CB371] text-white rounded-full p-1.5 md:p-2 shadow-xl">
                               <Check className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
                             </div>
                           </div>
@@ -143,8 +144,8 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                           transition-all duration-300
                           ${
                             isSelected
-                              ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-green-700'
-                              : 'text-gray-800 group-hover:text-gray-900'
+                              ? 'text-[#3CB371]'
+                              : 'text-gray-800 group-hover:text-black'
                           }
                         `}
                       >
@@ -165,18 +166,18 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                             transition-all duration-300
                             ${
                               isSelected
-                                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 text-white shadow-md md:shadow-lg shadow-emerald-200'
+                                ? 'bg-[#3CB371] text-white shadow-md md:shadow-lg'
                                 : 'bg-transparent border-2 border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                             }
                           `}
                         >
-                          {isSelected ? 'Selected ✓' : 'Select'}
+                          {isSelected ? 'Selected' : 'Select'}
                         </button>
                         
                         <DialogTrigger asChild>
                           <button 
                             onClick={(e) => e.stopPropagation()}
-                            className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all border-2 border-transparent hover:border-blue-200"
+                            className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold bg-gray-100 text-black hover:bg-gray-200 transition-all border-2 border-transparent hover:border-gray-300"
                           >
                             View
                           </button>
@@ -187,25 +188,25 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                 </div>
 
                 {/* Redesigned Dialog with Floating Close Button */}
-                <DialogContent className="w-full max-h-[90vh] overflow-hidden p-0 bg-gradient-to-br from-gray-50 to-white">
+                <DialogContent className="w-full max-h-[90vh] overflow-hidden p-0 bg-white">
                   {/* Floating Close Button - Top Right Outside Header */}
                   <DialogClose className="absolute top-4 right-4 z-50 p-2 md:p-2.5 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 hover:shadow-xl transition-all duration-200 group">
-                    <X className="w-5 h-5 md:w-6 md:h-6 text-gray-600 group-hover:text-gray-900 group-hover:rotate-90 transition-all duration-200" />
+                    <X className="w-5 h-5 md:w-6 md:h-6 text-gray-600 group-hover:text-black group-hover:rotate-90 transition-all duration-200" />
                     <span className="sr-only">Close</span>
                   </DialogClose>
 
                   {/* Sticky Header */}
                   <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b p-4 md:p-6 pr-16 md:pr-20 z-10 shadow-sm">
                     <DialogHeader>
-                      <DialogTitle className="text-xl md:text-2xl font-bold text-gray-900">{menu.name}</DialogTitle>
+                      <DialogTitle className="text-xl md:text-2xl font-bold text-black">{menu.name}</DialogTitle>
                       <div className="flex items-center gap-2 md:gap-3 mt-2 flex-wrap">
-                        <span className="px-2.5 md:px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs md:text-sm font-semibold">
+                        <span className="px-2.5 md:px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs md:text-sm font-semibold">
                           ₹{menu.perDayPrice}/day
                         </span>
-                        <span className="px-2.5 md:px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs md:text-sm font-semibold">
+                        <span className="px-2.5 md:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs md:text-sm font-semibold">
                           {totalDays} days
                         </span>
-                        <span className="px-2.5 md:px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs md:text-sm font-semibold">
+                        <span className="px-2.5 md:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs md:text-sm font-semibold">
                           {menu.menuItems.length} meals
                         </span>
                       </div>
@@ -240,7 +241,7 @@ function WeeklyCalendarView({
 }: { 
   menu: MenuWithPopulatedMeals;
   mealsByDay: Record<DayOfWeek, Record<MealCategory, MenuItemWithPopulatedMeal | null>>;
-  getMealIcon: (category: MealCategory) => string;
+  getMealIcon: (category: MealCategory) => React.ComponentType<any>;
   getMealName: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string;
   getMealDescription: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string | undefined;
   getMealImage: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string;
@@ -261,14 +262,14 @@ function WeeklyCalendarView({
           return (
             <div key={day} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
               {/* Day Header */}
-              <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 px-4 md:px-6 py-3 md:py-4">
+              <div className="relative bg-gray-50 px-4 md:px-6 py-3 md:py-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#3CB371] flex items-center justify-center shadow-md">
                     <span className="text-xs md:text-sm font-bold text-white">
                       {day.slice(0, 3)}
                     </span>
                   </div>
-                  <h4 className="font-bold text-base md:text-lg text-gray-900">{day}</h4>
+                  <h4 className="font-bold text-base md:text-lg text-black">{day}</h4>
                 </div>
               </div>
 
@@ -279,14 +280,15 @@ function WeeklyCalendarView({
                   const mealName = mealItem ? getMealName(mealItem.meal) : null;
                   const mealDesc = mealItem ? getMealDescription(mealItem.meal) : null;
                   const mealImage = mealItem ? getMealImage(mealItem.meal) : null;
+                  const MealIconComponent = getMealIcon(category);
                   
                   return (
                     <div key={category} className="relative group">
                       {mealItem ? (
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all duration-300">
+                        <div className="bg-white rounded-xl p-4 border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300">
                           {/* Meal Icon Badge */}
-                          <div className="absolute -top-2 -right-2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg border-2 border-gray-100 flex items-center justify-center text-xl md:text-2xl">
-                            {getMealIcon(category)}
+                          <div className="absolute -top-2 -right-2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg border-2 border-gray-100 flex items-center justify-center">
+                            <MealIconComponent className="w-5 h-5 md:w-6 md:h-6 text-[#3CB371]" />
                           </div>
 
                           {/* Category */}
@@ -308,7 +310,7 @@ function WeeklyCalendarView({
                           )}
 
                           {/* Meal Name */}
-                          <h5 className="text-sm md:text-base font-bold text-gray-900 mb-2 line-clamp-1">
+                          <h5 className="text-sm md:text-base font-bold text-black mb-2 line-clamp-1">
                             {mealName}
                           </h5>
 
@@ -329,7 +331,7 @@ function WeeklyCalendarView({
                           {/* Nutritional Info */}
                           {typeof mealItem.meal === 'object' && mealItem.meal.nutritionalDetails && (
                             <div className="flex gap-1.5 md:gap-2 flex-wrap">
-                              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                              <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-[9px] md:text-[10px] font-semibold">
                                 {mealItem.meal.nutritionalDetails.protein}g P
                               </span>
                               <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[9px] md:text-[10px] font-semibold">
@@ -346,7 +348,7 @@ function WeeklyCalendarView({
                         </div>
                       ) : (
                         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 border-dashed h-full flex flex-col items-center justify-center min-h-[200px] md:min-h-[240px]">
-                          <span className="text-3xl md:text-4xl opacity-30 mb-2">{getMealIcon(category)}</span>
+                          <MealIconComponent className="w-12 h-12 md:w-16 md:h-16 opacity-30 mb-2 text-gray-400" />
                           <p className="text-xs md:text-sm text-gray-400 font-medium">{category}</p>
                           <p className="text-[10px] md:text-xs text-gray-400 mt-1">Not scheduled</p>
                         </div>

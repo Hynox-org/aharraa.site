@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { IoCart, IoArrowForward, IoCheckmarkCircle } from "react-icons/io5"
-import { Spinner } from "./ui/spinner" // Import Spinner
+import { IoCart, IoArrowForward, IoCheckmarkCircle, IoChevronDown, IoChevronUp } from "react-icons/io5"
+import { Spinner } from "./ui/spinner"
 
 interface CheckoutOrderSummaryProps {
   totalPrice: number
@@ -12,9 +12,8 @@ interface CheckoutOrderSummaryProps {
   grandTotal: number
   itemCount: number
   onProceedToPayment: () => void
-  isProcessingPayment: boolean // New prop for loading state
+  isProcessingPayment: boolean
 }
-
 
 export function CheckoutOrderSummary({
   totalPrice,
@@ -24,73 +23,93 @@ export function CheckoutOrderSummary({
   grandTotal,
   itemCount,
   onProceedToPayment,
-  isProcessingPayment, // Destructure new prop
+  isProcessingPayment,
 }: CheckoutOrderSummaryProps) {
   const [open, setOpen] = useState(false)
+  
   return (
-    <div className="rounded-xl p-4 sm:p-6 shadow-xl" style={{ backgroundColor: "#283618" }}>
+    <div className="bg-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-lg border border-gray-100">
       {/* Header */}
-      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-        <IoCart className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: "#FEFAE0" }} />
-        <h3 className="text-lg sm:text-xl font-bold" style={{ color: "#FEFAE0" }}>Order Summary</h3>
+      <div className="flex items-center gap-3 mb-5 md:mb-6 pb-4 md:pb-5 border-b border-gray-100">
+        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#3CB371] flex items-center justify-center shadow-md">
+          <IoCart className="w-5 h-5 md:w-6 md:h-6 text-white" />
+        </div>
+        <div>
+          <h3 className="text-lg md:text-xl font-bold text-black">
+            Order Summary
+          </h3>
+          <p className="text-xs text-gray-500">Review your total</p>
+        </div>
       </div>
 
-      {/* Subtotal only */}
-      <div className="flex justify-between items-center text-sm sm:text-base mb-2">
-        <span style={{ color: "rgba(254, 250, 224, 0.8)" }}>
+      {/* Subtotal */}
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-sm md:text-base text-gray-600">
           Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
         </span>
-        <span className="font-bold" style={{ color: "#FEFAE0" }}>
+        <span className="font-bold text-base md:text-lg text-black">
           ₹{totalPrice.toFixed(0)}
         </span>
       </div>
 
-      {/* Accordion trigger */}
+      {/* Accordion Trigger */}
       <button
-        className="w-full text-left font-bold text-sm py-3 px-4 rounded-lg mb-2 flex justify-between items-center"
-        style={{ background: open ? '#DDA15E' : '#606C38', color: '#FEFAE0' }}
+        className={`w-full text-left font-semibold text-sm md:text-base py-3 px-4 rounded-xl mb-4 flex justify-between items-center transition-all duration-300 ${
+          open 
+            ? 'bg-gray-100 text-black border-2 border-gray-300' 
+            : 'bg-gray-50 text-gray-700 border-2 border-gray-200 hover:bg-gray-100'
+        }`}
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
         aria-controls="order-breakdown"
       >
-        {open ? 'Hide Details' : 'View Breakdown'}
-        <span style={{ fontSize: 18 }}>{open ? '▲' : '▼'}</span>
+        <span>{open ? 'Hide Details' : 'View Breakdown'}</span>
+        {open ? (
+          <IoChevronUp className="w-5 h-5" />
+        ) : (
+          <IoChevronDown className="w-5 h-5" />
+        )}
       </button>
 
       {/* Accordion Details */}
       {open && (
-        <div id="order-breakdown" className="space-y-3 sm:space-y-4 mb-2 animate-fade-in">
-          <div className="flex justify-between items-start text-sm sm:text-base">
-            <span className="flex-1 pr-2" style={{ color: "rgba(254, 250, 224, 0.8)" }}>
+        <div 
+          id="order-breakdown" 
+          className="space-y-3 md:space-y-4 mb-4 p-4 rounded-xl bg-gray-50 border border-gray-100 animate-fade-in"
+        >
+          <div className="flex justify-between items-start text-sm md:text-base">
+            <span className="flex-1 pr-2 text-gray-600">
               Delivery Fee
             </span>
-            <span className="font-bold flex-shrink-0" style={{ color: "#FEFAE0" }}>
+            <span className="font-semibold flex-shrink-0 text-black">
               ₹{deliveryCost.toFixed(0)}
             </span>
           </div>
 
-          <div className="flex justify-between items-center text-sm sm:text-base">
-            <span style={{ color: "rgba(254, 250, 224, 0.8)" }}>Platform Cost (10%)</span>
-            <span className="font-bold" style={{ color: "#FEFAE0" }}>
+          <div className="flex justify-between items-center text-sm md:text-base">
+            <span className="text-gray-600">Platform Cost (10%)</span>
+            <span className="font-semibold text-black">
               ₹{platformCost.toFixed(0)}
             </span>
           </div>
 
-          <div className="flex justify-between items-center text-sm sm:text-base">
-            <span style={{ color: "rgba(254, 250, 224, 0.8)" }}>GST (5%)</span>
-            <span className="font-bold" style={{ color: "#FEFAE0" }}>
+          <div className="flex justify-between items-center text-sm md:text-base">
+            <span className="text-gray-600">GST (5%)</span>
+            <span className="font-semibold text-black">
               ₹{gstCost.toFixed(0)}
             </span>
           </div>
 
-          <div className="h-px" style={{ backgroundColor: "rgba(221, 161, 94, 0.3)" }}></div>
+          <div className="h-px bg-gray-200"></div>
         </div>
       )}
 
-      {/* Grand Total (outside or inside accordion, your choice) */}
-      <div className="flex justify-between items-center pt-2">
-        <span className="text-lg sm:text-xl font-bold" style={{ color: "#FEFAE0" }}>Total</span>
-        <span className="text-2xl sm:text-3xl font-bold" style={{ color: "#DDA15E" }}>
+      {/* Grand Total */}
+      <div className="flex justify-between items-center pt-4 md:pt-5 mb-5 md:mb-6 border-t-2 border-gray-100">
+        <span className="text-base md:text-lg font-bold text-black">
+          Total Amount
+        </span>
+        <span className="text-3xl md:text-4xl font-black text-black">
           ₹{grandTotal.toFixed(0)}
         </span>
       </div>
@@ -98,34 +117,41 @@ export function CheckoutOrderSummary({
       {/* Proceed Button */}
       <button
         onClick={onProceedToPayment}
-        className="w-full py-3 sm:py-4 rounded-lg font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mt-4 sm:mt-6"
-        style={{ backgroundColor: "#DDA15E", color: "#283618" }}
-        disabled={isProcessingPayment} // Disable button when processing payment
+        disabled={isProcessingPayment}
+        className="w-full py-3 md:py-3.5 rounded-xl font-bold text-sm md:text-base bg-[#3CB371] hover:bg-[#2FA05E] text-white shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-300 flex items-center justify-center gap-2"
       >
         {isProcessingPayment ? (
           <>
-            <Spinner className="w-5 h-5 text-[#283618]" />
-            Processing...
+            <Spinner className="w-5 h-5 text-white" />
+            <span>Processing...</span>
           </>
         ) : (
           <>
-            Proceed to Payment
+            <span>Proceed to Payment</span>
             <IoArrowForward className="w-5 h-5" />
           </>
         )}
       </button>
 
-      {/* Trust indicators & info */}
-      <div className="space-y-2 pt-4 sm:pt-6" style={{ borderTop: "1px solid rgba(221, 161, 94, 0.3)" }}>
-        {["Secure payment gateway", "100% money-back guarantee", "Cancel anytime"].map((feature, i) => (
-          <div key={i} className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: "#DDA15E" }}>
-            <IoCheckmarkCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{feature}</span>
-          </div>
-        ))}
+      {/* Trust Indicators */}
+      <div className="pt-5 md:pt-6 border-t border-gray-100 mt-5 md:mt-6">
+        <div className="space-y-2 md:space-y-2.5">
+          {[
+            "Secure payment gateway",
+            "100% money-back guarantee",
+            "Cancel anytime"
+          ].map((feature, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs md:text-sm text-gray-600">
+              <IoCheckmarkCircle className="w-4 h-4 md:w-4.5 md:h-4.5 text-[#3CB371] flex-shrink-0" />
+              <span>{feature}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}>
-        <p className="text-xs sm:text-sm text-center" style={{ color: "rgba(254, 250, 224, 0.9)" }}>
+
+      {/* Info Box */}
+      <div className="mt-4 md:mt-5 p-3 md:p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <p className="text-xs md:text-sm text-center text-gray-700">
           All prices are in INR and include applicable taxes
         </p>
       </div>

@@ -12,26 +12,28 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner"; // Import Spinner
+import { Spinner } from "@/components/ui/spinner";
 
 interface CancelConfirmationModalProps {
   onConfirm: () => void;
   children: React.ReactNode;
-  isCancellingOrder: boolean; // New prop
+  isCancellingOrder: boolean;
 }
 
 export function CancelConfirmationModal({
   onConfirm,
   children,
-  isCancellingOrder, // Destructure new prop
+  isCancellingOrder,
 }: CancelConfirmationModalProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-white border border-gray-200">
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogTitle className="text-black text-xl font-bold">
+            Are you absolutely sure?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-gray-600">
             This action cannot be undone. This will permanently cancel your
             order and remove its data from our servers. A refund will be
             initiated according to our cancellation and refund policy. Please
@@ -39,8 +41,17 @@ export function CancelConfirmationModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isCancellingOrder}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} disabled={isCancellingOrder}>
+          <AlertDialogCancel 
+            disabled={isCancellingOrder}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300"
+          >
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onConfirm} 
+            disabled={isCancellingOrder}
+            className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+          >
             {isCancellingOrder ? (
               <Spinner className="w-4 h-4 text-white" />
             ) : (

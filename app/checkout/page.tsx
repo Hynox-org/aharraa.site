@@ -35,7 +35,7 @@ import {
   calculateGstCost,
 } from "@/lib/checkout-helpers"
 import { getCartItems , clearCart} from "@/lib/api"; 
-import { Button } from "@/components/ui/button" // Import Button component
+import { Button } from "@/components/ui/button"
 
 export default function CheckoutPage() {
   const { isAuthenticated, loading, user } = useAuth()
@@ -47,10 +47,9 @@ export default function CheckoutPage() {
   >({})
   const [useDefaultForAll, setUseDefaultForAll] = useState(false)
   const [primaryAddress, setPrimaryAddress] = useState<MealCategory>("Breakfast")
-  const [isFetchingAddresses, setIsFetchingAddresses] = useState(false) // New state for fetching addresses
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false) // New state for processing payment
+  const [isFetchingAddresses, setIsFetchingAddresses] = useState(false)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
 
-//  Fetch Cart Items from MongoDB
   useEffect(() => {
     const fetchCart = async () => {
       if (!user?.id) return
@@ -80,6 +79,7 @@ export default function CheckoutPage() {
       fetchCart()
     }
   }, [isAuthenticated, loading, user?.id])
+  
   const initializeSDK = async () => {
     const cashfree = await load({
       mode: `${process.env.NEXT_PUBLIC_CASHFREE_ENVIRONMENT}`,
@@ -103,14 +103,10 @@ console.log("userCartItems:", userCartItems);
 const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItem | null => {
-        // Ensure menu is an object before accessing properties
         if (typeof cartItem.menu === 'string' || !cartItem.menu) {
           console.error("CartItem menu is not a populated object:", cartItem.menu);
           return null;
         }
-        // Ensure vendor is an object before accessing properties
-        // The type for cartItem.menu.vendor is 'string | Vendor' from Menu interface in types.ts.
-        // We need to ensure it's a Vendor object before accessing '_id'.
         if (typeof cartItem.menu.vendor === 'string' || !cartItem.menu.vendor) {
           console.error("CartItem menu vendor is not a populated object:", cartItem.menu.vendor);
           return null;
@@ -125,12 +121,13 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           startDate: cartItem.startDate,
           endDate: cartItem.endDate,
           itemTotalPrice: cartItem.itemTotalPrice,
-          vendor: (cartItem.menu.vendor as Vendor)._id, // Type assertion for vendor
-          selectedMealTimes: cartItem.selectedMealTimes, // Include selected meal times
+          vendor: (cartItem.menu.vendor as Vendor)._id,
+          selectedMealTimes: cartItem.selectedMealTimes,
         }
       })
       .filter((item): item is CheckoutItem => item !== null)
   }, [userCartItems])
+  
   const displayCheckoutItemsView: CheckoutItemView[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItemView | null => {
@@ -150,9 +147,9 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           itemTotalPrice: cartItem.itemTotalPrice,
           vendor: {
             id: cartItem.vendor,
-            name: "Vendor", // Placeholder, as vendor name is not directly available
+            name: "Vendor",
           },
-          selectedMealTimes: cartItem.selectedMealTimes, // Include selected meal times
+          selectedMealTimes: cartItem.selectedMealTimes,
         }
       })
       .filter((item): item is CheckoutItemView => item !== null)
@@ -208,8 +205,6 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
   }, [isAuthenticated, loading, router])
 
   useEffect(() => {
-    // Only redirect if authentication is loaded, cart loading is complete,
-    // and the user is authenticated but the cart is empty.
     if (!loading && !cartLoading && isAuthenticated && userCartItems.length === 0) {
       toast.info("Your cart is empty. Redirecting to pricing page.")
       router.push("/pricing")
@@ -228,20 +223,20 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       };
     });
     setDeliveryAddresses(initialAddresses);
-  }, []); // Empty dependency array to run once on mount
+  }, []);
 
-  // Combine authentication loading and cart specific loading for initial page load
   if (loading || cartLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
       </div>
     )
   }
 
   if (!isAuthenticated || !user) {
-    return null // Should already be redirected by useEffect
+    return null
   }
+  
   const handleAddressChange = (
     category: MealCategory,
     field: keyof DeliveryAddress,
@@ -301,7 +296,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       return
     }
 
-    setIsFetchingAddresses(true) // Start loading for fetching addresses
+    setIsFetchingAddresses(true)
     try {
       const userProfile = await getProfileDetails(token)
       if (userProfile) {
@@ -311,7 +306,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           if (!location) return undefined
           return {
             street: location.street || "",
-            city: "Coimbatore", // Hardcoding as per existing logic
+            city: "Coimbatore",
             zip: location.pincode || "",
             lat: location.lat,
             lon: location.lon,
@@ -328,7 +323,6 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           newDeliveryAddresses.Dinner = mapLocationToAddress(userProfile.dinnerDeliveryLocation)
         }
 
-        // Only update if there's at least one address fetched
         if (Object.keys(newDeliveryAddresses).length > 0) {
           setDeliveryAddresses((prev) => {
             const updatedAddresses = { ...prev };
@@ -350,7 +344,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       console.error("Error fetching profile addresses:", error)
         toast.error("Failed to fetch addresses from profile.")
     } finally {
-      setIsFetchingAddresses(false) // End loading for fetching addresses
+      setIsFetchingAddresses(false)
     }
   }
 
@@ -384,17 +378,16 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       return
     }
 
-    setIsProcessingPayment(true) // Start loading for processing payment
+    setIsProcessingPayment(true)
     try {
-      // 1. Update user profile with meal-specific delivery addresses
       const profileUpdatePayload: any = {
-        email: user.email, // Ensure email is included for identification
+        email: user.email,
       }
 
       if (deliveryAddresses.Breakfast) {
         profileUpdatePayload.breakfastDeliveryLocation = {
           street: deliveryAddresses.Breakfast.street,
-          state: "Tamil Nadu", // Assuming a default state for Coimbatore
+          state: "Tamil Nadu",
           pincode: deliveryAddresses.Breakfast.zip,
           lat: deliveryAddresses.Breakfast.lat,
           lon: deliveryAddresses.Breakfast.lon,
@@ -423,7 +416,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       await updateProfileDetails(profileUpdatePayload, token)
       toast.success("Delivery addresses saved to your profile!")
       console.log("initialCheckoutItems:",displayCheckoutItems )
-      // 2. Proceed with payment
+      
       const finalizedCheckoutData: CheckoutData = {
         id: `checkout-${Date.now()}-${user.id}`,
         userId: user.id,
@@ -438,7 +431,6 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
 
       console.log("Finalized Checkout Data:", finalizedCheckoutData)
 
-      // Create a deep copy of finalizedCheckoutData and remove the image property from meal objects
       const checkoutDataForBackend: CheckoutData = JSON.parse(
         JSON.stringify(finalizedCheckoutData)
       )
@@ -446,7 +438,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       const paymentPayload: CreatePaymentPayload = {
         userId: user.id,
         checkoutData: checkoutDataForBackend,
-        paymentMethod: "UPI", // This should be dynamic based on user selection
+        paymentMethod: "UPI",
         totalAmount: grandTotal,
         currency: "INR",
       }
@@ -465,32 +457,16 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
         } else if (result.paymentDetails) {
           console.log("Payment completed:", result.paymentDetails)
           toast.success(`Order created successfully!`)
-          // ✅ Clear cart from MongoDB after successful payment
-          // try {
-          //   if (user?.id && token) {
-          //     await clearCart(user.id, token)
-          //     toast.success("Cart cleared successfully!")
-          //     console.log("🧹 Cart cleared in MongoDB.")
-          //   }
-          // } catch (clearErr) {
-          //   console.error("Error clearing cart:", clearErr)
-          //   toast.error("Failed to clear cart. Please refresh later.")
-          // }
-          // // Optional: Redirect to order confirmation or history
-          // setTimeout(() => {
-          //   router.push("/orders")
-          // }, 1500)
         }
       })
   } catch (error: any) {
     console.error("Error during checkout process:", error)
     toast.error(`Failed to complete checkout: ${error.message || "Unknown error"}`)
   } finally {
-    setIsProcessingPayment(false) // End loading for processing payment
+    setIsProcessingPayment(false)
   }
 }
 
-// Add this handler after your existing handlers
 const handleCopyAddress = (fromCategory: MealCategory, toCategory: MealCategory) => {
   const sourceAddress = deliveryAddresses[fromCategory]
   if (sourceAddress) {
@@ -524,7 +500,6 @@ const handleUseDefaultForAll = (checked: boolean, category: MealCategory) => {
   }
 }
 
-// Update the address change handler to sync when "use for all" is active
 const handleAddressChangeWithSync = (
   category: MealCategory,
   field: keyof DeliveryAddress,
@@ -532,7 +507,6 @@ const handleAddressChangeWithSync = (
 ) => {
   handleAddressChange(category, field, value)
   
-  // If "use for all" is active and this is the primary address, sync to others
   if (useDefaultForAll && category === primaryAddress) {
     const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
     allCategories.forEach((cat) => {
@@ -549,17 +523,16 @@ const handleAddressChangeWithSync = (
   }
 }
 
-
   return (
-    <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
+    <main className="min-h-screen bg-white">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Page Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: "#283618" }}>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-black">
             Checkout
           </h1>
-          <p className="text-sm sm:text-base" style={{ color: "#606C38" }}>
+          <p className="text-sm sm:text-base text-gray-600">
             Review your order and enter delivery details
           </p>
         </div>
@@ -568,60 +541,58 @@ const handleAddressChangeWithSync = (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Forms */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-xl p-4 sm:p-6 shadow-md flex justify-between items-center" style={{ backgroundColor: "#ffffff" }}>
-              <p className="text-base font-bold" style={{ color: "#283618" }}>
+            <div className="rounded-xl p-4 sm:p-6 shadow-md flex justify-between items-center bg-white border border-gray-100">
+              <p className="text-base font-bold text-black">
                 Fetch addresses from your profile
               </p>
               <Button
                 onClick={handleFetchAddressesFromProfile}
-                className="text-white px-4 py-2 rounded-lg"
-                style={{ backgroundColor: "#606C38" }}
-                disabled={isFetchingAddresses} // Disable button while fetching
+                className="text-white px-4 py-2 rounded-lg bg-[#3CB371] hover:bg-[#2FA05E]"
+                disabled={isFetchingAddresses}
               >
                 {isFetchingAddresses ? "Fetching..." : "Fetch Addresses"}
               </Button>
             </div>
+            
             {/* Global "Use Same Address for All" Option */}
-  <div className="rounded-xl p-4 sm:p-6 shadow-md" style={{ backgroundColor: "#ffffff" }}>
-    <div className="flex items-start gap-3">
-      <input
-        type="checkbox"
-        id="use-same-address"
-        checked={useDefaultForAll}
-        onChange={(e) => handleUseDefaultForAll(e.target.checked, primaryAddress)}
-        className="mt-1 w-5 h-5 rounded cursor-pointer"
-        style={{ accentColor: "#606C38" }}
-      />
-      <div className="flex-1">
-        <label
-          htmlFor="use-same-address"
-          className="text-base font-bold cursor-pointer block"
-          style={{ color: "#283618" }}
-        >
-          Use same address for all deliveries
-        </label>
-        <p className="text-sm mt-1" style={{ color: "#606C38" }}>
-          Check this to use your primary address for Breakfast, Lunch, and Dinner deliveries
-        </p>
-      </div>
-    </div>
-  </div>
+            <div className="rounded-xl p-4 sm:p-6 shadow-md bg-white border border-gray-100">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="use-same-address"
+                  checked={useDefaultForAll}
+                  onChange={(e) => handleUseDefaultForAll(e.target.checked, primaryAddress)}
+                  className="mt-1 w-5 h-5 rounded cursor-pointer accent-[#3CB371]"
+                />
+                <div className="flex-1">
+                  <label
+                    htmlFor="use-same-address"
+                    className="text-base font-bold cursor-pointer block text-black"
+                  >
+                    Use same address for all deliveries
+                  </label>
+                  <p className="text-sm mt-1 text-gray-600">
+                    Check this to use your primary address for Breakfast, Lunch, and Dinner deliveries
+                  </p>
+                </div>
+              </div>
+            </div>
 
-  {/* Address Cards */}
-  {["Breakfast", "Lunch", "Dinner"].map((category, index) => (
-    <DeliveryAddressCard
-      key={category as MealCategory}
-      category={category as MealCategory}
-      address={deliveryAddresses[category as MealCategory]}
-      onAddressChange={handleAddressChangeWithSync}
-      onGeolocation={handleGeolocation}
-      onCopyAddress={handleCopyAddress}
-      isPrimary={useDefaultForAll && category === primaryAddress}
-      isDisabled={useDefaultForAll && category !== primaryAddress}
-      allCategories={["Breakfast", "Lunch", "Dinner"]}
-      showCopyOptions={!useDefaultForAll}
-    />
-  ))}
+            {/* Address Cards */}
+            {["Breakfast", "Lunch", "Dinner"].map((category, index) => (
+              <DeliveryAddressCard
+                key={category as MealCategory}
+                category={category as MealCategory}
+                address={deliveryAddresses[category as MealCategory]}
+                onAddressChange={handleAddressChangeWithSync}
+                onGeolocation={handleGeolocation}
+                onCopyAddress={handleCopyAddress}
+                isPrimary={useDefaultForAll && category === primaryAddress}
+                isDisabled={useDefaultForAll && category !== primaryAddress}
+                allCategories={["Breakfast", "Lunch", "Dinner"]}
+                showCopyOptions={!useDefaultForAll}
+              />
+            ))}
 
             <CheckoutItemCard items={displayCheckoutItemsView} />
           </div>
@@ -637,7 +608,7 @@ const handleAddressChangeWithSync = (
                 grandTotal={grandTotal}
                 itemCount={userCartItems.length}
                 onProceedToPayment={handleProceedToPayment}
-                isProcessingPayment={isProcessingPayment} // Pass loading state to summary card
+                isProcessingPayment={isProcessingPayment}
               />
             </div>
           </div>

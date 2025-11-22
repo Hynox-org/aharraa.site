@@ -27,7 +27,7 @@ const statusStyles = {
   confirmed: "bg-blue-100 text-blue-700 border-blue-200",
   delivered: "bg-green-100 text-green-700 border-green-200",
   cancelled: "bg-red-100 text-red-700 border-red-200",
-  failed: "bg-rose-100 text-rose-700 border-rose-200", // Added 'failed' status style
+  failed: "bg-rose-100 text-rose-700 border-rose-200",
   default: "bg-gray-100 text-gray-700 border-gray-200",
 } as const;
 
@@ -36,11 +36,11 @@ const statusIcons = {
   confirmed: <CheckCircle2 className="w-4 h-4" aria-label="Confirmed" />,
   delivered: <Package className="w-4 h-4" aria-label="Delivered" />,
   cancelled: <X className="w-4 h-4" aria-label="Cancelled" />,
-  failed: <AlertCircle className="w-4 h-4" aria-label="Failed" />, // Added 'failed' status icon
+  failed: <AlertCircle className="w-4 h-4" aria-label="Failed" />,
   default: <AlertCircle className="w-4 h-4" aria-label="Unknown status" />,
 };
 
-type OrderStatus = keyof typeof statusStyles; // Define OrderStatus type
+type OrderStatus = keyof typeof statusStyles;
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   const style = statusStyles[status] ?? statusStyles.default;
@@ -64,26 +64,24 @@ function StatusBadge({ status }: { status: OrderStatus }) {
 function EmptyOrders({ router }: { router: any }) {
   return (
     <div
-      className="rounded-2xl p-8 sm:p-12 lg:p-16 text-center shadow-lg sm:shadow-xl bg-white"
+      className="rounded-2xl p-8 sm:p-12 lg:p-16 text-center shadow-lg sm:shadow-xl bg-white border border-gray-100"
       role="region"
       aria-live="polite"
     >
       <div
-        className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-6"
-        style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}
+        className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-6 bg-gray-100"
       >
-        <Package className="w-12 h-12" style={{ color: "#DDA15E" }} />
+        <Package className="w-12 h-12 text-gray-600" />
       </div>
-      <h3 className="text-2xl font-bold mb-3" style={{ color: "#283618" }}>
+      <h3 className="text-2xl font-bold mb-3 text-black">
         No Orders Yet
       </h3>
-      <p className="mb-8 text-lg" style={{ color: "#606C38" }}>
+      <p className="mb-8 text-lg text-gray-600">
         Start your culinary journey with us today!
       </p>
       <button
         onClick={() => router.push("/pricing")}
-        className="px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-0.5 text-base"
-        style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
+        className="px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-0.5 text-base bg-[#3CB371] hover:bg-[#2FA05E] text-white"
         aria-label="Browse meals"
       >
         Browse Meals
@@ -114,17 +112,15 @@ function OrderItem({
         <section className="flex-1 min-w-0">
           <div className="flex items-start gap-4 mb-4">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: "rgba(96, 108, 56, 0.1)" }}
+              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-100"
               aria-hidden="true"
             >
-              <Package className="w-6 h-6" style={{ color: "#606C38" }} />
+              <Package className="w-6 h-6 text-gray-700" />
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 flex-wrap w-full">
               <h4
                 id={`order-${order._id}`}
-                className="font-bold text-lg break-words"
-                style={{ color: "#283618" }}
+                className="font-bold text-lg break-words text-black"
               >
                 Order #{order._id?.substring(0, 8).toUpperCase()}
               </h4>
@@ -132,7 +128,7 @@ function OrderItem({
             </div>
           </div>
 
-          <p className="text-2xl font-bold mb-3" style={{ color: "#606C38" }}>
+          <p className="text-2xl font-bold mb-3 text-black">
             ₹{order.totalAmount.toFixed(2)}
           </p>
 
@@ -156,7 +152,7 @@ function OrderItem({
             onClick={() =>
               order._id && router.push(`/order-details/${order._id}`)
             }
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-lg text-sm bg-[#DDA15E] text-[#283618] transition"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-lg text-sm bg-[#3CB371] hover:bg-[#2FA05E] text-white transition"
             aria-label={`View details for order ${order._id?.substring(0, 8)}`}
           >
             View Details <ArrowRight className="w-4 h-4" />
@@ -168,17 +164,13 @@ function OrderItem({
               isCancellingOrder={isCancellingOrder}
             >
               <button
-                className="px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-lg w-full sm:w-auto text-sm transition"
-                style={{
-                  backgroundColor: "rgba(188, 108, 37, 0.1)",
-                  color: "#BC6C25",
-                }}
+                className="px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-lg w-full sm:w-auto text-sm transition bg-red-50 hover:bg-red-100 text-red-600"
                 disabled={isCancellingOrder}
                 aria-disabled={isCancellingOrder}
                 aria-busy={isCancellingOrder}
               >
                 {isCancellingOrder ? (
-                  <Spinner className="w-5 h-5 text-[#BC6C25] mx-auto" />
+                  <Spinner className="w-5 h-5 text-red-600 mx-auto" />
                 ) : (
                   "Cancel Order"
                 )}

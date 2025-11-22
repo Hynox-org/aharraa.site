@@ -1,17 +1,17 @@
 "use client"
 
-import { IoClose, IoCheckmarkCircle } from "react-icons/io5"
+import { IoClose, IoCheckmarkCircle, IoAlertCircle, IoPerson, IoCall } from "react-icons/io5"
 import { PersonDetails } from "@/lib/types"
-import { Spinner } from "./ui/spinner" // Import Spinner
+import { Spinner } from "./ui/spinner"
 
 interface EditPersonDetailsDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   editingPersonDetails: PersonDetails[]
   onPersonDetailChange: (index: number, field: keyof PersonDetails, value: string) => void
-  onSave: (cartItemId: string) => void;
-  currentEditingCartItemId: string | null;
-  isSaving: boolean; // New prop for saving loading state
+  onSave: (cartItemId: string) => void
+  currentEditingCartItemId: string | null
+  isSaving: boolean
 }
 
 export function EditPersonDetailsDialog({
@@ -21,7 +21,7 @@ export function EditPersonDetailsDialog({
   onPersonDetailChange,
   onSave,
   currentEditingCartItemId,
-  isSaving, // Use the new prop
+  isSaving,
 }: EditPersonDetailsDialogProps) {
   if (!isOpen) return null
 
@@ -34,140 +34,187 @@ export function EditPersonDetailsDialog({
       return isNameValid(person.name) && isPhoneValid(person.phoneNumber)
     })
   }
-console.log("currentEditingCartItemId:", currentEditingCartItemId);
+
+  console.log("currentEditingCartItemId:", currentEditingCartItemId);
+  
   const handleSave = () => {
     if (areAllDetailsValid()) {
       if(currentEditingCartItemId){
-          console.log("Saving person details...");
-          onSave(currentEditingCartItemId); // pass the ID explicitly
-    }else{
-      console.log("currentEditingCartItemId is null");
-    }
-    }
-    else{
+        console.log("Saving person details...");
+        onSave(currentEditingCartItemId);
+      } else {
+        console.log("currentEditingCartItemId is null");
+      }
+    } else {
       console.log("validation failed");
     }
   }
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" 
-      style={{ backgroundColor: "rgba(40, 54, 24, 0.8)" }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={() => onOpenChange(false)}
     >
       <div 
-        className="w-full sm:w-full sm:max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-xl shadow-2xl"
-        style={{ backgroundColor: "#FEFAE0" }}
+        className="w-full sm:w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden rounded-t-3xl sm:rounded-3xl shadow-2xl bg-white"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="sticky top-0 p-4 sm:p-6 pb-3 sm:pb-4" style={{ backgroundColor: "#FEFAE0", borderBottom: "1px solid rgba(221, 161, 94, 0.2)" }}>
-          <div className="flex items-start justify-between">
-            <div className="flex-1 pr-4">
-              <h2 className="text-lg sm:text-xl font-bold mb-1" style={{ color: "#283618" }}>
+        {/* Header with Close Button */}
+        <div className="relative bg-gradient-to-br from-gray-50 to-white border-b border-gray-100 p-5 md:p-6">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="absolute top-4 right-4 md:top-5 md:right-5 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-all group"
+          >
+            <IoClose className="w-5 h-5 md:w-6 md:h-6 text-gray-600 group-hover:text-gray-900 group-hover:rotate-90 transition-all duration-200" />
+          </button>
+
+          <div className="flex items-center gap-3 pr-12">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
+              <IoPerson className="w-6 h-6 md:w-7 md:h-7 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900">
                 Edit Person Details
               </h2>
-              <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
-                Update names and phone numbers
+              <p className="text-xs md:text-sm text-gray-500">
+                Update contact information
               </p>
             </div>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all flex-shrink-0"
-              style={{ backgroundColor: "#DDA15E", color: "#FEFAE0" }}
-            >
-              <IoClose className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
         {/* Content - Scrollable */}
-        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+        <div className="overflow-y-auto max-h-[calc(95vh-200px)] sm:max-h-[calc(90vh-200px)] p-5 md:p-6 space-y-4 md:space-y-5">
           {editingPersonDetails.map((person, index) => {
             const nameError = person.name && !isNameValid(person.name)
             const phoneError = person.phoneNumber && !isPhoneValid(person.phoneNumber)
+            const isComplete = isNameValid(person.name) && isPhoneValid(person.phoneNumber)
 
             return (
               <div 
                 key={index} 
-                className="p-3 sm:p-4 rounded-lg space-y-3 sm:space-y-4"
-                style={{ 
-                  backgroundColor: "#ffffff",
-                  border: "2px solid #DDA15E"
-                }}
+                className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 md:p-5 border border-gray-100 hover:shadow-md transition-all duration-300"
               >
-                {/* Person Number */}
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                    style={{ 
-                      backgroundColor: "#606C38",
-                      color: "#FEFAE0"
-                    }}>
+                {/* Completion Badge */}
+                {isComplete && (
+                  <div className="absolute -top-2 -right-2 z-10">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-emerald-400 rounded-full blur-sm opacity-60 animate-pulse" />
+                      <div className="relative bg-emerald-500 rounded-full p-1.5 shadow-lg">
+                        <IoCheckmarkCircle className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={3} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Person Number Badge */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-bold shadow-md transition-all ${
+                    isComplete 
+                      ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white scale-105' 
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>
                     {index + 1}
                   </div>
-                  <h4 className="text-sm sm:text-base font-bold" style={{ color: "#283618" }}>
+                  <h4 className="text-base md:text-lg font-bold text-gray-900">
                     Person {index + 1}
                   </h4>
                 </div>
 
                 {/* Name Input */}
-                <div>
-                  <label className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2" style={{ color: "#283618" }}>
-                    Name <span style={{ color: "#BC6C25" }}>*</span>
+                <div className="mb-4">
+                  <label className="block text-xs md:text-sm font-bold mb-2 text-gray-800">
+                    Full Name <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Enter full name"
-                    value={person.name}
-                    onChange={(e) => onPersonDetailChange(index, "name", e.target.value)}
-                    required
-                    className="w-full h-11 sm:h-12 px-3 sm:px-4 rounded-lg transition-all text-sm sm:text-base"
-                    style={{
-                      border: nameError 
-                        ? "2px solid #BC6C25" 
-                        : person.name && isNameValid(person.name)
-                        ? "2px solid #606C38"
-                        : "2px solid #DDA15E",
-                      color: "#283618",
-                      backgroundColor: "#FEFAE0"
-                    }}
-                  />
+                  <div className="relative">
+                    <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <IoPerson className="w-4 h-4 md:w-5 md:h-5 text-gray-400" strokeWidth={2} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Enter full name"
+                      value={person.name}
+                      onChange={(e) => onPersonDetailChange(index, "name", e.target.value)}
+                      required
+                      className={`w-full h-11 md:h-12 pl-10 md:pl-12 pr-10 md:pr-12 rounded-xl text-sm md:text-base text-gray-900 bg-white placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                        nameError 
+                          ? 'border-2 border-red-400 focus:ring-red-400' 
+                          : person.name && isNameValid(person.name)
+                          ? 'border-2 border-emerald-500 focus:ring-emerald-500'
+                          : 'border-2 border-gray-200 focus:ring-gray-300 hover:border-gray-300'
+                      }`}
+                    />
+                    {person.name && (
+                      <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2">
+                        {isNameValid(person.name) ? (
+                          <IoCheckmarkCircle className="w-5 h-5 text-emerald-500" strokeWidth={2.5} />
+                        ) : (
+                          <IoAlertCircle className="w-5 h-5 text-red-400" strokeWidth={2.5} />
+                        )}
+                      </div>
+                    )}
+                  </div>
                   {nameError && (
-                    <p className="text-xs mt-1" style={{ color: "#BC6C25" }}>
-                      Name must be at least 2 characters
-                    </p>
+                    <div className="flex items-center gap-1.5 mt-2 text-red-500">
+                      <IoAlertCircle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2.5} />
+                      <p className="text-xs md:text-sm font-medium">
+                        Name must be at least 2 characters
+                      </p>
+                    </div>
                   )}
                 </div>
 
                 {/* Phone Input */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2" style={{ color: "#283618" }}>
-                    Phone Number <span style={{ color: "#BC6C25" }}>*</span>
+                  <label className="block text-xs md:text-sm font-bold mb-2 text-gray-800">
+                    Phone Number <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="tel"
-                    placeholder="10-digit mobile number"
-                    value={person.phoneNumber}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "").slice(0, 10)
-                      onPersonDetailChange(index, "phoneNumber", value)
-                    }}
-                    required
-                    maxLength={10}
-                    className="w-full h-11 sm:h-12 px-3 sm:px-4 rounded-lg transition-all text-sm sm:text-base"
-                    style={{
-                      border: phoneError 
-                        ? "2px solid #BC6C25" 
-                        : person.phoneNumber && isPhoneValid(person.phoneNumber)
-                        ? "2px solid #606C38"
-                        : "2px solid #DDA15E",
-                      color: "#283618",
-                      backgroundColor: "#FEFAE0"
-                    }}
-                  />
+                  <div className="relative">
+                    <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <IoCall className="w-4 h-4 md:w-5 md:h-5 text-gray-400" strokeWidth={2} />
+                    </div>
+                    <div className="absolute left-10 md:left-12 top-1/2 -translate-y-1/2 text-gray-600 font-semibold text-xs md:text-sm pointer-events-none">
+                      +91
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="10-digit mobile number"
+                      value={person.phoneNumber}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "").slice(0, 10)
+                        onPersonDetailChange(index, "phoneNumber", value)
+                      }}
+                      required
+                      maxLength={10}
+                      className={`w-full h-11 md:h-12 pl-16 md:pl-20 pr-10 md:pr-12 rounded-xl text-sm md:text-base text-gray-900 bg-white placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                        phoneError 
+                          ? 'border-2 border-red-400 focus:ring-red-400' 
+                          : person.phoneNumber && isPhoneValid(person.phoneNumber)
+                          ? 'border-2 border-emerald-500 focus:ring-emerald-500'
+                          : 'border-2 border-gray-200 focus:ring-gray-300 hover:border-gray-300'
+                      }`}
+                    />
+                    {person.phoneNumber && (
+                      <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2">
+                        {isPhoneValid(person.phoneNumber) ? (
+                          <IoCheckmarkCircle className="w-5 h-5 text-emerald-500" strokeWidth={2.5} />
+                        ) : (
+                          <IoAlertCircle className="w-5 h-5 text-red-400" strokeWidth={2.5} />
+                        )}
+                      </div>
+                    )}
+                  </div>
                   {phoneError && (
-                    <p className="text-xs mt-1" style={{ color: "#BC6C25" }}>
-                      Enter valid 10-digit number
+                    <div className="flex items-center gap-1.5 mt-2 text-red-500">
+                      <IoAlertCircle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2.5} />
+                      <p className="text-xs md:text-sm font-medium">
+                        Enter valid 10-digit Indian mobile number
+                      </p>
+                    </div>
+                  )}
+                  {!phoneError && person.phoneNumber.length > 0 && person.phoneNumber.length < 10 && (
+                    <p className="text-xs text-gray-400 mt-2">
+                      {10 - person.phoneNumber.length} digit{person.phoneNumber.length !== 9 ? 's' : ''} remaining
                     </p>
                   )}
                 </div>
@@ -176,41 +223,25 @@ console.log("currentEditingCartItemId:", currentEditingCartItemId);
           })}
         </div>
 
-        {/* Footer - Sticky on Mobile */}
-        <div 
-          className="sticky bottom-0 p-4 sm:p-6 pt-3 sm:pt-4 flex flex-col sm:flex-row gap-2 sm:gap-3" 
-          style={{ 
-            backgroundColor: "#FEFAE0", 
-            borderTop: "1px solid rgba(221, 161, 94, 0.3)",
-            boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.05)"
-          }}
-        >
+        {/* Footer - Sticky */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 md:p-6 flex flex-col-reverse sm:flex-row gap-3 shadow-lg">
           <button
             onClick={() => onOpenChange(false)}
-            className="w-full sm:flex-1 py-3 rounded-lg font-bold text-sm transition-all order-2 sm:order-1"
-            style={{ 
-              backgroundColor: "#ffffff",
-              color: "#283618",
-              border: "2px solid #DDA15E"
-            }}
+            className="w-full sm:flex-1 py-3 md:py-3.5 rounded-xl font-semibold text-sm md:text-base bg-white text-gray-700 border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!areAllDetailsValid() || isSaving}
-            className="w-full sm:flex-1 py-3 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed order-1 sm:order-2"
-            style={{ 
-              backgroundColor: "#606C38",
-              color: "#FEFAE0"
-            }}
+            className="w-full sm:flex-1 py-3 md:py-3.5 rounded-xl font-bold text-sm md:text-base bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-300 flex items-center justify-center gap-2"
           >
             {isSaving ? (
-              <Spinner className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <Spinner className="w-5 h-5 text-white" />
             ) : (
               <>
-                <IoCheckmarkCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                Save Changes
+                <IoCheckmarkCircle className="w-5 h-5" />
+                <span>Save Changes</span>
               </>
             )}
           </button>

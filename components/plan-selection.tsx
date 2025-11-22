@@ -18,7 +18,7 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
     <div className="py-4 md:py-6 px-4">
       {/* Minimal Header */}
       <div className="text-center mb-6 md:mb-8">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 md:mb-2">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-1 md:mb-2">
           Choose Your Plan
         </h2>
         <p className="text-xs md:text-sm text-gray-500 max-w-2xl mx-auto">
@@ -46,7 +46,7 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
             >
               {/* Glow Effect Background */}
               {isSelected && (
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-full blur-2xl opacity-60 animate-pulse" />
+                <div className="absolute inset-0 bg-[#3CB371] opacity-20 rounded-full blur-2xl animate-pulse" />
               )}
 
               {/* Floating Content */}
@@ -66,8 +66,8 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                 {isSelected && (
                   <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 z-20">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-emerald-400 rounded-full blur-md opacity-60 animate-pulse" />
-                      <div className="relative bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full p-1.5 md:p-2 shadow-xl">
+                      <div className="absolute inset-0 bg-[#3CB371] rounded-full blur-md opacity-60 animate-pulse" />
+                      <div className="relative bg-[#3CB371] text-white rounded-full p-1.5 md:p-2 shadow-xl">
                         <Check className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
                       </div>
                     </div>
@@ -81,7 +81,7 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                       "w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center",
                       "transition-all duration-700 ease-out filter",
                       isSelected 
-                        ? "bg-gradient-to-br from-emerald-500 to-teal-600 drop-shadow-2xl scale-110" 
+                        ? "bg-[#3CB371] drop-shadow-2xl scale-110" 
                         : "bg-gradient-to-br from-gray-100 to-gray-200 drop-shadow-xl group-hover:drop-shadow-2xl group-hover:scale-105"
                     )}
                   >
@@ -104,8 +104,8 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                     className={cn(
                       "font-bold text-base sm:text-lg md:text-xl transition-all duration-300",
                       isSelected
-                        ? "text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-green-700"
-                        : "text-gray-800 group-hover:text-gray-900"
+                        ? "text-[#3CB371]"
+                        : "text-gray-800 group-hover:text-black"
                     )}
                   >
                     {plan.name}
@@ -116,7 +116,7 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                     <div className="flex items-baseline justify-center gap-1">
                       <span className={cn(
                         "text-2xl sm:text-3xl md:text-4xl font-black",
-                        isSelected ? "text-emerald-600" : "text-gray-900"
+                        isSelected ? "text-[#3CB371]" : "text-black"
                       )}>
                         ₹{totalPrice}
                       </span>
@@ -125,7 +125,7 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                       <span className={cn(
                         "text-[10px] md:text-xs font-semibold px-2 py-0.5 rounded-full",
                         isSelected 
-                          ? "bg-emerald-100 text-emerald-700" 
+                          ? "bg-green-100 text-green-700" 
                           : "bg-gray-100 text-gray-600"
                       )}>
                         ₹{dailyPrice}/day
@@ -143,13 +143,13 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                     <div className="flex items-center justify-center gap-1.5">
                       <div className={cn(
                         "w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center",
-                        isSelected ? "bg-emerald-500" : "bg-gray-400"
+                        isSelected ? "bg-[#3CB371]" : "bg-gray-400"
                       )}>
                         <Check className="w-2 h-2 md:w-2.5 md:h-2.5 text-white" strokeWidth={3} />
                       </div>
                       <p className={cn(
                         "text-[10px] md:text-xs font-medium",
-                        isSelected ? "text-teal-600" : "text-gray-600"
+                        isSelected ? "text-gray-700" : "text-gray-600"
                       )}>
                         Daily fresh delivery
                       </p>
@@ -158,13 +158,13 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                     <div className="flex items-center justify-center gap-1.5">
                       <div className={cn(
                         "w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center",
-                        isSelected ? "bg-emerald-500" : "bg-gray-400"
+                        isSelected ? "bg-[#3CB371]" : "bg-gray-400"
                       )}>
                         <Check className="w-2 h-2 md:w-2.5 md:h-2.5 text-white" strokeWidth={3} />
                       </div>
                       <p className={cn(
                         "text-[10px] md:text-xs font-medium",
-                        isSelected ? "text-teal-600" : "text-gray-600"
+                        isSelected ? "text-gray-700" : "text-gray-600"
                       )}>
                         Cancel anytime
                       </p>
@@ -173,13 +173,13 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                     <div className="flex items-center justify-center gap-1.5">
                       <div className={cn(
                         "w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center",
-                        isSelected ? "bg-emerald-500" : "bg-gray-400"
+                        isSelected ? "bg-[#3CB371]" : "bg-gray-400"
                       )}>
                         <Check className="w-2 h-2 md:w-2.5 md:h-2.5 text-white" strokeWidth={3} />
                       </div>
                       <p className={cn(
                         "text-[10px] md:text-xs font-medium",
-                        isSelected ? "text-teal-600" : "text-gray-600"
+                        isSelected ? "text-gray-700" : "text-gray-600"
                       )}>
                         Full menu included
                       </p>
@@ -193,7 +193,7 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                         "inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold",
                         "transition-all duration-300",
                         isSelected
-                          ? "bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 text-white shadow-md md:shadow-lg shadow-emerald-200"
+                          ? "bg-[#3CB371] text-white shadow-md md:shadow-lg"
                           : "bg-transparent border-2 border-gray-200 text-gray-600 group-hover:border-gray-300 group-hover:bg-gray-50"
                       )}
                     >

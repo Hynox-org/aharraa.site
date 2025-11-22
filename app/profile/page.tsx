@@ -21,8 +21,8 @@ import { OrdersTab } from "@/components/profile/orders-tab";
 import { AddressesTab } from "@/components/profile/addresses-tab";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { TabNavigation } from "@/components/profile/tab-navigation";
-import LottieAnimation from "@/components/lottie-animation"; // Import LottieAnimation component
-import ItayCheffAnimation from "../../public/lottie/ItayCheff.json"; // Import your Lottie JSON animation data
+import LottieAnimation from "@/components/lottie-animation";
+import ItayCheffAnimation from "../../public/lottie/ItayCheff.json";
 
 export default function ProfilePage() {
   const { user, token, loading: authLoading } = useAuth();
@@ -33,8 +33,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "orders" | "addresses">("overview");
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isCancellingOrder, setIsCancellingOrder] = useState(false); // New loading state
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // New loading state
+  const [isCancellingOrder, setIsCancellingOrder] = useState(false);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
@@ -138,7 +138,7 @@ export default function ProfilePage() {
       return;
     }
 
-    setIsCancellingOrder(true); // Start loading
+    setIsCancellingOrder(true);
     try {
       const updatedOrder = await updateOrder(orderId, { status: "cancelled" }, token);
       setOrders((prevOrders) =>
@@ -150,12 +150,12 @@ export default function ProfilePage() {
     } catch (error: any) {
       toast.error(`Failed to cancel order: ${error.message}`);
     } finally {
-      setIsCancellingOrder(false); // End loading
+      setIsCancellingOrder(false);
     }
   };
 
   const handleUpdateProfile = async () => {
-    setIsUpdatingProfile(true); // Start loading
+    setIsUpdatingProfile(true);
     try {
       if (!token) {
         toast.error("Authentication token not found. Please log in again.");
@@ -174,13 +174,13 @@ export default function ProfilePage() {
         router.push("/auth");
       }
     } finally {
-      setIsUpdatingProfile(false); // End loading
+      setIsUpdatingProfile(false);
     }
   };
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
       </div>
     );
@@ -188,24 +188,22 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
-        <Header /> {/* Keeping header for error page as per pricing page */}
+      <main className="min-h-screen bg-white">
+        <Header />
         <div className="flex justify-center items-center min-h-[calc(100vh-80px)] px-4">
           <div className="text-center max-w-md mx-auto">
             <AlertCircle
-              className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6"
-              style={{ color: "#BC6C25" }}
+              className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 text-red-500"
             />
-            <h2 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: "#283618" }}>
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 text-black">
               Profile Not Found
             </h2>
-            <p className="mb-6 text-sm sm:text-base" style={{ color: "#606C38" }}>
+            <p className="mb-6 text-sm sm:text-base text-gray-600">
               We couldn't load your profile data. Please try logging in again.
             </p>
             <button
               onClick={() => router.push("/auth")}
-              className="px-6 py-3 rounded-lg font-semibold text-sm sm:text-base"
-              style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
+              className="px-6 py-3 rounded-lg font-semibold text-sm sm:text-base bg-[#3CB371] hover:bg-[#2FA05E] text-white transition-colors"
             >
               Go to Login
             </button>
@@ -226,7 +224,7 @@ export default function ProfilePage() {
     .reduce((sum, order) => sum + order.totalAmount, 0);
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
+    <main className="min-h-screen bg-white">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Profile Header */}
@@ -256,7 +254,7 @@ export default function ProfilePage() {
             setIsEditing={setIsEditing}
             loading={loading}
             handleUpdateProfile={handleUpdateProfile}
-            isUpdatingProfile={isUpdatingProfile} // Pass loading state
+            isUpdatingProfile={isUpdatingProfile}
             setActiveTab={setActiveTab}
             router={router}
           />
@@ -268,7 +266,7 @@ export default function ProfilePage() {
             tabLoading={tabLoading}
             loading={loading}
             handleCancelOrder={handleCancelOrder}
-            isCancellingOrder={isCancellingOrder} // Pass loading state
+            isCancellingOrder={isCancellingOrder}
             router={router}
           />
         )}
@@ -282,7 +280,7 @@ export default function ProfilePage() {
             setIsEditing={setIsEditing}
             loading={loading}
             handleUpdateProfile={handleUpdateProfile}
-            isUpdatingProfile={isUpdatingProfile} // Pass loading state
+            isUpdatingProfile={isUpdatingProfile}
           />
         )}
       </div>

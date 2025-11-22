@@ -8,7 +8,7 @@ import { useEffect, useState } from "react"
 import { PersonDetails } from "@/lib/types"
 import LottieAnimation from "@/components/lottie-animation"
 import ItayCheffAnimation from "@/public/lottie/ItayCheff.json"
-import { useToast } from "@/components/ui/use-toast" // Import useToast
+import { useToast } from "@/components/ui/use-toast"
 
 import { CartEmptyState } from "@/components/cart-empty-state"
 import { CartItemCard } from "@/components/cart-item-card"
@@ -20,17 +20,17 @@ import { User } from "@/lib/types"
 export default function CartPage() {
   const { isAuthenticated, loading, user } = useAuth()
   const router = useRouter()
-  const { toast } = useToast() // Initialize useToast
+  const { toast } = useToast()
 
   const [isEditingPersonDetails, setIsEditingPersonDetails] = useState(false)
   const [currentEditingCartItemId, setCurrentEditingCartItemId] = useState<string | null>(null)
   const [editingPersonDetails, setEditingPersonDetails] = useState<PersonDetails[]>([])
   const [pendingNewQuantity, setPendingNewQuantity] = useState<number | null>(null)
   const [fetchedCart, setFetchedCart] = useState<any>(null)
-  const [isCartLoading, setIsCartLoading] = useState(true) // New state for cart loading
-  const [isUpdatingQuantity, setIsUpdatingQuantity] = useState(false) // New loading state
-  const [isRemovingItem, setIsRemovingItem] = useState(false) // New loading state
-  const [isSavingPersonDetails, setIsSavingPersonDetails] = useState(false) // New loading state
+  const [isCartLoading, setIsCartLoading] = useState(true)
+  const [isUpdatingQuantity, setIsUpdatingQuantity] = useState(false)
+  const [isRemovingItem, setIsRemovingItem] = useState(false)
+  const [isSavingPersonDetails, setIsSavingPersonDetails] = useState(false)
 
   // Helper function for person details validation
   const arePersonDetailsValidForQuantity = (details: PersonDetails[] | undefined, requiredQuantity: number) => {
@@ -64,33 +64,32 @@ export default function CartPage() {
       if (!token) {
         console.error("No auth token found — user must log in first");
         router.push("/auth?returnUrl=/cart")
-        setIsCartLoading(false); // Ensure loading state is false if redirecting
+        setIsCartLoading(false);
         return;
       }
       const fetchCart = async () => {
-        setIsCartLoading(true); // Start loading
+        setIsCartLoading(true);
         try {
-          const cartData = await getCartItems(user.id!, token!); // Use ! to assert user.id is not undefined
+          const cartData = await getCartItems(user.id!, token!);
           console.log("Fetched cart items:", cartData);
           setFetchedCart(cartData);
         } catch (error) {
           console.error("Failed to fetch cart items:", error);
-          toast({ title: "Error", description: "Failed to fetch cart items." }); // Add toast for error
+          toast({ title: "Error", description: "Failed to fetch cart items." });
         } finally {
-          setIsCartLoading(false); // End loading
+          setIsCartLoading(false);
         }
       };
       fetchCart();
     } else if (!loading && !isAuthenticated) {
-      setIsCartLoading(false); // If not authenticated, cart is not loading
+      setIsCartLoading(false);
     }
-  }, [isAuthenticated, loading, user?.id, toast, router]); // Add toast to dependency array
+  }, [isAuthenticated, loading, user?.id, toast, router]);
 
   const handleEditPersonDetails = (itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => {
     console.log("setting currentEditingCartItemId to", itemId);
     setCurrentEditingCartItemId(itemId);
     
-    // Initialize editingPersonDetails with existing details or empty objects up to quantityToEdit
     const initialDetails = Array.from({ length: quantityToEdit }, (_, i) => {
       return details?.[i] || { name: "", phoneNumber: "" };
     });
@@ -99,13 +98,12 @@ export default function CartPage() {
   };
 
   const handleSavePersonDetails = async () => {
-    if (isSavingPersonDetails) return; // Prevent multiple clicks
+    if (isSavingPersonDetails) return;
     setIsSavingPersonDetails(true);
 
     console.log("handleSavePersonalDetails called")
     const currentItem = currentEditingCartItemId;
     if (currentEditingCartItemId) {
-      // Validation is handled within EditPersonDetailsDialog before onSave is called
       const token = localStorage.getItem("aharraa-u-token");
       if (!token || !user?.id) {
         router.push("/auth?returnUrl=/cart");
@@ -114,14 +112,12 @@ export default function CartPage() {
       }
       console.log("verified token and user");
       try {
-        // Update person details via API
         console.log("Calling updateCartItemPersonDetails API");
         const updatedCart = await updateCartItemPersonDetails(user.id, currentEditingCartItemId, editingPersonDetails, token);
         console.log("API call success, updating local state");
         setFetchedCart(updatedCart);
         toast({ title: "Person details updated successfully!" });
 
-        // If there's a pending new quantity, update the quantity in the store
         if (pendingNewQuantity !== null) {
           console.log("Updating quantity after person details update");
           const updatedCartWithQuantity = await updateCartItemQuantity(user.id, currentEditingCartItemId, pendingNewQuantity, token);
@@ -155,9 +151,8 @@ export default function CartPage() {
     setEditingPersonDetails(updatedDetails);
   };
 
-  // New handler for updating quantity
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
-    if (isUpdatingQuantity) return; // Prevent multiple clicks
+    if (isUpdatingQuantity) return;
     setIsUpdatingQuantity(true);
 
     const currentItem = (fetchedCart?.items || []).find((item: any) => item._id === itemId);
@@ -176,7 +171,6 @@ export default function CartPage() {
       if (newQuantity > currentItem.quantity) {
         setPendingNewQuantity(newQuantity);
         handleEditPersonDetails(itemId, currentItem.personDetails, newQuantity);
-        // Note: isUpdatingQuantity will be set to false after person details are saved.
         return;
       } else if (newQuantity < currentItem.quantity) {
         const updatedDetails = currentItem.personDetails?.slice(0, newQuantity) || [];
@@ -196,7 +190,7 @@ export default function CartPage() {
   };
 
   const handleRemoveItem = async (itemId: string) => {
-    if (isRemovingItem) return; // Prevent multiple clicks
+    if (isRemovingItem) return;
     setIsRemovingItem(true);
 
     const token = localStorage.getItem("aharraa-u-token");
@@ -225,17 +219,16 @@ export default function CartPage() {
     }
   };
 
-  // Combine authentication loading and cart specific loading
   if (loading || isCartLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
       </div>
     )
   }
 
   if (!isAuthenticated || !user) {
-    return null // Should already be redirected by useEffect
+    return null
   }
   console.log("User ID:", user?.id);
   console.log("Fetched Cart:", fetchedCart);
@@ -245,22 +238,10 @@ export default function CartPage() {
   const totalPrice = userCartItems.reduce((sum: number, item: any) => sum + item.itemTotalPrice, 0)
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
+    <main className="min-h-screen bg-white">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Page Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: "#283618" }}>
-            Your Shopping Cart
-          </h1>
-          {userCartItems.length > 0 && (
-            <p className="text-sm sm:text-base" style={{ color: "#606C38" }}>
-              {totalItems} {totalItems === 1 ? 'item' : 'items'} in your cart
-            </p>
-          )}
-        </div>
-
         {userCartItems.length === 0 ? (
           <CartEmptyState />
         ) : (
@@ -282,7 +263,7 @@ export default function CartPage() {
 
             {/* Cart Summary - Mobile: Full width, Desktop: 1 column */}
             <div className="lg:col-span-1">
-              <div className="lg:sticky lg:top-6">
+              <div className="sticky top-24">
                 <CartSummaryCard
                   totalItems={totalItems}
                   totalPrice={totalPrice}

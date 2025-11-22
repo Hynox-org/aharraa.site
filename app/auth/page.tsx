@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { IoMail, IoLockClosed, IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
 import Image from "next/image"
-import Link from "next/link" // Import Link
+import Link from "next/link"
 import { useAuth } from "@/app/context/auth-context"
 import { toast } from "sonner"
 import { apiRequest, oauthLogin } from "@/lib/api"
@@ -40,7 +40,7 @@ function AuthPageContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#FEFAE0]">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <LottieAnimation animationData={ItayCheffAnimation} style={{ width: 200, height: 200 }} />
       </div>
     );
@@ -109,18 +109,17 @@ function AuthPageContent() {
   return (
     <div className="flex min-h-screen h-screen overflow-hidden">
       {/* Left Side - Branding & Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #FEFAE0 0%, #606C38 50%, #283618 100%)" }}>
-        <div className="absolute inset-0" style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}></div>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-black to-gray-900">
+        <div className="absolute inset-0 bg-black opacity-40"></div>
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-20"
           style={{
             backgroundImage: "url('/auth-bg.jpeg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         ></div>
-        <div className="relative z-10 flex flex-col justify-center items-start p-12 xl:p-16" style={{ color: "#FEFAE0" }}>
+        <div className="relative z-10 flex flex-col justify-center items-start p-12 xl:p-16 text-white">
           <Link href="/" className="flex items-center gap-3 mb-6">
             <Image
               src="/logo.png"
@@ -146,8 +145,7 @@ function AuthPageContent() {
       </div>
 
       {/* Right Side - Auth Forms */}
-      <div className="flex-1 flex justify-center p-4 sm:p-8 overflow-y-auto"
-        style={{ background: "linear-gradient(135deg, #FEFAE0 0%, #ffffff 100%)" }}>
+      <div className="flex-1 flex justify-center p-4 sm:p-8 overflow-y-auto bg-white">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <Link href="/" className="lg:hidden flex items-center justify-center gap-2 mb-6 sm:mb-8">
@@ -158,20 +156,19 @@ function AuthPageContent() {
               height={40}
               className="rounded-xl"
             />
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: "#283618" }}>
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">
               AHARRAA
             </h1>
           </Link>
 
           {/* Tab Buttons */}
-          <div className="grid grid-cols-2 gap-2 mb-6 sm:mb-8 p-1 rounded-xl"
-            style={{ backgroundColor: "rgba(96, 108, 56, 0.1)" }}>
+          <div className="grid grid-cols-2 gap-2 mb-6 sm:mb-8 p-1 rounded-xl bg-gray-100">
             <button
               onClick={() => setActiveTab("signin")}
               className="py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all"
               style={{
                 backgroundColor: activeTab === "signin" ? "#ffffff" : "transparent",
-                color: activeTab === "signin" ? "#283618" : "#606C38",
+                color: activeTab === "signin" ? "#000000" : "#6B7280",
                 boxShadow: activeTab === "signin" ? "0 1px 3px rgba(0, 0, 0, 0.1)" : "none"
               }}
             >
@@ -182,7 +179,7 @@ function AuthPageContent() {
               className="py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all"
               style={{
                 backgroundColor: activeTab === "signup" ? "#ffffff" : "transparent",
-                color: activeTab === "signup" ? "#283618" : "#606C38",
+                color: activeTab === "signup" ? "#000000" : "#6B7280",
                 boxShadow: activeTab === "signup" ? "0 1px 3px rgba(0, 0, 0, 0.1)" : "none"
               }}
             >
@@ -192,12 +189,12 @@ function AuthPageContent() {
 
           {/* Sign In Form */}
           {activeTab === "signin" && (
-            <div className="rounded-2xl p-6 sm:p-8 shadow-xl" style={{ backgroundColor: "#ffffff" }}>
+            <div className="rounded-2xl p-6 sm:p-8 shadow-xl bg-white border border-gray-100">
               <div className="mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: "#283618" }}>
+                <h2 className="text-xl sm:text-2xl font-bold mb-2 text-black">
                   Welcome back!
                 </h2>
-                <p className="text-sm sm:text-base" style={{ color: "#606C38" }}>
+                <p className="text-sm sm:text-base text-gray-600">
                   Sign in to continue your culinary journey
                 </p>
               </div>
@@ -205,24 +202,17 @@ function AuthPageContent() {
               <div className="space-y-4 sm:space-y-5">
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: "#283618" }}>
+                  <label className="block text-sm font-semibold mb-2 text-black">
                     Email
                   </label>
                   <div className="relative">
-                    <IoMail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#606C38" }} />
+                    <IoMail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                     <input
                       type="email"
                       placeholder="you@example.com"
                       value={signInEmail}
                       onChange={(e) => setSignInEmail(e.target.value)}
-                      className="w-full h-11 sm:h-12 pl-10 pr-4 rounded-lg text-sm sm:text-base transition-all"
-                      style={{
-                        border: "2px solid #DDA15E",
-                        color: "#283618",
-                        backgroundColor: "#FEFAE0"
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
+                      className="w-full h-11 sm:h-12 pl-10 pr-4 rounded-lg text-sm sm:text-base transition-all border-2 border-gray-300 text-black bg-white focus:border-[#3CB371] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -230,34 +220,26 @@ function AuthPageContent() {
                 {/* Password */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-semibold" style={{ color: "#283618" }}>
+                    <label className="text-sm font-semibold text-black">
                       Password
                     </label>
-                    <Link href="/auth/forgot-password" className="text-xs sm:text-sm font-semibold" style={{ color: "#BC6C25" }}>
+                    <Link href="/auth/forgot-password" className="text-xs sm:text-sm font-semibold text-[#3CB371] hover:text-[#2FA05E]">
                       Forgot Password?
                     </Link>
                   </div>
                   <div className="relative">
-                    <IoLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#606C38" }} />
+                    <IoLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                     <input
                       type={showSignInPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
-                      className="w-full h-11 sm:h-12 pl-10 pr-10 rounded-lg text-sm sm:text-base transition-all"
-                      style={{
-                        border: "2px solid #DDA15E",
-                        color: "#283618",
-                        backgroundColor: "#FEFAE0"
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
+                      className="w-full h-11 sm:h-12 pl-10 pr-10 rounded-lg text-sm sm:text-base transition-all border-2 border-gray-300 text-black bg-white focus:border-[#3CB371] focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignInPassword(!showSignInPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none"
-                      style={{ color: "#606C38" }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none text-gray-500 hover:text-gray-700"
                     >
                       {showSignInPassword ? (
                         <IoEyeOffOutline className="w-5 h-5" />
@@ -272,15 +254,11 @@ function AuthPageContent() {
                 <button
                   onClick={handleLogin}
                   disabled={isSignInLoading}
-                  className="w-full h-11 sm:h-12 rounded-lg font-bold text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-                  style={{
-                    backgroundColor: "#606C38",
-                    color: "#FEFAE0"
-                  }}
+                  className="w-full h-11 sm:h-12 rounded-lg font-bold text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6 bg-[#3CB371] hover:bg-[#2FA05E] text-white"
                 >
                   {isSignInLoading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <Spinner className="size-4" style={{ color: "#FEFAE0" }} /> Signing in...
+                      <Spinner className="size-4 text-white" /> Signing in...
                     </span>
                   ) : (
                     "Sign In"
@@ -290,10 +268,10 @@ function AuthPageContent() {
                 {/* Divider */}
                 <div className="relative my-5 sm:my-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full h-px" style={{ backgroundColor: "#DDA15E" }} />
+                    <div className="w-full h-px bg-gray-200" />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="px-2 text-xs uppercase" style={{ backgroundColor: "#ffffff", color: "#606C38" }}>
+                    <span className="px-2 text-xs uppercase bg-white text-gray-500">
                       Or continue with
                     </span>
                   </div>
@@ -303,16 +281,11 @@ function AuthPageContent() {
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isGoogleLoading}
-                  className="w-full h-11 sm:h-12 rounded-lg font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2"
-                  style={{
-                    border: "2px solid #DDA15E",
-                    backgroundColor: "#ffffff",
-                    color: "#283618"
-                  }}
+                  className="w-full h-11 sm:h-12 rounded-lg font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2 border-2 border-gray-300 bg-white text-black hover:bg-gray-50"
                 >
                   {isGoogleLoading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <Spinner className="size-4" style={{ color: "#283618" }} /> Signing in...
+                      <Spinner className="size-4 text-black" /> Signing in...
                     </span>
                   ) : (
                     <>
@@ -344,12 +317,12 @@ function AuthPageContent() {
 
           {/* Sign Up Form */}
           {activeTab === "signup" && (
-            <div className="rounded-2xl p-6 sm:p-8 shadow-xl" style={{ backgroundColor: "#ffffff" }}>
+            <div className="rounded-2xl p-6 sm:p-8 shadow-xl bg-white border border-gray-100">
               <div className="mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: "#283618" }}>
+                <h2 className="text-xl sm:text-2xl font-bold mb-2 text-black">
                   Create an account
                 </h2>
-                <p className="text-sm sm:text-base" style={{ color: "#606C38" }}>
+                <p className="text-sm sm:text-base text-gray-600">
                   Join us and discover amazing home-cooked meals
                 </p>
               </div>
@@ -357,54 +330,39 @@ function AuthPageContent() {
               <div className="space-y-4 sm:space-y-5">
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: "#283618" }}>
+                  <label className="block text-sm font-semibold mb-2 text-black">
                     Email
                   </label>
                   <div className="relative">
-                    <IoMail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#606C38" }} />
+                    <IoMail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                     <input
                       type="email"
                       placeholder="you@example.com"
                       value={signUpEmail}
                       onChange={(e) => setSignUpEmail(e.target.value)}
-                      className="w-full h-11 sm:h-12 pl-10 pr-4 rounded-lg text-sm sm:text-base transition-all"
-                      style={{
-                        border: "2px solid #DDA15E",
-                        color: "#283618",
-                        backgroundColor: "#FEFAE0"
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
+                      className="w-full h-11 sm:h-12 pl-10 pr-4 rounded-lg text-sm sm:text-base transition-all border-2 border-gray-300 text-black bg-white focus:border-[#3CB371] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Password */}
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: "#283618" }}>
+                  <label className="block text-sm font-semibold mb-2 text-black">
                     Password
                   </label>
                   <div className="relative">
-                    <IoLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#606C38" }} />
+                    <IoLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                     <input
                       type={showSignUpPassword ? "text" : "password"}
                       placeholder="Create a strong password"
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
-                      className="w-full h-11 sm:h-12 pl-10 pr-10 rounded-lg text-sm sm:text-base transition-all"
-                      style={{
-                        border: "2px solid #DDA15E",
-                        color: "#283618",
-                        backgroundColor: "#FEFAE0"
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
+                      className="w-full h-11 sm:h-12 pl-10 pr-10 rounded-lg text-sm sm:text-base transition-all border-2 border-gray-300 text-black bg-white focus:border-[#3CB371] focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignUpPassword(!showSignUpPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none"
-                      style={{ color: "#606C38" }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none text-gray-500 hover:text-gray-700"
                     >
                       {showSignUpPassword ? (
                         <IoEyeOffOutline className="w-5 h-5" />
@@ -422,16 +380,15 @@ function AuthPageContent() {
                     id="terms"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-1 w-4 h-4 rounded"
-                    style={{ accentColor: "#606C38" }}
+                    className="mt-1 w-4 h-4 rounded accent-[#3CB371]"
                   />
-                  <label htmlFor="terms" className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
+                  <label htmlFor="terms" className="text-xs sm:text-sm text-gray-600">
                     I agree to the{" "}
-                    <a href="#" className="font-semibold" style={{ color: "#BC6C25" }}>
+                    <a href="#" className="font-semibold text-[#3CB371] hover:text-[#2FA05E]">
                       Terms of Service
                     </a>{" "}
                     and{" "}
-                    <a href="#" className="font-semibold" style={{ color: "#BC6C25" }}>
+                    <a href="#" className="font-semibold text-[#3CB371] hover:text-[#2FA05E]">
                       Privacy Policy
                     </a>
                   </label>
@@ -441,15 +398,11 @@ function AuthPageContent() {
                 <button
                   onClick={handleSignup}
                   disabled={isSignUpLoading}
-                  className="w-full h-11 sm:h-12 rounded-lg font-bold text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-                  style={{
-                    backgroundColor: "#606C38",
-                    color: "#FEFAE0"
-                  }}
+                  className="w-full h-11 sm:h-12 rounded-lg font-bold text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6 bg-[#3CB371] hover:bg-[#2FA05E] text-white"
                 >
                   {isSignUpLoading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <Spinner className="size-4" style={{ color: "#FEFAE0" }} /> Creating account...
+                      <Spinner className="size-4 text-white" /> Creating account...
                     </span>
                   ) : (
                     "Create Account"
@@ -459,10 +412,10 @@ function AuthPageContent() {
                 {/* Divider */}
                 <div className="relative my-5 sm:my-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full h-px" style={{ backgroundColor: "#DDA15E" }} />
+                    <div className="w-full h-px bg-gray-200" />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="px-2 text-xs uppercase" style={{ backgroundColor: "#ffffff", color: "#606C38" }}>
+                    <span className="px-2 text-xs uppercase bg-white text-gray-500">
                       Or continue with
                     </span>
                   </div>
@@ -472,16 +425,11 @@ function AuthPageContent() {
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isGoogleLoading}
-                  className="w-full h-11 sm:h-12 rounded-lg font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2"
-                  style={{
-                    border: "2px solid #DDA15E",
-                    backgroundColor: "#ffffff",
-                    color: "#283618"
-                  }}
+                  className="w-full h-11 sm:h-12 rounded-lg font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2 border-2 border-gray-300 bg-white text-black hover:bg-gray-50"
                 >
                   {isGoogleLoading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <Spinner className="size-4" style={{ color: "#283618" }} /> Signing up...
+                      <Spinner className="size-4 text-black" /> Signing up...
                     </span>
                   ) : (
                     <>
@@ -519,8 +467,8 @@ function AuthPageContent() {
 export default function AuthPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#FEFAE0" }}>
-        <p className="text-lg font-medium" style={{ color: "#283618" }}>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-lg font-medium text-black">
           Loading authentication...
         </p>
       </div>

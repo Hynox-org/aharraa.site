@@ -46,17 +46,16 @@ const ForgotPasswordPage = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left Side - Branding (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #FEFAE0 0%, #606C38 50%, #283618 100%)" }}>
-        <div className="absolute inset-0" style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}></div>
-        <div className="absolute inset-0 opacity-30"
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-black to-gray-900">
+        <div className="absolute inset-0 bg-black opacity-40"></div>
+        <div className="absolute inset-0 opacity-20"
           style={{
             backgroundImage: "url('/auth-bg.jpeg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}>
         </div>
-        <div className="relative z-10 flex flex-col justify-center items-start p-12 xl:p-16" style={{ color: "#FEFAE0" }}>
+        <div className="relative z-10 flex flex-col justify-center items-start p-12 xl:p-16 text-white">
           <div className="flex items-center gap-3 mb-6">
             <Image
               src="/logo.png"
@@ -79,8 +78,7 @@ const ForgotPasswordPage = () => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex justify-center items-center p-4 sm:p-8"
-        style={{ background: "linear-gradient(135deg, #FEFAE0 0%, #ffffff 100%)" }}>
+      <div className="flex-1 flex justify-center items-center p-4 sm:p-8 bg-white">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
@@ -91,23 +89,22 @@ const ForgotPasswordPage = () => {
               height={40}
               className="rounded-xl"
             />
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: "#283618" }}>
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">
               AHARRAA
             </h1>
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl p-6 sm:p-8 shadow-xl" style={{ backgroundColor: "#ffffff" }}>
+          <div className="rounded-2xl p-6 sm:p-8 shadow-xl bg-white border border-gray-100">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #606C38, #283618)" }}>
-                <Mail className="w-8 h-8" style={{ color: "#FEFAE0" }} />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-[#3CB371]">
+                <Mail className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: "#283618" }}>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-black">
                 Forgot Password?
               </h2>
-              <p className="text-sm sm:text-base" style={{ color: "#606C38" }}>
+              <p className="text-sm sm:text-base text-gray-600">
                 Enter your email and we'll send you a reset link
               </p>
             </div>
@@ -116,11 +113,11 @@ const ForgotPasswordPage = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Input */}
               <div>
-                <label className="block text-sm font-bold mb-2" style={{ color: "#283618" }}>
-                  Email Address <span style={{ color: "#BC6C25" }}>*</span>
+                <label className="block text-sm font-bold mb-2 text-black">
+                  Email Address <span className="text-[#3CB371]">*</span>
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#606C38" }} />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                   <input
                     type="email"
                     id="email"
@@ -128,24 +125,16 @@ const ForgotPasswordPage = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full h-12 pl-10 pr-4 rounded-lg text-sm sm:text-base transition-all"
-                    style={{
-                      border: "2px solid #DDA15E",
-                      color: "#283618",
-                      backgroundColor: "#FEFAE0"
-                    }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#606C38"}
-                    onBlur={(e) => e.currentTarget.style.borderColor = "#DDA15E"}
+                    className="w-full h-12 pl-10 pr-4 rounded-lg text-sm sm:text-base transition-all border-2 border-gray-300 text-black bg-white focus:border-[#3CB371] focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className="p-4 rounded-lg flex items-start gap-3"
-                  style={{ backgroundColor: "rgba(188, 108, 37, 0.1)", border: "1px solid #BC6C25" }}>
-                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#BC6C25" }} />
-                  <p className="text-sm" style={{ color: "#BC6C25" }}>
+                <div className="p-4 rounded-lg flex items-start gap-3 bg-red-50 border border-red-200">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-600" />
+                  <p className="text-sm text-red-700">
                     {error}
                   </p>
                 </div>
@@ -153,10 +142,9 @@ const ForgotPasswordPage = () => {
 
               {/* Success Message */}
               {message && (
-                <div className="p-4 rounded-lg flex items-start gap-3"
-                  style={{ backgroundColor: "rgba(96, 108, 56, 0.1)", border: "1px solid #606C38" }}>
-                  <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#606C38" }} />
-                  <p className="text-sm" style={{ color: "#606C38" }}>
+                <div className="p-4 rounded-lg flex items-start gap-3 bg-green-50 border border-green-200">
+                  <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5 text-[#3CB371]" />
+                  <p className="text-sm text-green-700">
                     {message}
                   </p>
                 </div>
@@ -166,13 +154,11 @@ const ForgotPasswordPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 rounded-lg font-bold text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
+                className="w-full h-12 rounded-lg font-bold text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-[#3CB371] hover:bg-[#2FA05E] text-white"
               >
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
-                      style={{ borderColor: "#FEFAE0", borderTopColor: "transparent" }}>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
                     </div>
                     Sending...
                   </>
@@ -189,10 +175,7 @@ const ForgotPasswordPage = () => {
             <div className="mt-6 text-center">
               <Link
                 href="/auth"
-                className="inline-flex items-center gap-2 text-sm sm:text-base font-semibold transition-colors"
-                style={{ color: "#606C38" }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "#BC6C25"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "#606C38"}
+                className="inline-flex items-center gap-2 text-sm sm:text-base font-semibold transition-colors text-gray-700 hover:text-[#3CB371]"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Login
@@ -200,8 +183,8 @@ const ForgotPasswordPage = () => {
             </div>
 
             {/* Info Box */}
-            <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}>
-              <p className="text-xs sm:text-sm text-center" style={{ color: "#606C38" }}>
+            <div className="mt-6 p-4 rounded-lg bg-gray-50 border border-gray-200">
+              <p className="text-xs sm:text-sm text-center text-gray-600">
                 <strong>Note:</strong> The reset link will be valid for 1 hour. Check your spam folder if you don't see the email.
               </p>
             </div>

@@ -1,8 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { IoCart } from "react-icons/io5"
+import { IoCart, IoPerson, IoCall, IoCalendar } from "react-icons/io5"
 import { CheckoutItem, CheckoutItemView, PersonDetails } from "@/lib/types"
+import { format } from "date-fns"
 
 interface CheckoutItemCardProps {
   items: CheckoutItemView[]
@@ -10,100 +11,138 @@ interface CheckoutItemCardProps {
 
 export function CheckoutItemCard({ items }: CheckoutItemCardProps) {
   console.log(items);
+  
   return (
-    <div className="rounded-xl p-4 sm:p-6 shadow-md" style={{ backgroundColor: "#ffffff" }}>
+    <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4 sm:mb-6">
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, #606C38, #283618)" }}>
-          <IoCart className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: "#FEFAE0" }} />
+      <div className="flex items-center gap-3 mb-5 md:mb-6 pb-4 md:pb-5 border-b border-gray-100">
+        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#3CB371] flex items-center justify-center shadow-md">
+          <IoCart className="w-6 h-6 md:w-7 md:h-7 text-white" />
         </div>
         <div>
-          <h3 className="text-lg sm:text-xl font-bold" style={{ color: "#283618" }}>
-            Your Items
+          <h3 className="text-lg md:text-xl font-bold text-black">
+            Order Items
           </h3>
-          <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
-            {items.length} {items.length === 1 ? 'item' : 'items'} in order
+          <p className="text-xs md:text-sm text-gray-500">
+            {items.length} {items.length === 1 ? 'item' : 'items'} in your order
           </p>
         </div>
       </div>
 
       {/* Items List */}
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-4 md:space-y-5">
         {items.map((item) => (
           <div
             key={item.id}
-            className="rounded-lg p-3 sm:p-4"
-            style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}
+            className="bg-white rounded-xl p-4 md:p-5 border border-gray-100 hover:shadow-md transition-all duration-300"
           >
-            <div className="flex gap-3 sm:gap-4">
+            <div className="flex gap-3 md:gap-4">
               {/* Image */}
               <div className="flex-shrink-0">
-                <Image
-                  src={item.menu.coverImage || "/defaults/default-meal.jpg"}
-                  alt={item.menu.name}
-                  width={80}
-                  height={80}
-                  className="rounded-lg object-cover w-16 h-16 sm:w-20 sm:h-20"
-                />
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-[#3CB371] rounded-lg blur opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                  <Image
+                    src={item.menu.coverImage || "/defaults/default-meal.jpg"}
+                    alt={item.menu.name}
+                    width={80}
+                    height={80}
+                    className="relative rounded-lg object-cover w-16 h-16 md:w-20 md:h-20 border border-gray-100"
+                  />
+                </div>
               </div>
 
               {/* Details */}
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-base sm:text-lg mb-1 truncate" style={{ color: "#283618" }}>
+                <h4 className="font-bold text-base md:text-lg text-black mb-2 truncate">
                   {item.menu.name}
-                </p>
-                <p className="text-xs sm:text-sm mb-1" style={{ color: "#606C38" }}>
-                  {item.plan.name} ({item.plan.durationDays} days)
-                </p>
+                </h4>
+                
+                {/* Plan & Duration */}
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs md:text-sm font-semibold">
+                    {item.plan.name}
+                  </span>
+                  <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs md:text-sm font-semibold">
+                    {item.plan.durationDays} days
+                  </span>
+                </div>
+
+                {/* Meal Times */}
                 {item.selectedMealTimes && item.selectedMealTimes.length > 0 && (
-                  <p className="text-xs sm:text-sm mb-1" style={{ color: "#606C38" }}>
-                    Meal Times: <span className="font-bold">{item.selectedMealTimes.join(", ")}</span>
-                  </p>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {item.selectedMealTimes.map((mealTime) => (
+                      <span 
+                        key={mealTime}
+                        className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-[10px] md:text-xs font-medium"
+                      >
+                        {mealTime}
+                      </span>
+                    ))}
+                  </div>
                 )}
-                <p className="text-xs" style={{ color: "#606C38" }}>
-                  Quantity: <span className="font-bold">{item.quantity}</span>
-                </p>
+
+                {/* Dates */}
+                {item.startDate && item.endDate && (
+                  <div className="flex items-center gap-1.5 mb-2 text-gray-600">
+                    <IoCalendar className="w-3.5 h-3.5 flex-shrink-0" />
+                    <p className="text-xs md:text-sm">
+                      {format(new Date(item.startDate), "MMM d")} - {format(new Date(item.endDate), "MMM d, yyyy")}
+                    </p>
+                  </div>
+                )}
+
+                {/* Quantity */}
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-full">
+                  <span className="text-xs md:text-sm text-gray-600 font-medium">
+                    Qty: <span className="font-bold text-black">{item.quantity}</span>
+                  </span>
+                </div>
 
                 {/* Person Details */}
-                {item.quantity > 1 &&
-                  item.personDetails &&
-                  item.personDetails.length > 0 && (
-                    <div className="mt-3 p-2 rounded-lg" style={{ backgroundColor: "rgba(96, 108, 56, 0.1)" }}>
-                      <p className="text-xs font-bold mb-2" style={{ color: "#283618" }}>
-                        Person Details:
-                      </p>
-                      <div className="space-y-1">
-                        {item.personDetails.map((person, idx) => (
-                          <div key={idx} className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2 text-xs">
-                            <span className="font-medium" style={{ color: "#283618" }}>
+                {item.quantity > 1 && item.personDetails && item.personDetails.length > 0 && (
+                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-100">
+                    <p className="text-xs md:text-sm font-bold text-black mb-2 md:mb-3">
+                      Person Details:
+                    </p>
+                    <div className="space-y-2">
+                      {item.personDetails.map((person, idx) => (
+                        <div 
+                          key={idx}
+                          className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2 p-2.5 md:p-3 rounded-lg bg-gray-50 border border-gray-100"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-[#3CB371] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                              {idx + 1}
+                            </div>
+                            <span className="font-semibold text-xs md:text-sm text-black">
                               {person.name || `Person ${idx + 1}`}
                             </span>
-                            <span style={{ color: "#606C38" }}>
-                              {person.phoneNumber}
-                            </span>
                           </div>
-                        ))}
-                      </div>
+                          <div className="flex items-center gap-1.5 text-xs md:text-sm text-gray-600 font-medium pl-8 sm:pl-0">
+                            <IoCall className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span>{person.phoneNumber}</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
               </div>
 
               {/* Price - Desktop */}
               <div className="hidden sm:flex items-start flex-shrink-0">
-                <span className="font-bold text-lg sm:text-xl" style={{ color: "#606C38" }}>
+                <span className="font-black text-xl md:text-2xl text-black">
                   ₹{item.itemTotalPrice.toFixed(0)}
                 </span>
               </div>
             </div>
 
-            {/* Price - Mobile (Below) */}
-            <div className="sm:hidden mt-3 pt-3 flex justify-between items-center"
-              style={{ borderTop: "1px solid rgba(221, 161, 94, 0.3)" }}>
-              <span className="text-sm font-bold" style={{ color: "#283618" }}>
-                Total
+            {/* Price - Mobile */}
+            <div className="sm:hidden mt-4 pt-4 flex justify-between items-center border-t border-gray-100">
+              <span className="text-sm font-bold text-gray-700">
+                Item Total
               </span>
-              <span className="font-bold text-lg" style={{ color: "#606C38" }}>
+              <span className="font-black text-xl text-black">
                 ₹{item.itemTotalPrice.toFixed(0)}
               </span>
             </div>
@@ -112,12 +151,11 @@ export function CheckoutItemCard({ items }: CheckoutItemCardProps) {
       </div>
 
       {/* Total Summary */}
-      <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 flex justify-between items-center"
-        style={{ borderTop: "2px solid rgba(221, 161, 94, 0.3)" }}>
-        <span className="text-base sm:text-lg font-bold" style={{ color: "#283618" }}>
+      <div className="mt-5 md:mt-6 pt-5 md:pt-6 flex justify-between items-center border-t-2 border-gray-100">
+        <span className="text-base md:text-lg font-bold text-black">
           Subtotal ({items.length} {items.length === 1 ? 'item' : 'items'})
         </span>
-        <span className="text-xl sm:text-2xl font-bold" style={{ color: "#606C38" }}>
+        <span className="text-2xl md:text-3xl font-black text-black">
           ₹{items.reduce((sum, item) => sum + item.itemTotalPrice, 0).toFixed(0)}
         </span>
       </div>

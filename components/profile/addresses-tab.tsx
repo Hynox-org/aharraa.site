@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Spinner } from "../ui/spinner"; // Import Spinner
+import { Spinner } from "../ui/spinner";
 
 interface AddressesTabProps {
   profile: UserProfile;
@@ -21,7 +21,7 @@ interface AddressesTabProps {
   setIsEditing: (editing: boolean) => void;
   loading: boolean;
   handleUpdateProfile: () => void;
-  isUpdatingProfile: boolean; // New prop
+  isUpdatingProfile: boolean;
 }
 
 export function AddressesTab({
@@ -32,7 +32,7 @@ export function AddressesTab({
   setIsEditing,
   loading,
   handleUpdateProfile,
-  isUpdatingProfile, // Destructure new prop
+  isUpdatingProfile,
 }: AddressesTabProps) {
   const [fetchingLocation, setFetchingLocation] = useState(false);
 
@@ -130,14 +130,13 @@ export function AddressesTab({
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-        <h2 className="text-xl sm:text-2xl font-bold" style={{ color: "#283618" }}>
+        <h2 className="text-xl sm:text-2xl font-bold text-black">
           Delivery Locations
         </h2>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-md hover:shadow-lg transition-all w-full sm:w-auto justify-center"
-            style={{ backgroundColor: "#DDA15E", color: "#283618" }}
+            className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-md hover:shadow-lg transition-all w-full sm:w-auto justify-center bg-[#3CB371] hover:bg-[#2FA05E] text-white"
           >
             <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             Edit All
@@ -157,8 +156,7 @@ export function AddressesTab({
           return (
             <div
               key={item.id}
-              className="rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg sm:shadow-xl border transition-all hover:shadow-2xl"
-              style={{ borderColor: "rgba(96, 108, 56, 0.1)" }}
+              className="rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg sm:shadow-xl border border-gray-100 transition-all hover:shadow-2xl"
             >
               {/* Header with Gradient */}
               <div className={`p-4 sm:p-6 bg-gradient-to-br ${item.gradient}`}>
@@ -178,13 +176,12 @@ export function AddressesTab({
               </div>
 
               {/* Content */}
-              <div className="p-4 sm:p-6" style={{ backgroundColor: "#ffffff" }}>
+              <div className="p-4 sm:p-6 bg-white">
                 {isEditing ? (
                   <div className="space-y-3 sm:space-y-4">
                     <div>
                       <label
-                        className="block text-xs font-semibold mb-1.5 sm:mb-2"
-                        style={{ color: "#606C38" }}
+                        className="block text-xs font-semibold mb-1.5 sm:mb-2 text-gray-700"
                       >
                         Street Address
                       </label>
@@ -193,20 +190,14 @@ export function AddressesTab({
                         placeholder="123 Main Street"
                         value={formData[item.formKey]?.street || ""}
                         onChange={(e) => handleLocationChange(e, item.formKey)}
-                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2"
-                        style={{
-                          border: "2px solid rgba(221, 161, 94, 0.3)",
-                          color: "#283618",
-                          backgroundColor: "#FEFAE0",
-                        }}
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <div>
                         <label
-                          className="block text-xs font-semibold mb-1.5 sm:mb-2"
-                          style={{ color: "#606C38" }}
+                          className="block text-xs font-semibold mb-1.5 sm:mb-2 text-gray-700"
                         >
                           State
                         </label>
@@ -215,18 +206,12 @@ export function AddressesTab({
                           placeholder="Maharashtra"
                           value={formData[item.formKey]?.state || ""}
                           onChange={(e) => handleLocationChange(e, item.formKey)}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2"
-                          style={{
-                            border: "2px solid rgba(221, 161, 94, 0.3)",
-                            color: "#283618",
-                            backgroundColor: "#FEFAE0",
-                          }}
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
                         />
                       </div>
                       <div>
                         <label
-                          className="block text-xs font-semibold mb-1.5 sm:mb-2"
-                          style={{ color: "#606C38" }}
+                          className="block text-xs font-semibold mb-1.5 sm:mb-2 text-gray-700"
                         >
                           Pincode
                         </label>
@@ -235,12 +220,7 @@ export function AddressesTab({
                           placeholder="400001"
                           value={formData[item.formKey]?.pincode || ""}
                           onChange={(e) => handleLocationChange(e, item.formKey)}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2"
-                          style={{
-                            border: "2px solid rgba(221, 161, 94, 0.3)",
-                            color: "#283618",
-                            backgroundColor: "#FEFAE0",
-                          }}
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
                         />
                       </div>
                     </div>
@@ -248,8 +228,7 @@ export function AddressesTab({
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <div>
                         <label
-                          className="block text-xs font-semibold mb-1.5 sm:mb-2"
-                          style={{ color: "#606C38" }}
+                          className="block text-xs font-semibold mb-1.5 sm:mb-2 text-gray-700"
                         >
                           Latitude
                         </label>
@@ -260,18 +239,12 @@ export function AddressesTab({
                           placeholder="19.0760"
                           value={formData[item.formKey]?.lat || ""}
                           onChange={(e) => handleLocationChange(e, item.formKey)}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2"
-                          style={{
-                            border: "2px solid rgba(221, 161, 94, 0.3)",
-                            color: "#283618",
-                            backgroundColor: "#FEFAE0",
-                          }}
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
                         />
                       </div>
                       <div>
                         <label
-                          className="block text-xs font-semibold mb-1.5 sm:mb-2"
-                          style={{ color: "#606C38" }}
+                          className="block text-xs font-semibold mb-1.5 sm:mb-2 text-gray-700"
                         >
                           Longitude
                         </label>
@@ -282,12 +255,7 @@ export function AddressesTab({
                           placeholder="72.8777"
                           value={formData[item.formKey]?.lon || ""}
                           onChange={(e) => handleLocationChange(e, item.formKey)}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2"
-                          style={{
-                            border: "2px solid rgba(221, 161, 94, 0.3)",
-                            color: "#283618",
-                            backgroundColor: "#FEFAE0",
-                          }}
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
                         />
                       </div>
                     </div>
@@ -296,11 +264,7 @@ export function AddressesTab({
                       type="button"
                       onClick={() => handleFetchGPSLocation(item.formKey)}
                       disabled={fetchingLocation}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50"
-                      style={{
-                        backgroundColor: "#606C38",
-                        color: "#FEFAE0",
-                      }}
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 bg-[#3CB371] hover:bg-[#2FA05E] text-white"
                     >
                       <Navigation className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       {fetchingLocation ? "Fetching..." : "Fetch My Location"}
@@ -313,14 +277,12 @@ export function AddressesTab({
                         {item.location?.street && (
                           <div>
                             <p
-                              className="text-[10px] sm:text-xs font-semibold mb-1"
-                              style={{ color: "#999" }}
+                              className="text-[10px] sm:text-xs font-semibold mb-1 text-gray-400"
                             >
                               ADDRESS
                             </p>
                             <p
-                              className="text-xs sm:text-sm font-semibold break-words"
-                              style={{ color: "#283618" }}
+                              className="text-xs sm:text-sm font-semibold break-words text-black"
                             >
                               {item.location.street}
                             </p>
@@ -330,14 +292,12 @@ export function AddressesTab({
                         {(item.location?.state || item.location?.pincode) && (
                           <div>
                             <p
-                              className="text-[10px] sm:text-xs font-semibold mb-1"
-                              style={{ color: "#999" }}
+                              className="text-[10px] sm:text-xs font-semibold mb-1 text-gray-400"
                             >
                               LOCATION
                             </p>
                             <p
-                              className="text-xs sm:text-sm font-semibold"
-                              style={{ color: "#283618" }}
+                              className="text-xs sm:text-sm font-semibold text-black"
                             >
                               {item.location.state}
                               {item.location.state && item.location.pincode && " - "}
@@ -349,8 +309,7 @@ export function AddressesTab({
                         {item.location?.lat !== 0 && item.location?.lat !== undefined && (
                           <div>
                             <p
-                              className="text-[10px] sm:text-xs font-semibold mb-2"
-                              style={{ color: "#999" }}
+                              className="text-[10px] sm:text-xs font-semibold mb-2 text-gray-400"
                             >
                               COORDINATES
                             </p>
@@ -358,11 +317,7 @@ export function AddressesTab({
                               href={`https://www.google.com/maps/search/?api=1&query=${item.location.lat},${item.location.lon}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all hover:shadow-md"
-                              style={{
-                                backgroundColor: "rgba(96, 108, 56, 0.1)",
-                                color: "#606C38",
-                              }}
+                              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all hover:shadow-md bg-gray-100 text-gray-700 hover:bg-gray-200"
                             >
                               <MapPinned className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                               View on Map
@@ -373,16 +328,14 @@ export function AddressesTab({
                     ) : (
                       <div className="text-center py-6 sm:py-8">
                         <AlertCircle
-                          className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3"
-                          style={{ color: "#DDA15E" }}
+                          className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 text-gray-400"
                         />
                         <p
-                          className="text-xs sm:text-sm font-semibold mb-1"
-                          style={{ color: "#283618" }}
+                          className="text-xs sm:text-sm font-semibold mb-1 text-black"
                         >
                           No address set
                         </p>
-                        <p className="text-[10px] sm:text-xs" style={{ color: "#999" }}>
+                        <p className="text-[10px] sm:text-xs text-gray-400">
                           Add your {item.title.toLowerCase()} delivery location
                         </p>
                       </div>
@@ -426,22 +379,17 @@ export function AddressesTab({
                 },
               });
             }}
-            className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold transition-all shadow-md hover:shadow-lg text-sm w-full sm:w-auto"
-            style={{
-              backgroundColor: "rgba(188, 108, 37, 0.1)",
-              color: "#BC6C25",
-            }}
+            className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold transition-all shadow-md hover:shadow-lg text-sm w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600"
           >
             Cancel
           </button>
           <button
             onClick={handleUpdateProfile}
-            disabled={isUpdatingProfile} // Use isUpdatingProfile
-            className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 flex items-center justify-center gap-2 text-sm w-full sm:w-auto"
-            style={{ backgroundColor: "#606C38", color: "#FEFAE0" }}
+            disabled={isUpdatingProfile}
+            className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 flex items-center justify-center gap-2 text-sm w-full sm:w-auto bg-[#3CB371] hover:bg-[#2FA05E] text-white"
           >
             {isUpdatingProfile ? (
-              <Spinner className="w-4 h-4 sm:w-5 sm:h-5 text-[#FEFAE0]" />
+              <Spinner className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             ) : (
               <Save className="w-4 h-4 sm:w-5 sm:h-5" />
             )}

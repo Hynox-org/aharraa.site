@@ -1,6 +1,6 @@
 import { UserProfile } from "@/lib/types";
 import { User, Edit3, Save, X, Package, MapPin, CreditCard, ArrowRight } from "lucide-react";
-import { Spinner } from "../ui/spinner"; // Corrected Import Spinner path
+import { Spinner } from "../ui/spinner";
 
 interface GeneralTabProps {
   profile: UserProfile;
@@ -10,7 +10,7 @@ interface GeneralTabProps {
   setIsEditing: (editing: boolean) => void;
   loading: boolean;
   handleUpdateProfile: () => void;
-  isUpdatingProfile: boolean; // New prop
+  isUpdatingProfile: boolean;
   setActiveTab: (tab: "overview" | "orders" | "addresses") => void;
   router: any;
 }
@@ -23,7 +23,7 @@ export function GeneralTab({
   setIsEditing,
   loading,
   handleUpdateProfile,
-  isUpdatingProfile, // Destructure new prop
+  isUpdatingProfile,
   setActiveTab,
   router,
 }: GeneralTabProps) {
@@ -36,20 +36,17 @@ export function GeneralTab({
     <div className="space-y-4 sm:space-y-6">
       {/* Personal Information Card */}
       <div
-        className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg sm:shadow-xl border"
-        style={{ backgroundColor: "#ffffff", borderColor: "rgba(96, 108, 56, 0.1)" }}
+        className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg sm:shadow-xl border border-gray-100 bg-white"
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-3">
             <div
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: "rgba(96, 108, 56, 0.1)" }}
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center bg-gray-100"
             >
-              <User className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: "#606C38" }} />
+              <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
             </div>
             <h2
-              className="text-xl sm:text-2xl font-bold"
-              style={{ color: "#283618" }}
+              className="text-xl sm:text-2xl font-bold text-black"
             >
               Personal Information
             </h2>
@@ -88,22 +85,17 @@ export function GeneralTab({
                       },
                     });
                   }}
-                  className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all flex-1 sm:flex-none"
-                  style={{
-                    backgroundColor: "rgba(188, 108, 37, 0.1)",
-                    color: "#BC6C25",
-                  }}
+                  className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all flex-1 sm:flex-none bg-red-50 text-red-600 hover:bg-red-100"
                 >
                   <X className="w-4 h-4 sm:w-5 sm:h-5 mx-auto" />
                 </button>
                 <button
                   onClick={handleUpdateProfile}
-                  disabled={isUpdatingProfile} // Use isUpdatingProfile
-                  className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm flex-1 sm:flex-none"
-                  style={{ backgroundColor: "#DDA15E", color: "#283618" }}
+                  disabled={isUpdatingProfile}
+                  className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm flex-1 sm:flex-none bg-[#3CB371] hover:bg-[#2FA05E] text-white"
                 >
                   {isUpdatingProfile ? (
-                    <Spinner className="w-4 h-4 sm:w-5 sm:h-5 text-[#283618]" />
+                    <Spinner className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   ) : (
                     <Save className="w-4 h-4 sm:w-5 sm:h-5" />
                   )}
@@ -113,8 +105,7 @@ export function GeneralTab({
             ) : (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm w-full sm:w-auto"
-                style={{ backgroundColor: "#DDA15E", color: "#283618" }}
+                className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm w-full sm:w-auto bg-[#3CB371] hover:bg-[#2FA05E] text-white"
               >
                 <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Edit</span>
@@ -126,8 +117,7 @@ export function GeneralTab({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <label
-              className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3"
-              style={{ color: "#606C38" }}
+              className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-gray-700"
             >
               Full Name
             </label>
@@ -137,30 +127,20 @@ export function GeneralTab({
                 value={formData.fullName}
                 onChange={handleInputChange}
                 placeholder="Enter your full name"
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-sm font-medium transition-all focus:outline-none focus:ring-2"
-                style={{
-                  border: "2px solid rgba(221, 161, 94, 0.3)",
-                  color: "#283618",
-                  backgroundColor: "#FEFAE0",
-                }}
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
               />
             ) : (
               <div
-                className="px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-sm font-semibold break-words"
-                style={{
-                  backgroundColor: "rgba(221, 161, 94, 0.08)",
-                  color: "#283618",
-                }}
+                className="px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-sm font-semibold break-words bg-gray-50 text-black"
               >
-                {profile.fullName || <span style={{ color: "#999" }}>Not set</span>}
+                {profile.fullName || <span className="text-gray-400">Not set</span>}
               </div>
             )}
           </div>
 
           <div>
             <label
-              className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3"
-              style={{ color: "#606C38" }}
+              className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-gray-700"
             >
               Phone Number
             </label>
@@ -170,22 +150,13 @@ export function GeneralTab({
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 placeholder="+91 XXXXX XXXXX"
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-sm font-medium transition-all focus:outline-none focus:ring-2"
-                style={{
-                  border: "2px solid rgba(221, 161, 94, 0.3)",
-                  color: "#283618",
-                  backgroundColor: "#FEFAE0",
-                }}
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
               />
             ) : (
               <div
-                className="px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-sm font-semibold"
-                style={{
-                  backgroundColor: "rgba(221, 161, 94, 0.08)",
-                  color: "#283618",
-                }}
+                className="px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-sm font-semibold bg-gray-50 text-black"
               >
-                {profile.phoneNumber || <span style={{ color: "#999" }}>Not set</span>}
+                {profile.phoneNumber || <span className="text-gray-400">Not set</span>}
               </div>
             )}
           </div>
@@ -196,66 +167,60 @@ export function GeneralTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <button
           onClick={() => setActiveTab("orders")}
-          className="p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-left group"
-          style={{ backgroundColor: "#ffffff" }}
+          className="p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-left group bg-white border border-gray-100"
         >
           <div className="flex items-start justify-between mb-3 sm:mb-4">
             <div
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"
-              style={{ backgroundColor: "rgba(96, 108, 56, 0.1)" }}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform bg-gray-100"
             >
-              <Package className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: "#606C38" }} />
+              <Package className="w-6 h-6 sm:w-7 sm:h-7 text-gray-700" />
             </div>
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: "#DDA15E" }} />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#3CB371]" />
           </div>
-          <h3 className="text-base sm:text-lg font-bold mb-1.5 sm:mb-2" style={{ color: "#283618" }}>
+          <h3 className="text-base sm:text-lg font-bold mb-1.5 sm:mb-2 text-black">
             My Orders
           </h3>
-          <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
+          <p className="text-xs sm:text-sm text-gray-600">
             View and track your orders
           </p>
         </button>
 
         <button
           onClick={() => setActiveTab("addresses")}
-          className="p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-left group"
-          style={{ backgroundColor: "#ffffff" }}
+          className="p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-left group bg-white border border-gray-100"
         >
           <div className="flex items-start justify-between mb-3 sm:mb-4">
             <div
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"
-              style={{ backgroundColor: "rgba(221, 161, 94, 0.1)" }}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform bg-gray-100"
             >
-              <MapPin className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: "#BC6C25" }} />
+              <MapPin className="w-6 h-6 sm:w-7 sm:h-7 text-gray-700" />
             </div>
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: "#DDA15E" }} />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#3CB371]" />
           </div>
-          <h3 className="text-base sm:text-lg font-bold mb-1.5 sm:mb-2" style={{ color: "#283618" }}>
+          <h3 className="text-base sm:text-lg font-bold mb-1.5 sm:mb-2 text-black">
             Delivery Addresses
           </h3>
-          <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
+          <p className="text-xs sm:text-sm text-gray-600">
             Manage your delivery locations
           </p>
         </button>
 
         <button
           onClick={() => router.push("/pricing")}
-          className="p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-left group sm:col-span-2 lg:col-span-1"
-          style={{ backgroundColor: "#ffffff" }}
+          className="p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-left group sm:col-span-2 lg:col-span-1 bg-white border border-gray-100"
         >
           <div className="flex items-start justify-between mb-3 sm:mb-4">
             <div
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"
-              style={{ backgroundColor: "rgba(188, 108, 37, 0.1)" }}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform bg-gray-100"
             >
-              <CreditCard className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: "#BC6C25" }} />
+              <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 text-gray-700" />
             </div>
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: "#DDA15E" }} />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#3CB371]" />
           </div>
-          <h3 className="text-base sm:text-lg font-bold mb-1.5 sm:mb-2" style={{ color: "#283618" }}>
+          <h3 className="text-base sm:text-lg font-bold mb-1.5 sm:mb-2 text-black">
             Browse Meals
           </h3>
-          <p className="text-xs sm:text-sm" style={{ color: "#606C38" }}>
+          <p className="text-xs sm:text-sm text-gray-600">
             Explore our delicious menu
           </p>
         </button>

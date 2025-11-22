@@ -76,7 +76,7 @@ export function DateSelection({
     <div className="py-4 md:py-6 px-4">
       {/* Minimal Header */}
       <div className="text-center mb-6 md:mb-8">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 md:mb-2">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-1 md:mb-2">
           Select Start Date
         </h2>
         <p className="text-xs md:text-sm text-gray-500">
@@ -89,7 +89,7 @@ export function DateSelection({
         {/* Date Display - Floating Circle Style */}
         <div className="relative mb-6 md:mb-8">
           {startDate && (
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl opacity-60" />
+            <div className="absolute inset-0 bg-[#3CB371] opacity-20 rounded-full blur-2xl" />
           )}
           
           <button
@@ -102,7 +102,7 @@ export function DateSelection({
               disabled:opacity-50 disabled:cursor-not-allowed
               ${
                 startDate 
-                  ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white drop-shadow-2xl scale-[1.02]' 
+                  ? 'bg-[#3CB371] text-white drop-shadow-2xl scale-[1.02]' 
                   : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-gray-300 drop-shadow-lg hover:drop-shadow-xl'
               }
             `}
@@ -142,7 +142,7 @@ export function DateSelection({
                 <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-700" strokeWidth={2.5} />
               </button>
               
-              <h3 className="text-base md:text-lg font-bold text-gray-900">
+              <h3 className="text-base md:text-lg font-bold text-black">
                 {format(currentMonth, "MMMM yyyy")}
               </h3>
               
@@ -194,16 +194,16 @@ export function DateSelection({
                       flex items-center justify-center relative
                       ${
                         selected
-                          ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg scale-105'
+                          ? 'bg-[#3CB371] text-white shadow-lg scale-105'
                           : disabled || isDisabled
                           ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                          : 'bg-gray-50 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 active:scale-95'
+                          : 'bg-gray-50 text-gray-700 hover:bg-green-50 hover:text-[#3CB371] active:scale-95'
                       }
                     `}
                   >
                     {day}
                     {todayDate && !selected && (
-                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-500" />
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#3CB371]" />
                     )}
                   </button>
                 );
@@ -215,9 +215,9 @@ export function DateSelection({
         {/* Delivery Info - Minimal */}
         {startDate && endDate && (
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-2xl opacity-60" />
+            <div className="absolute inset-0 bg-black opacity-10 rounded-full blur-2xl" />
             
-            <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl md:rounded-3xl p-5 md:p-6 text-white shadow-2xl">
+            <div className="relative bg-black rounded-2xl md:rounded-3xl p-5 md:p-6 text-white shadow-2xl">
               <div className="flex items-start gap-3 md:gap-4">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
                   <Clock className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
