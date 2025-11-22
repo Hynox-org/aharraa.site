@@ -41,25 +41,28 @@ export function MealTimeSelection({
   return (
     <div className="w-full">
       {/* Header Section with Gradient Background */}
-      <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100 rounded-3xl p-8 mb-8 shadow-sm">
-        <div className="max-w-3xl">
-          {/* Updated counter badge to green/sandalwood theme */}
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full mb-4 shadow-sm">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-gray-700">
-              {selectedMealTimes.length} meal{selectedMealTimes.length !== 1 ? 's' : ''} selected
-            </span>
-          </div>
-          
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 leading-tight">
-            Select Your Meal Times
-          </h2>
-          
-          <p className="text-lg text-gray-600">
-            Choose when you'd like to enjoy delicious meals from this menu. You can select multiple meal times.
-          </p>
-        </div>
-      </div>
+      <div className="text-center mb-6 md:mb-8 px-4">
+  {/* Selection Counter - Floating Badge */}
+  {selectedMealTimes.length > 0 && (
+    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md mb-4 border border-gray-100">
+      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+      <span className="text-xs md:text-sm font-semibold text-gray-700">
+        {selectedMealTimes.length} selected
+      </span>
+    </div>
+  )}
+  
+  {/* Main Title */}
+  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+    Select Your Meal Times
+  </h2>
+  
+  {/* Subtitle */}
+  <p className="text-xs md:text-sm text-gray-500 max-w-2xl mx-auto">
+    Choose when you'd like to enjoy your meals
+  </p>
+</div>
+
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-2">

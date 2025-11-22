@@ -1,6 +1,6 @@
 import React from "react"
 import { Menu, MenuItem, MealCategory, DayOfWeek, Meal, MenuItemWithPopulatedMeal, MenuWithPopulatedMeals } from "@/lib/types"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import Image from "next/image"
 import { Check, Eye, X } from "lucide-react"
 
@@ -186,20 +186,26 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                   </div>
                 </div>
 
-                {/* Redesigned Dialog */}
+                {/* Redesigned Dialog with Floating Close Button */}
                 <DialogContent className="w-full max-h-[90vh] overflow-hidden p-0 bg-gradient-to-br from-gray-50 to-white">
+                  {/* Floating Close Button - Top Right Outside Header */}
+                  <DialogClose className="absolute top-4 right-4 z-50 p-2 md:p-2.5 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 hover:shadow-xl transition-all duration-200 group">
+                    <X className="w-5 h-5 md:w-6 md:h-6 text-gray-600 group-hover:text-gray-900 group-hover:rotate-90 transition-all duration-200" />
+                    <span className="sr-only">Close</span>
+                  </DialogClose>
+
                   {/* Sticky Header */}
-                  <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b p-4 md:p-6 z-10 shadow-sm">
+                  <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b p-4 md:p-6 pr-16 md:pr-20 z-10 shadow-sm">
                     <DialogHeader>
                       <DialogTitle className="text-xl md:text-2xl font-bold text-gray-900">{menu.name}</DialogTitle>
-                      <div className="flex items-center gap-3 mt-2 flex-wrap">
-                        <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs md:text-sm font-semibold">
+                      <div className="flex items-center gap-2 md:gap-3 mt-2 flex-wrap">
+                        <span className="px-2.5 md:px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs md:text-sm font-semibold">
                           ₹{menu.perDayPrice}/day
                         </span>
-                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs md:text-sm font-semibold">
+                        <span className="px-2.5 md:px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs md:text-sm font-semibold">
                           {totalDays} days
                         </span>
-                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs md:text-sm font-semibold">
+                        <span className="px-2.5 md:px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs md:text-sm font-semibold">
                           {menu.menuItems.length} meals
                         </span>
                       </div>
@@ -254,7 +260,7 @@ function WeeklyCalendarView({
 
           return (
             <div key={day} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-              {/* Day Header - Floating Badge Style */}
+              {/* Day Header */}
               <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 px-4 md:px-6 py-3 md:py-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
@@ -266,7 +272,7 @@ function WeeklyCalendarView({
                 </div>
               </div>
 
-              {/* Meals Grid - Floating Cards */}
+              {/* Meals Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 p-4 md:p-6">
                 {MEAL_CATEGORIES.map((category) => {
                   const mealItem = dayMeals[category];
@@ -320,7 +326,7 @@ function WeeklyCalendarView({
                             </div>
                           )}
 
-                          {/* Nutritional Info - Minimal Pills */}
+                          {/* Nutritional Info */}
                           {typeof mealItem.meal === 'object' && mealItem.meal.nutritionalDetails && (
                             <div className="flex gap-1.5 md:gap-2 flex-wrap">
                               <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[9px] md:text-[10px] font-semibold">
