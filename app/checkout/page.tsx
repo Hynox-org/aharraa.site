@@ -599,7 +599,7 @@ const handleAddressChangeWithSync = (
 
           {/* Right Column - Summary */}
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-6">
+            <div className="lg:sticky lg:top-25">
               <CheckoutOrderSummary
                 totalPrice={totalPrice}
                 deliveryCost={deliveryCost}
