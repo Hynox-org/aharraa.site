@@ -41,31 +41,31 @@ export function MealTimeSelection({
 
   return (
     <div className="w-full">
-      {/* Header Section with Gradient Background */}
-      <div className="text-center mb-6 md:mb-8 px-4">
-        {/* Selection Counter - Floating Badge */}
+      {/* Header Section - More Compact */}
+      <div className="text-center mb-3 md:mb-8 px-2 md:px-4">
+        {/* Selection Counter - Smaller */}
         {selectedMealTimes.length > 0 && (
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md mb-4 border border-gray-100">
-            <div className="w-2 h-2 bg-[#3CB371] rounded-full animate-pulse" />
-            <span className="text-xs md:text-sm font-semibold text-black">
+          <div className="inline-flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1 md:py-2 bg-white rounded-full shadow-sm md:shadow-md mb-2 md:mb-4 border border-gray-100">
+            <div className="w-1 h-1 md:w-2 md:h-2 bg-[#3CB371] rounded-full animate-pulse" />
+            <span className="text-[9px] sm:text-[10px] md:text-sm font-semibold text-black">
               {selectedMealTimes.length} selected
             </span>
           </div>
         )}
         
-        {/* Main Title */}
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-2">
+        {/* Main Title - Smaller */}
+        <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-black mb-0.5 md:mb-2">
           Select Your Meal Times
         </h2>
         
-        {/* Subtitle */}
-        <p className="text-xs md:text-sm text-gray-500 max-w-2xl mx-auto">
+        {/* Subtitle - Smaller */}
+        <p className="text-[10px] sm:text-xs md:text-sm text-gray-500 max-w-2xl mx-auto">
           Choose when you'd like to enjoy your meals
         </p>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-2">
+      {/* Cards Grid - Tighter Gap */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 lg:gap-8 px-1 md:px-2">
         {selectedMenu.availableMealTimes.map((mealTime) => (
           <FoodDisplayCard
             key={mealTime}
@@ -80,11 +80,11 @@ export function MealTimeSelection({
         ))}
       </div>
 
-      {/* Helper Text */}
+      {/* Helper Text - Smaller */}
       {selectedMealTimes.length === 0 && (
-        <div className="mt-8 text-center">
-          <p className="text-gray-400 text-sm flex items-center justify-center gap-2">
-            <IoHandLeftOutline className="w-5 h-5" />
+        <div className="mt-3 md:mt-8 text-center px-2">
+          <p className="text-gray-400 text-[10px] md:text-sm flex items-center justify-center gap-1 md:gap-2">
+            <IoHandLeftOutline className="w-3 h-3 md:w-5 md:h-5" />
             Tap on any meal card to get started
           </p>
         </div>

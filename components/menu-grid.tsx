@@ -65,9 +65,9 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
   };
 
   return (
-    <div className="w-full py-4 md:py-6">
-      <div className="text-center mb-6 md:mb-8 px-4">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-1 md:mb-2">Select Your Menu</h2>
+    <div className="w-full py-3 md:py-6">
+      <div className="text-center mb-4 md:mb-8 px-2 md:px-4">
+        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-black mb-1">Select Your Menu</h2>
         <p className="text-xs md:text-sm text-gray-500">Choose your weekly meal plan</p>
       </div>
 
@@ -77,7 +77,7 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
           <p className="text-xs md:text-sm">No menus available</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10 px-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8 lg:gap-10 px-2 md:px-4">
           {menus.map((menu) => {
             const isSelected = selectedMenu?._id === menu._id;
             const totalDays = getTotalDays(menu);
@@ -88,18 +88,18 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                   className={`
                     relative cursor-pointer group
                     transition-all duration-500 ease-out
-                    ${isSelected ? 'scale-[1.03]' : 'hover:scale-[1.01]'}
+                    ${isSelected ? 'scale-[1.02] md:scale-[1.03]' : 'hover:scale-[1.01]'}
                   `}
                   onClick={() => onMenuSelect(menu)}
                 >
                   {isSelected && (
-                    <div className="absolute inset-0 bg-[#3CB371] opacity-20 rounded-full blur-2xl animate-pulse" />
+                    <div className="absolute inset-0 bg-[#3CB371] opacity-20 rounded-full blur-xl md:blur-2xl animate-pulse" />
                   )}
 
                   <div className="relative flex flex-col items-center">
-                    <div className="relative mb-3 md:mb-4">
+                    <div className="relative mb-2 md:mb-4">
                       {menu.coverImage && (
-                        <div className="relative w-40 h-40">
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40">
                           <Image
                             src={menu.coverImage}
                             alt={menu.name}
@@ -110,37 +110,37 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                               filter
                               ${
                                 isSelected 
-                                  ? 'drop-shadow-2xl scale-110 rotate-6' 
-                                  : 'drop-shadow-xl group-hover:drop-shadow-2xl group-hover:scale-105 group-hover:-rotate-3'
+                                  ? 'drop-shadow-xl md:drop-shadow-2xl scale-105 md:scale-110 rotate-3 md:rotate-6' 
+                                  : 'drop-shadow-lg md:drop-shadow-xl group-hover:drop-shadow-xl md:group-hover:drop-shadow-2xl group-hover:scale-105 group-hover:-rotate-2 md:group-hover:-rotate-3'
                               }
                             `}
                           />
                         </div>
                       )}
 
-                      <div className="absolute bottom-1 md:bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1.5 md:px-4 md:py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg md:shadow-xl">
-                        <span className="text-xs sm:text-sm md:text-base font-bold text-black">
+                      <div className="absolute bottom-0 md:bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-1 md:px-4 md:py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-md md:shadow-xl">
+                        <span className="text-[10px] sm:text-xs md:text-base font-bold text-black">
                           ₹{menu.perDayPrice}
-                          <span className="text-[10px] sm:text-xs font-normal text-gray-600">/day</span>
+                          <span className="text-[8px] sm:text-[10px] md:text-xs font-normal text-gray-600">/day</span>
                         </span>
                       </div>
 
                       {isSelected && (
                         <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 z-20">
                           <div className="relative">
-                            <div className="absolute inset-0 bg-[#3CB371] rounded-full blur-md opacity-60 animate-pulse" />
-                            <div className="relative bg-[#3CB371] text-white rounded-full p-1.5 md:p-2 shadow-xl">
-                              <Check className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
+                            <div className="absolute inset-0 bg-[#3CB371] rounded-full blur-sm md:blur-md opacity-60 animate-pulse" />
+                            <div className="relative bg-[#3CB371] text-white rounded-full p-1 md:p-2 shadow-lg md:shadow-xl">
+                              <Check className="w-3 h-3 md:w-5 md:h-5" strokeWidth={3} />
                             </div>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    <div className="text-center space-y-1 md:space-y-2 px-2 md:px-4 w-full">
+                    <div className="text-center space-y-0.5 md:space-y-2 px-1 md:px-4 w-full">
                       <h3
                         className={`
-                          font-bold text-base sm:text-lg md:text-xl lg:text-2xl
+                          font-bold text-xs sm:text-sm md:text-xl lg:text-2xl
                           transition-all duration-300
                           ${
                             isSelected
@@ -152,32 +152,18 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                         {menu.name}
                       </h3>
 
-                      <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs md:text-sm text-gray-500 pt-1">
+                      <div className="flex items-center justify-center gap-1 md:gap-2 text-[8px] sm:text-[9px] md:text-sm text-gray-500">
                         <span>{totalDays} Days</span>
                         <span>•</span>
                         <span>{menu.menuItems.length} Meals</span>
                       </div>
 
-                      <div className="pt-2 md:pt-3 flex flex-col xs:flex-row gap-2 justify-center">
-                        <button
-                          onClick={() => onMenuSelect(menu)}
-                          className={`
-                            px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold
-                            transition-all duration-300
-                            ${
-                              isSelected
-                                ? 'bg-[#3CB371] text-white shadow-md md:shadow-lg'
-                                : 'bg-transparent border-2 border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-                            }
-                          `}
-                        >
-                          {isSelected ? 'Selected' : 'Select'}
-                        </button>
-                        
+                      <div className="pt-1 md:pt-3 flex flex-col gap-1 md:gap-2 justify-center">
+                      
                         <DialogTrigger asChild>
                           <button 
                             onClick={(e) => e.stopPropagation()}
-                            className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold bg-gray-100 text-black hover:bg-gray-200 transition-all border-2 border-transparent hover:border-gray-300"
+                            className="px-2 sm:px-3 md:px-6 py-1 md:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-semibold bg-gray-100 text-black hover:bg-gray-200 transition-all border border-transparent hover:border-gray-300 md:border-2"
                           >
                             View
                           </button>
@@ -190,23 +176,23 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                 {/* Redesigned Dialog with Floating Close Button */}
                 <DialogContent className="w-full max-h-[90vh] overflow-hidden p-0 bg-white">
                   {/* Floating Close Button - Top Right Outside Header */}
-                  <DialogClose className="absolute top-4 right-4 z-50 p-2 md:p-2.5 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 hover:shadow-xl transition-all duration-200 group">
-                    <X className="w-5 h-5 md:w-6 md:h-6 text-gray-600 group-hover:text-black group-hover:rotate-90 transition-all duration-200" />
+                  <DialogClose className="absolute top-3 right-3 md:top-4 md:right-4 z-50 p-1.5 md:p-2.5 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 hover:shadow-xl transition-all duration-200 group">
+                    <X className="w-4 h-4 md:w-6 md:h-6 text-gray-600 group-hover:text-black group-hover:rotate-90 transition-all duration-200" />
                     <span className="sr-only">Close</span>
                   </DialogClose>
 
                   {/* Sticky Header */}
-                  <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b p-4 md:p-6 pr-16 md:pr-20 z-10 shadow-sm">
+                  <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b p-3 md:p-6 pr-12 md:pr-20 z-10 shadow-sm">
                     <DialogHeader>
-                      <DialogTitle className="text-xl md:text-2xl font-bold text-black">{menu.name}</DialogTitle>
-                      <div className="flex items-center gap-2 md:gap-3 mt-2 flex-wrap">
-                        <span className="px-2.5 md:px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs md:text-sm font-semibold">
+                      <DialogTitle className="text-base md:text-2xl font-bold text-black">{menu.name}</DialogTitle>
+                      <div className="flex items-center gap-1.5 md:gap-3 mt-2 flex-wrap">
+                        <span className="px-2 md:px-3 py-0.5 md:py-1 bg-green-100 text-green-700 rounded-full text-[10px] md:text-sm font-semibold">
                           ₹{menu.perDayPrice}/day
                         </span>
-                        <span className="px-2.5 md:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs md:text-sm font-semibold">
+                        <span className="px-2 md:px-3 py-0.5 md:py-1 bg-gray-100 text-gray-700 rounded-full text-[10px] md:text-sm font-semibold">
                           {totalDays} days
                         </span>
-                        <span className="px-2.5 md:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs md:text-sm font-semibold">
+                        <span className="px-2 md:px-3 py-0.5 md:py-1 bg-gray-100 text-gray-700 rounded-full text-[10px] md:text-sm font-semibold">
                           {menu.menuItems.length} meals
                         </span>
                       </div>
@@ -251,8 +237,8 @@ function WeeklyCalendarView({
   );
 
   return (
-    <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-4 md:p-6 w-full">
-      <div className="space-y-4 md:space-y-6">
+    <div className="overflow-y-auto max-h-[calc(90vh-100px)] md:max-h-[calc(90vh-120px)] p-3 md:p-6 w-full">
+      <div className="space-y-3 md:space-y-6">
         {activeDays.map((day) => {
           const dayMeals = mealsByDay[day];
           const hasMeals = Object.values(dayMeals).some(meal => meal !== null);
@@ -260,21 +246,21 @@ function WeeklyCalendarView({
           if (!hasMeals) return null;
 
           return (
-            <div key={day} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+            <div key={day} className="bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm border border-gray-100">
               {/* Day Header */}
-              <div className="relative bg-gray-50 px-4 md:px-6 py-3 md:py-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#3CB371] flex items-center justify-center shadow-md">
-                    <span className="text-xs md:text-sm font-bold text-white">
+              <div className="relative bg-gray-50 px-3 md:px-6 py-2 md:py-4">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-[#3CB371] flex items-center justify-center shadow-md">
+                    <span className="text-[10px] md:text-sm font-bold text-white">
                       {day.slice(0, 3)}
                     </span>
                   </div>
-                  <h4 className="font-bold text-base md:text-lg text-black">{day}</h4>
+                  <h4 className="font-bold text-sm md:text-lg text-black">{day}</h4>
                 </div>
               </div>
 
               {/* Meals Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 p-4 md:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 p-3 md:p-6">
                 {MEAL_CATEGORIES.map((category) => {
                   const mealItem = dayMeals[category];
                   const mealName = mealItem ? getMealName(mealItem.meal) : null;
@@ -285,42 +271,42 @@ function WeeklyCalendarView({
                   return (
                     <div key={category} className="relative group">
                       {mealItem ? (
-                        <div className="bg-white rounded-xl p-4 border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300">
+                        <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300">
                           {/* Meal Icon Badge */}
-                          <div className="absolute -top-2 -right-2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg border-2 border-gray-100 flex items-center justify-center">
-                            <MealIconComponent className="w-5 h-5 md:w-6 md:h-6 text-[#3CB371]" />
+                          <div className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 w-8 h-8 md:w-12 md:h-12 rounded-full bg-white shadow-lg border-2 border-gray-100 flex items-center justify-center">
+                            <MealIconComponent className="w-4 h-4 md:w-6 md:h-6 text-[#3CB371]" />
                           </div>
 
                           {/* Category */}
-                          <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">
+                          <p className="text-[9px] md:text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 md:mb-3">
                             {category}
                           </p>
 
                           {/* Meal Image */}
                           {mealImage && (
-                            <div className="relative w-full h-32 md:h-40 mb-3 rounded-lg overflow-hidden bg-gray-100">
+                            <div className="relative w-full h-24 md:h-40 mb-2 md:mb-3 rounded-md md:rounded-lg overflow-hidden bg-gray-100">
                               <Image
                                 src={mealImage}
                                 alt={mealName || 'Meal'}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                               />
                             </div>
                           )}
 
                           {/* Meal Name */}
-                          <h5 className="text-sm md:text-base font-bold text-black mb-2 line-clamp-1">
+                          <h5 className="text-xs md:text-base font-bold text-black mb-1.5 md:mb-2 line-clamp-2">
                             {mealName}
                           </h5>
 
                           {/* Sub Products */}
                           {typeof mealItem.meal === 'object' && mealItem.meal.subProducts && mealItem.meal.subProducts.length > 0 && (
-                            <div className="mt-2 mb-3">
-                              <p className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Includes</p>
-                              <div className="flex flex-wrap gap-1.5 md:gap-2">
+                            <div className="mt-1.5 md:mt-2 mb-2 md:mb-3">
+                              <p className="text-[8px] md:text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 md:mb-1.5">Includes</p>
+                              <div className="flex flex-wrap gap-1 md:gap-2">
                                 {mealItem.meal.subProducts.map((subProduct, index) => (
-                                  <span key={index} className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-[9px] md:text-[10px] font-medium">
+                                  <span key={index} className="px-1.5 py-0.5 md:px-2 bg-gray-100 text-gray-700 rounded-full text-[8px] md:text-[10px] font-medium">
                                     {subProduct}
                                   </span>
                                 ))}
@@ -330,27 +316,27 @@ function WeeklyCalendarView({
 
                           {/* Nutritional Info */}
                           {typeof mealItem.meal === 'object' && mealItem.meal.nutritionalDetails && (
-                            <div className="flex gap-1.5 md:gap-2 flex-wrap">
-                              <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                            <div className="flex gap-1 md:gap-2 flex-wrap">
+                              <span className="px-1.5 py-0.5 md:px-2 bg-green-50 text-green-700 rounded-full text-[8px] md:text-[10px] font-semibold">
                                 {mealItem.meal.nutritionalDetails.protein}g P
                               </span>
-                              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                              <span className="px-1.5 py-0.5 md:px-2 bg-blue-50 text-blue-700 rounded-full text-[8px] md:text-[10px] font-semibold">
                                 {mealItem.meal.nutritionalDetails.carbs}g C
                               </span>
-                              <span className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                              <span className="px-1.5 py-0.5 md:px-2 bg-amber-50 text-amber-700 rounded-full text-[8px] md:text-[10px] font-semibold">
                                 {mealItem.meal.nutritionalDetails.fats}g F
                               </span>
-                              <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                              <span className="px-1.5 py-0.5 md:px-2 bg-purple-50 text-purple-700 rounded-full text-[8px] md:text-[10px] font-semibold">
                                 {mealItem.meal.nutritionalDetails.calories} cal
                               </span>
                             </div>
                           )}
                         </div>
                       ) : (
-                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 border-dashed h-full flex flex-col items-center justify-center min-h-[200px] md:min-h-[240px]">
-                          <MealIconComponent className="w-12 h-12 md:w-16 md:h-16 opacity-30 mb-2 text-gray-400" />
-                          <p className="text-xs md:text-sm text-gray-400 font-medium">{category}</p>
-                          <p className="text-[10px] md:text-xs text-gray-400 mt-1">Not scheduled</p>
+                        <div className="bg-gray-50 rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-200 border-dashed h-full flex flex-col items-center justify-center min-h-[140px] md:min-h-[240px]">
+                          <MealIconComponent className="w-8 h-8 md:w-16 md:h-16 opacity-30 mb-1 md:mb-2 text-gray-400" />
+                          <p className="text-[10px] md:text-sm text-gray-400 font-medium">{category}</p>
+                          <p className="text-[8px] md:text-xs text-gray-400 mt-0.5 md:mt-1">Not scheduled</p>
                         </div>
                       )}
                     </div>

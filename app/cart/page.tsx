@@ -241,13 +241,13 @@ export default function CartPage() {
     <main className="min-h-screen bg-white">
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 lg:py-12">
         {userCartItems.length === 0 ? (
           <CartEmptyState />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {/* Cart Items - Mobile: Full width, Desktop: 2 columns */}
-            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            <div className="lg:col-span-2 space-y-3 sm:space-y-4 md:space-y-6">
               {userCartItems.map((item: any) => (
                 <CartItemCard
                   key={item._id}
@@ -263,7 +263,7 @@ export default function CartPage() {
 
             {/* Cart Summary - Mobile: Full width, Desktop: 1 column */}
             <div className="lg:col-span-1">
-              <div className="sticky top-24">
+              <div className="lg:sticky lg:top-20">
                 <CartSummaryCard
                   totalItems={totalItems}
                   totalPrice={totalPrice}

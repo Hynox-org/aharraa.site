@@ -526,28 +526,28 @@ const handleAddressChangeWithSync = (
   return (
     <main className="min-h-screen bg-white">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 lg:py-12">
         {/* Page Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-black">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 md:mb-2 text-black">
             Checkout
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-xs sm:text-sm md:text-base text-gray-600">
             Review your order and enter delivery details
           </p>
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Forms */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-xl p-4 sm:p-6 shadow-md flex justify-between items-center bg-white border border-gray-100">
-              <p className="text-base font-bold text-black">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            <div className="rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white border border-gray-100">
+              <p className="text-sm sm:text-base font-bold text-black">
                 Fetch addresses from your profile
               </p>
               <Button
                 onClick={handleFetchAddressesFromProfile}
-                className="text-white px-4 py-2 rounded-lg bg-[#3CB371] hover:bg-[#2FA05E]"
+                className="text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm bg-[#3CB371] hover:bg-[#2FA05E] w-full sm:w-auto"
                 disabled={isFetchingAddresses}
               >
                 {isFetchingAddresses ? "Fetching..." : "Fetch Addresses"}
@@ -555,23 +555,23 @@ const handleAddressChangeWithSync = (
             </div>
             
             {/* Global "Use Same Address for All" Option */}
-            <div className="rounded-xl p-4 sm:p-6 shadow-md bg-white border border-gray-100">
-              <div className="flex items-start gap-3">
+            <div className="rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 shadow-sm bg-white border border-gray-100">
+              <div className="flex items-start gap-2 sm:gap-3">
                 <input
                   type="checkbox"
                   id="use-same-address"
                   checked={useDefaultForAll}
                   onChange={(e) => handleUseDefaultForAll(e.target.checked, primaryAddress)}
-                  className="mt-1 w-5 h-5 rounded cursor-pointer accent-[#3CB371]"
+                  className="mt-0.5 sm:mt-1 w-4 h-4 sm:w-5 sm:h-5 rounded cursor-pointer accent-[#3CB371] flex-shrink-0"
                 />
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <label
                     htmlFor="use-same-address"
-                    className="text-base font-bold cursor-pointer block text-black"
+                    className="text-sm sm:text-base font-bold cursor-pointer block text-black"
                   >
                     Use same address for all deliveries
                   </label>
-                  <p className="text-sm mt-1 text-gray-600">
+                  <p className="text-xs sm:text-sm mt-0.5 sm:mt-1 text-gray-600">
                     Check this to use your primary address for Breakfast, Lunch, and Dinner deliveries
                   </p>
                 </div>
@@ -599,7 +599,7 @@ const handleAddressChangeWithSync = (
 
           {/* Right Column - Summary */}
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-25">
+            <div className="lg:sticky lg:top-20">
               <CheckoutOrderSummary
                 totalPrice={totalPrice}
                 deliveryCost={deliveryCost}
