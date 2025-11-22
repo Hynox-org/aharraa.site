@@ -2,7 +2,7 @@ import React from "react"
 import { Menu, MenuItem, MealCategory, DayOfWeek, Meal, MenuItemWithPopulatedMeal, MenuWithPopulatedMeals } from "@/lib/types"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Image from "next/image"
-import { Check, Eye } from "lucide-react"
+import { Check, Eye, X } from "lucide-react"
 
 interface MenuGridProps {
   menus: MenuWithPopulatedMeals[];
@@ -65,7 +65,6 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
 
   return (
     <div className="w-full py-4 md:py-6">
-      {/* Minimal Header - Reduced sizes */}
       <div className="text-center mb-6 md:mb-8 px-4">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 md:mb-2">Select Your Menu</h2>
         <p className="text-xs md:text-sm text-gray-500">Choose your weekly meal plan</p>
@@ -84,7 +83,6 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
             
             return (
               <Dialog key={menu._id}>
-                {/* Floating Card Container - Reduced scale */}
                 <div
                   className={`
                     relative cursor-pointer group
@@ -93,15 +91,11 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                   `}
                   onClick={() => onMenuSelect(menu)}
                 >
-                  {/* Glow Effect Background - Smaller blur */}
                   {isSelected && (
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-full blur-2xl opacity-60 animate-pulse" />
                   )}
 
-                  {/* Floating Content */}
                   <div className="relative flex flex-col items-center">
-                    
-                    {/* Floating Image - Reduced sizes */}
                     <div className="relative mb-3 md:mb-4">
                       {menu.coverImage && (
                         <div className="relative w-40 h-40">
@@ -123,7 +117,6 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                         </div>
                       )}
 
-                      {/* Price Badge - Smaller on mobile */}
                       <div className="absolute bottom-1 md:bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1.5 md:px-4 md:py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg md:shadow-xl">
                         <span className="text-xs sm:text-sm md:text-base font-bold text-gray-900">
                           ₹{menu.perDayPrice}
@@ -131,7 +124,6 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                         </span>
                       </div>
 
-                      {/* Selected Badge - Smaller */}
                       {isSelected && (
                         <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 z-20">
                           <div className="relative">
@@ -144,9 +136,7 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                       )}
                     </div>
 
-                    {/* Text Content - Reduced sizes */}
                     <div className="text-center space-y-1 md:space-y-2 px-2 md:px-4 w-full">
-                      {/* Title - Smaller font sizes */}
                       <h3
                         className={`
                           font-bold text-base sm:text-lg md:text-xl lg:text-2xl
@@ -161,14 +151,12 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                         {menu.name}
                       </h3>
 
-                      {/* Meta Info - Smaller */}
                       <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs md:text-sm text-gray-500 pt-1">
                         <span>{totalDays} Days</span>
                         <span>•</span>
                         <span>{menu.menuItems.length} Meals</span>
                       </div>
 
-                      {/* Action Buttons - Reduced padding and text */}
                       <div className="pt-2 md:pt-3 flex flex-col xs:flex-row gap-2 justify-center">
                         <button
                           onClick={() => onMenuSelect(menu)}
@@ -186,7 +174,10 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                         </button>
                         
                         <DialogTrigger asChild>
-                          <button className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all border-2 border-transparent hover:border-blue-200">
+                          <button 
+                            onClick={(e) => e.stopPropagation()}
+                            className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all border-2 border-transparent hover:border-blue-200"
+                          >
                             View
                           </button>
                         </DialogTrigger>
@@ -195,17 +186,22 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                   </div>
                 </div>
 
-                {/* Dialog */}
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
-                  <div className="sticky top-0 bg-white border-b p-3 md:p-4 lg:p-6 z-10">
+                {/* Redesigned Dialog */}
+                <DialogContent className="w-full max-h-[90vh] overflow-hidden p-0 bg-gradient-to-br from-gray-50 to-white">
+                  {/* Sticky Header */}
+                  <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b p-4 md:p-6 z-10 shadow-sm">
                     <DialogHeader>
-                      <DialogTitle className="text-base md:text-lg lg:text-xl font-bold">{menu.name}</DialogTitle>
-                      <div className="flex items-center gap-2 md:gap-3 mt-1 md:mt-2 text-[10px] md:text-xs lg:text-sm text-gray-600">
-                        <span>₹{menu.perDayPrice}/day</span>
-                        <span>•</span>
-                        <span>{totalDays} days</span>
-                        <span>•</span>
-                        <span>{menu.menuItems.length} meals</span>
+                      <DialogTitle className="text-xl md:text-2xl font-bold text-gray-900">{menu.name}</DialogTitle>
+                      <div className="flex items-center gap-3 mt-2 flex-wrap">
+                        <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs md:text-sm font-semibold">
+                          ₹{menu.perDayPrice}/day
+                        </span>
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs md:text-sm font-semibold">
+                          {totalDays} days
+                        </span>
+                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs md:text-sm font-semibold">
+                          {menu.menuItems.length} meals
+                        </span>
                       </div>
                     </DialogHeader>
                   </div>
@@ -248,70 +244,115 @@ function WeeklyCalendarView({
   );
 
   return (
-    <div className="p-3 md:p-4 lg:p-6 space-y-3 md:space-y-4">
-      {activeDays.map((day) => {
-        const dayMeals = mealsByDay[day];
-        const hasMeals = Object.values(dayMeals).some(meal => meal !== null);
-        
-        if (!hasMeals) return null;
+    <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-4 md:p-6 w-full">
+      <div className="space-y-4 md:space-y-6">
+        {activeDays.map((day) => {
+          const dayMeals = mealsByDay[day];
+          const hasMeals = Object.values(dayMeals).some(meal => meal !== null);
+          
+          if (!hasMeals) return null;
 
-        return (
-          <div key={day} className="border rounded-lg overflow-hidden">
-            {/* Day Header - Smaller */}
-            <div className="bg-gray-50 px-3 md:px-4 py-2 border-b">
-              <h4 className="font-semibold text-xs md:text-sm lg:text-base text-gray-900">{day}</h4>
-            </div>
-
-            {/* Meals Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
-              {MEAL_CATEGORIES.map((category) => {
-                const mealItem = dayMeals[category];
-                const mealName = mealItem ? getMealName(mealItem.meal) : null;
-                const mealDesc = mealItem ? getMealDescription(mealItem.meal) : null;
-                const mealImage = mealItem ? getMealImage(mealItem.meal) : null;
-                
-                return (
-                  <div key={category} className="p-2.5 md:p-3 lg:p-4">
-                    <div className="flex items-start gap-2">
-                      <span className="text-lg md:text-xl lg:text-2xl flex-shrink-0">{getMealIcon(category)}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[9px] md:text-[10px] lg:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 md:mb-2">
-                          {category}
-                        </p>
-                        {mealItem ? (
-                          <>
-                            {mealImage && (
-                              <div className="relative w-full h-16 md:h-20 lg:h-24 mb-1.5 md:mb-2 rounded-md overflow-hidden bg-gray-100">
-                                <Image
-                                  src={mealImage}
-                                  alt={mealName || 'Meal'}
-                                  fill
-                                  className="object-cover"
-                                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                />
-                              </div>
-                            )}
-                            <p className="text-[10px] md:text-xs lg:text-sm font-semibold text-gray-900 mb-0.5 md:mb-1 line-clamp-1">
-                              {mealName}
-                            </p>
-                            {mealDesc && (
-                              <p className="text-[9px] md:text-[10px] lg:text-xs text-gray-600 line-clamp-2">
-                                {mealDesc}
-                              </p>
-                            )}
-                          </>
-                        ) : (
-                          <p className="text-[10px] md:text-xs text-gray-400">Not scheduled</p>
-                        )}
-                      </div>
-                    </div>
+          return (
+            <div key={day} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+              {/* Day Header - Floating Badge Style */}
+              <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 px-4 md:px-6 py-3 md:py-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
+                    <span className="text-xs md:text-sm font-bold text-white">
+                      {day.slice(0, 3)}
+                    </span>
                   </div>
-                );
-              })}
+                  <h4 className="font-bold text-base md:text-lg text-gray-900">{day}</h4>
+                </div>
+              </div>
+
+              {/* Meals Grid - Floating Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 p-4 md:p-6">
+                {MEAL_CATEGORIES.map((category) => {
+                  const mealItem = dayMeals[category];
+                  const mealName = mealItem ? getMealName(mealItem.meal) : null;
+                  const mealDesc = mealItem ? getMealDescription(mealItem.meal) : null;
+                  const mealImage = mealItem ? getMealImage(mealItem.meal) : null;
+                  
+                  return (
+                    <div key={category} className="relative group">
+                      {mealItem ? (
+                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all duration-300">
+                          {/* Meal Icon Badge */}
+                          <div className="absolute -top-2 -right-2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg border-2 border-gray-100 flex items-center justify-center text-xl md:text-2xl">
+                            {getMealIcon(category)}
+                          </div>
+
+                          {/* Category */}
+                          <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">
+                            {category}
+                          </p>
+
+                          {/* Meal Image */}
+                          {mealImage && (
+                            <div className="relative w-full h-32 md:h-40 mb-3 rounded-lg overflow-hidden bg-gray-100">
+                              <Image
+                                src={mealImage}
+                                alt={mealName || 'Meal'}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              />
+                            </div>
+                          )}
+
+                          {/* Meal Name */}
+                          <h5 className="text-sm md:text-base font-bold text-gray-900 mb-2 line-clamp-1">
+                            {mealName}
+                          </h5>
+
+                          {/* Sub Products */}
+                          {typeof mealItem.meal === 'object' && mealItem.meal.subProducts && mealItem.meal.subProducts.length > 0 && (
+                            <div className="mt-2 mb-3">
+                              <p className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Includes</p>
+                              <div className="flex flex-wrap gap-1.5 md:gap-2">
+                                {mealItem.meal.subProducts.map((subProduct, index) => (
+                                  <span key={index} className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-[9px] md:text-[10px] font-medium">
+                                    {subProduct}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Nutritional Info - Minimal Pills */}
+                          {typeof mealItem.meal === 'object' && mealItem.meal.nutritionalDetails && (
+                            <div className="flex gap-1.5 md:gap-2 flex-wrap">
+                              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                                {mealItem.meal.nutritionalDetails.protein}g P
+                              </span>
+                              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                                {mealItem.meal.nutritionalDetails.carbs}g C
+                              </span>
+                              <span className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                                {mealItem.meal.nutritionalDetails.fats}g F
+                              </span>
+                              <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full text-[9px] md:text-[10px] font-semibold">
+                                {mealItem.meal.nutritionalDetails.calories} cal
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 border-dashed h-full flex flex-col items-center justify-center min-h-[200px] md:min-h-[240px]">
+                          <span className="text-3xl md:text-4xl opacity-30 mb-2">{getMealIcon(category)}</span>
+                          <p className="text-xs md:text-sm text-gray-400 font-medium">{category}</p>
+                          <p className="text-[10px] md:text-xs text-gray-400 mt-1">Not scheduled</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
