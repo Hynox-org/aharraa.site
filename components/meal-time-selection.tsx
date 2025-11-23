@@ -9,13 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import FoodDisplayCard from "./food-display-card"
-import { MenuWithPopulatedMeals } from "@/lib/types"
+import { MenuWithPopulatedMeals, MealCategory } from "@/lib/types" // Import MealCategory
 import { IoHandLeftOutline } from "react-icons/io5"
 
 interface MealTimeSelectionProps {
   selectedMenu: MenuWithPopulatedMeals | null
-  selectedMealTimes: string[]
-  onMealTimeSelect: (mealTime: string, isSelected: boolean) => void
+  selectedMealTimes: MealCategory[] // Changed to MealCategory[]
+  onMealTimeSelect: (mealTime: MealCategory, isSelected: boolean) => void // Changed to MealCategory
 }
 
 export function MealTimeSelection({

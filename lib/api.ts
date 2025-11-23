@@ -33,6 +33,7 @@ export async function apiRequest<T>(
       url: `${API_URL}${endpoint}`,
       method,
       headers,
+      // payloadSent: payload, // Removed debugging log
       body: method !== "GET" && method !== "DELETE" ? JSON.stringify(payload) : null,
     });
 
@@ -68,7 +69,6 @@ export async function apiRequest<T>(
       throw new Error(cleanMessage);
     }
 
-    console.log("✅ API Success:", data);
     return data as T;
   } catch (err: any) {
     console.error("🚨 apiRequest Catch:", err);

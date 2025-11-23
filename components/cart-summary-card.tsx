@@ -2,22 +2,20 @@
 
 import { useRouter } from "next/navigation"
 import { IoCart, IoArrowForward, IoCheckmarkCircle } from "react-icons/io5"
-import Link from "next/link"
 import { Spinner } from "./ui/spinner"
-import { useState } from "react"
 
 interface CartSummaryCardProps {
   totalItems: number
   totalPrice: number
   isUpdatingCart: boolean
+  onCheckout: () => void // Added onCheckout prop
 }
 
-export function CartSummaryCard({ totalItems, totalPrice, isUpdatingCart }: CartSummaryCardProps) {
+export function CartSummaryCard({ totalItems, totalPrice, isUpdatingCart, onCheckout }: CartSummaryCardProps) {
   const router = useRouter()
-  const [isBtnLoading, SetIsBtnLoading] = useState(isUpdatingCart);
+  // No need for local isBtnLoading state if parent controls it via isUpdatingCart
   const handleCheckoutClick = () => {
-    SetIsBtnLoading(true)
-    router.push("/checkout")
+    onCheckout(); // Call the parent's checkout handler
   }
 
   return (
@@ -64,14 +62,14 @@ export function CartSummaryCard({ totalItems, totalPrice, isUpdatingCart }: Cart
         <div className="pt-1 md:pt-2">
           <button 
             onClick={handleCheckoutClick}
-            disabled={isBtnLoading}
+            disabled={isUpdatingCart}
             className="w-full py-2.5 md:py-3 lg:py-3.5 rounded-lg md:rounded-xl font-bold text-xs md:text-sm lg:text-base
                      bg-[#3CB371] hover:bg-[#2FA05E] text-white
                      shadow-lg hover:shadow-xl
                      disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
                      transition-all duration-300 flex items-center justify-center gap-2"
           >
-            {isBtnLoading ? (
+            {isUpdatingCart ? ( /* Use isUpdatingCart for spinner display */
               <Spinner className="w-4 h-4 md:w-5 md:h-5 text-white" />
             ) : (
               <>

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Plan, CartItem, PersonDetails, Vendor, Menu, MenuWithPopulatedMeals } from "@/lib/types"
+import { Plan, CartItem, PersonDetails, Vendor, Menu, MenuWithPopulatedMeals, MealCategory } from "@/lib/types"
 import { getPlans, getAllMenus, getVendorById } from "@/lib/api"
 import { format, addDays } from "date-fns"
 import { useAuth } from "@/app/context/auth-context"
@@ -19,6 +19,7 @@ import { PersonDetailsInput } from "@/components/person-details-input"
 import { DateSelection } from "@/components/date-selection"
 import { OrderSummarySidebar } from "@/components/order-summary-sidebar"
 import { addToCartApi } from "@/lib/api"
+import { addLocalCartItem, LocalCartItem } from "@/lib/localCart"
 import { MenuGrid } from "@/components/menu-grid"
 import { MealTimeSelection } from "@/components/meal-time-selection"
 
@@ -50,7 +51,7 @@ export default function PricingPage() {
   )
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [selectedMealTimes, setSelectedMealTimes] = useState<string[]>([])
+  const [selectedMealTimes, setSelectedMealTimes] = useState<MealCategory[]>([]) // Changed type to MealCategory[]
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [isDirectCheckingOut, setIsDirectCheckingOut] = useState(false)
 
@@ -207,47 +208,62 @@ export default function PricingPage() {
   ) => {
     setLoadingState(true)
 
-    if (!isAuthenticated) {
-      router.push("/auth?returnUrl=/pricing")
-      setLoadingState(false)
-      return
-    }
-
-    if (!selectedMenu || !selectedPlan || !startDate || !endDate || !user?.id) {
+    if (!selectedMenu || !selectedPlan || !startDate || !endDate) {
       toast.error("Cannot proceed", { description: "Please complete all steps." })
       setLoadingState(false)
       return
     }
 
-    const token = localStorage.getItem("aharraa-u-token")
-    if (!token) {
-      router.push("/auth?returnUrl=/pricing")
-      setLoadingState(false)
-      return
-    }
-
-    const cartItem = {
+    const newCartItem = {
       menuId: selectedMenu._id,
       planId: selectedPlan._id,
       quantity,
       startDate: format(startDate, "yyyy-MM-dd"),
       personDetails: quantity >= 1 ? personDetails : undefined,
       selectedMealTimes: selectedMealTimes,
+    }; // Removed vendorId as it's not allowed by backend
+
+    if (!isAuthenticated) {
+      // Save to local storage if not authenticated
+      try {
+        addLocalCartItem(newCartItem, selectedMenu, selectedPlan); // Pass selectedMenu and selectedPlan
+        toast.success("Success!", {
+          description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added to local cart.`,
+        });
+        resetSelection();
+        router.push(redirectTo); // Redirect to cart or checkout page
+      } catch (error: any) {
+        toast.error("Error", {
+          description: error.message || "Failed to add to local cart.",
+        });
+      } finally {
+        setLoadingState(false);
+      }
+      return;
+    }
+
+    // If authenticated, proceed with existing backend logic
+    const token = localStorage.getItem("aharraa-u-token")
+    if (!token) {
+      router.push("/auth?returnUrl=/pricing"); // Should ideally not happen if isAuthenticated is true, but as a fallback
+      setLoadingState(false);
+      return;
     }
 
     try {
-      await addToCartApi(user.id!, cartItem, token)
+      // Use user.id which is guaranteed to be present if isAuthenticated is true
+      await addToCartApi(user!.id!, newCartItem, token); 
       toast.success("Success!", {
         description: `${quantity}x ${selectedMenu.name} (${selectedPlan.name}) added to cart.`,
-      })
-      resetSelection()
-      router.push(redirectTo)
+      });
+      resetSelection();
+      router.push(redirectTo);
     } catch (error: any) {
       toast.error("Error", {
         description: error.message || "Failed to process order.",
-      })
+      });
     } finally {
-      setLoadingState(false)
+      setLoadingState(false);
     }
   }
 
@@ -272,7 +288,7 @@ export default function PricingPage() {
     setCurrentStep(1)
   }
 
-  const handleMealTimeSelect = useCallback((mealTime: string, isSelected: boolean) => {
+  const handleMealTimeSelect = useCallback((mealTime: MealCategory, isSelected: boolean) => { // Changed type to MealCategory
     setSelectedMealTimes((prev) => {
       if (isSelected) {
         return [...prev, mealTime]
