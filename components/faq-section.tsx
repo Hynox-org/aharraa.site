@@ -9,6 +9,7 @@ import { BiLeaf } from "react-icons/bi"
 import { FaQuestionCircle } from "react-icons/fa"
 import { BsChatDots } from "react-icons/bs"
 import { FaqItem } from "@/lib/types"
+import { useRouter } from "next/navigation"
 
 const faqs: FaqItem[] = [
   {
@@ -74,6 +75,7 @@ const getIconComponent = (iconType: string) => {
 
 export function FaqSection() {
   const [openId, setOpenId] = useState<number | null>(null)
+  const router = useRouter();
 
   return (
     <section className="py-20 my-16 animate-fade-in-up relative overflow-hidden">
@@ -219,7 +221,9 @@ export function FaqSection() {
               </p>
               
               {/* Contact Button */}
-              <button className="inline-flex items-center gap-2 bg-[#3CB371] hover:bg-[#2FA05E] text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 transition-all duration-300">
+              <button onClick={() => {
+                router.push("/contact")
+              }} className="inline-flex items-center gap-2 bg-[#3CB371] hover:bg-[#2FA05E] text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 transition-all duration-300">
                 <HiSparkles className="w-5 h-5" />
                 Contact Support
                 <IoChevronDown className="w-5 h-5 -rotate-90" />

@@ -137,7 +137,27 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
                       )}
                     </div>
                   </div>
-
+{/* Selection Button */}
+                  <div className="pt-3 md:pt-4">
+                    <div
+                      className={cn(
+                        "inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold",
+                        "transition-all duration-300",
+                        isSelected
+                          ? "bg-[#3CB371] text-white shadow-md md:shadow-lg"
+                          : "bg-transparent border-2 border-gray-200 text-gray-600 group-hover:border-gray-300 group-hover:bg-gray-50"
+                      )}
+                    >
+                      {isSelected ? (
+                        <>
+                          <Check className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={3} />
+                          <span>Selected</span>
+                        </>
+                      ) : (
+                        <span>Select</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </button>

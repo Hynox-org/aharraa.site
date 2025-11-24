@@ -99,7 +99,26 @@ const FoodDisplayCard: React.FC<FoodDisplayCardProps> = ({
               {description}
             </p>
           )}
+{/* Selection Indicator - Minimalist Pill */}
+          <div className="pt-2">
+            <div
+              className={`
+                inline-flex items-center gap-2 px-4 py-2 rounded-full
+                transition-all duration-300
+                ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 text-white'
+                    : 'bg-transparent border-2 border-gray-200 text-gray-500 group-hover:border-gray-300'
+                }
+              `}
+            >
+              <span className="text-xs font-semibold uppercase tracking-wider">
+                {isSelected ? 'Selected' : 'Select'}
+              </span>
+              
 
+            </div>
+          </div>
         </div>
       </div>
     </div>

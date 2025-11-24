@@ -4,6 +4,7 @@ import { Highlight } from "@/lib/types"
 import { GiChefToque, GiFruitBowl, GiCheckMark } from "react-icons/gi"
 import { MdDeliveryDining } from "react-icons/md"
 import { IoSparkles, IoArrowForward } from "react-icons/io5"
+import { useRouter } from "next/navigation"
 
 const highlights: Highlight[] = [
   {
@@ -37,6 +38,7 @@ const highlights: Highlight[] = [
 ]
 
 export function FoodShowcase() {
+  const router = useRouter();
   return (
     <section className="py-16 md:py-20 my-12 md:my-16 relative overflow-hidden">
       {/* Subtle Background Decoration */}
@@ -142,7 +144,9 @@ export function FoodShowcase() {
                   <p className="text-white font-bold text-base md:text-lg mb-1">Ready to experience the difference?</p>
                   <p className="text-white text-sm opacity-90">Join hundreds of satisfied customers today</p>
                 </div>
-                <button className="w-full sm:w-auto bg-white text-black px-5 md:px-6 py-2.5 md:py-3 rounded-xl font-bold hover:shadow-xl transform hover:scale-105 transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-2">
+                <button onClick={() => {
+                  router.push("/pricing")
+                }} className="w-full sm:w-auto bg-white text-black px-5 md:px-6 py-2.5 md:py-3 rounded-xl font-bold hover:shadow-xl transform hover:scale-105 transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-2">
                   Order Now
                   <IoArrowForward className="w-5 h-5" />
                 </button>

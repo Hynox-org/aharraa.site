@@ -159,7 +159,20 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                       </div>
 
                       <div className="pt-1 md:pt-3 flex flex-col gap-1 md:gap-2 justify-center">
-                      
+                       <button
+                          onClick={() => onMenuSelect(menu)}
+                          className={`
+                            px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold
+                            transition-all duration-300
+                            ${
+                              isSelected
+                                ? 'bg-[#3CB371] text-white shadow-md md:shadow-lg'
+                                : 'bg-transparent border-2 border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                            }
+                          `}
+                        >
+                          {isSelected ? 'Selected' : 'Select'}
+                        </button>
                         <DialogTrigger asChild>
                           <button 
                             onClick={(e) => e.stopPropagation()}
