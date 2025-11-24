@@ -33,7 +33,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "orders" | "addresses">("overview");
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isCancellingOrder, setIsCancellingOrder] = useState(false);
+  const [isCancellingOrderId, setIsCancellingOrderId] = useState<string | null>(null);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -138,7 +138,7 @@ export default function ProfilePage() {
       return;
     }
 
-    setIsCancellingOrder(true);
+    setIsCancellingOrderId(orderId);
     try {
       const updatedOrder = await updateOrder(orderId, { status: "cancelled" }, token);
       setOrders((prevOrders) =>
@@ -150,7 +150,7 @@ export default function ProfilePage() {
     } catch (error: any) {
       toast.error(`Failed to cancel order: ${error.message}`);
     } finally {
-      setIsCancellingOrder(false);
+      setIsCancellingOrderId(null);
     }
   };
 
@@ -266,7 +266,7 @@ export default function ProfilePage() {
             tabLoading={tabLoading}
             loading={loading}
             handleCancelOrder={handleCancelOrder}
-            isCancellingOrder={isCancellingOrder}
+            isCancellingOrderId={isCancellingOrderId}
             router={router}
           />
         )}

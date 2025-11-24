@@ -395,6 +395,8 @@ export default function PricingPage() {
                   selectedPlan={selectedPlan}
                   plans={plans}
                   onPlanSelect={handlePlanSelect}
+                  selectedMealTimes={selectedMealTimes as string[]}
+                  quantity={quantity}
                 />
               )}
 

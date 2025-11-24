@@ -294,10 +294,19 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
               ))}
             </div>
 
+            {/* View Order Details Button */}
+            <Link
+              href={`/order-details/${order._id}`}
+              className="w-full flex items-center justify-center gap-2 py-3 sm:py-4 text-base sm:text-lg font-bold rounded-xl transition-all shadow-lg hover:shadow-xl bg-blue-600 hover:bg-blue-700 text-white mt-4"
+            >
+              <IoReceipt className="w-5 h-5" />
+              View Order Details
+            </Link>
+
             {/* Continue Shopping Button */}
             <Link
               href="/pricing"
-              className="w-full flex items-center justify-center gap-2 py-3 sm:py-4 text-base sm:text-lg font-bold rounded-xl transition-all shadow-lg hover:shadow-xl bg-[#3CB371] hover:bg-[#2FA05E] text-white"
+              className="w-full flex items-center justify-center gap-2 py-3 sm:py-4 text-base sm:text-lg font-bold rounded-xl transition-all shadow-lg hover:shadow-xl bg-[#3CB371] hover:bg-[#2FA05E] text-white mt-4"
             >
               <IoHome className="w-5 h-5" />
               Continue Shopping

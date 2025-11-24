@@ -349,7 +349,6 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
   }
 
   const handleProceedToPayment = async () => {
-    setCartLoading(true)
     if (!user?.id || !user?.email) {
       toast.error("User not authenticated or user email not found.")
       return
@@ -450,11 +449,13 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
         paymentSessionId: response.paymentSessionId,
         redirectTarget: "_modal",
       }
+      
       cashfree.checkout(checkoutOptions).then(async (result: any) => {
         if (result.error) {
           console.error("Payment error:", result.error)
           toast.error("Payment failed. Please try again.")
         } else if (result.paymentDetails) {
+          setCartLoading(true)
           console.log("Payment completed:", result.paymentDetails)
           router.push(`/order-status/${response.order._id}`)
           toast.success(`Order created successfully!`)

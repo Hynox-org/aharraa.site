@@ -33,19 +33,19 @@ export default function CartPage() {
   const [isUpdatingQuantity, setIsUpdatingQuantity] = useState(false)
   const [isRemovingItem, setIsRemovingItem] = useState(false)
   const [isSavingPersonDetails, setIsSavingPersonDetails] = useState(false)
-  const [allMenus, setAllMenus] = useState<MenuWithPopulatedMeals[]>([]); // To provide to localCart updates
-  const [allPlans, setAllPlans] = useState<Plan[]>([]); // To provide to localCart updates
+  const [allMenus, setAllMenus] = useState<MenuWithPopulatedMeals[]>([]);
+  const [allPlans, setAllPlans] = useState<Plan[]>([]);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false); // New state to track initial data loading
 
-  const currentUser = user; // Renamed to avoid conflict with interface
+  const currentUser = user;
 
   // Combined cart items for rendering
   const combinedCartItems = useMemo(() => {
-    // Convert LocalCartItem to PopulatedCartItem like structure for consistent display
     const transformedLocalItems: PopulatedCartItem[] = localCartItems.map(item => ({
       _id: item._id,
-      user: currentUser?.id || '', // User ID will be empty for local items
-      menu: item.menu as MenuWithPopulatedMeals, // Assume menu is populated in localCartItem
-      plan: item.plan as Plan, // Assume plan is populated in localCartItem
+      user: currentUser?.id || '',
+      menu: item.menu as MenuWithPopulatedMeals,
+      plan: item.plan as Plan,
       quantity: item.quantity,
       personDetails: item.personDetails,
       startDate: item.startDate,
@@ -53,24 +53,22 @@ export default function CartPage() {
       itemTotalPrice: item.itemTotalPrice,
       selectedMealTimes: item.selectedMealTimes,
       addedDate: item.addedDate,
-      vendor: item.menu.vendor, // Use item.menu.vendor as vendorId is removed from LocalCartItem
+      vendor: item.menu.vendor,
     }));
     
-    // Filter out potential duplicate items if merging happened (backend cart is source of truth)
+    // Backend cart is the source of truth if logged in
     const dbItems = dbCart ? dbCart : [];
-    const uniqueCombinedItems = dbItems; // Backend cart is the source of truth if logged in
 
     if (!isAuthenticated) {
       return transformedLocalItems;
     }
-    return uniqueCombinedItems;
+    return dbItems;
   }, [localCartItems, dbCart, isAuthenticated, currentUser?.id]);
 
 
-  // Effect to fetch initial data (menus, plans) and local cart
+  // Effect to fetch initial data (menus, plans)
   useEffect(() => {
-    async function fetchInitialData() {
-      setIsCartLoading(true);
+    async function fetchMenusAndPlans() {
       try {
         const [fetchedPlans, fetchedMenus] = await Promise.all([
           getPlans(),
@@ -78,34 +76,41 @@ export default function CartPage() {
         ]);
         setAllPlans(fetchedPlans);
         setAllMenus(fetchedMenus);
-        setLocalCartItems(getLocalCartItems());
+        setInitialDataLoaded(true);
       } catch (error) {
-        console.error("Failed to fetch initial data:", error);
+        console.error("Failed to fetch initial data (menus/plans):", error);
         toast({ title: "Error", description: "Failed to load menus and plans." });
-      } finally {
-        setIsCartLoading(false);
       }
     }
-    fetchInitialData();
+    fetchMenusAndPlans();
   }, [toast]);
 
-  // Effect to handle authenticated user: fetch DB cart and merge local cart
+  // Main effect to fetch/sync cart data
   useEffect(() => {
-    if (!authLoading && isAuthenticated && currentUser?.id) {
-      const token = localStorage.getItem("aharraa-u-token");
-      if (!token) {
-        console.error("No auth token found — user must log in first");
-        router.push("/auth?returnUrl=/cart"); // Redirect to login if token is missing
-        return;
-      }
+    if (!initialDataLoaded || authLoading) {
+      // Wait for initial data (menus/plans) and auth status to be resolved
+      return;
+    }
 
-      const fetchDbCartAndSyncLocal = async () => {
-        setIsCartLoading(true);
-        try {
-          // Sync local cart items to DB
-          if (localCartItems.length > 0) {
+    const fetchCartData = async () => {
+      setIsCartLoading(true);
+      try {
+        if (isAuthenticated && currentUser?.id) {
+          const token = localStorage.getItem("aharraa-u-token");
+          if (!token) {
+            console.error("No auth token found — user must log in first");
+            router.push("/auth?returnUrl=/cart");
+            return;
+          }
+
+          // Fetch local cart items (always do this if authenticated as it might contain items from before login)
+          const currentLocalCartItems = getLocalCartItems();
+          setLocalCartItems(currentLocalCartItems);
+
+          // Sync local cart items to DB if any
+          if (currentLocalCartItems.length > 0) {
             console.log("Syncing local cart with database...");
-            for (const localItem of localCartItems) {
+            for (const localItem of currentLocalCartItems) {
               const cartItemPayload = {
                 menuId: localItem.menuId,
                 planId: localItem.planId,
@@ -113,33 +118,32 @@ export default function CartPage() {
                 startDate: localItem.startDate,
                 personDetails: localItem.personDetails,
                 selectedMealTimes: localItem.selectedMealTimes,
-                // vendorId is not allowed by backend, so it's removed from payload
-                // The backend should infer vendorId from menuId
               };
               await addToCartApi(currentUser.id!, cartItemPayload, token);
-            } // Close the for loop block
+            }
             clearLocalCart();
             setLocalCartItems([]); // Clear local cart state after syncing
             toast({ title: "Local cart synced!", description: "Your items have been added to your account." });
-          } // Close the if block
+          }
 
           // Fetch the updated DB cart
-          const cartData: Cart = await getCartItems(currentUser.id!, token); // Explicitly type cartData as Cart
-          setDbCart(cartData.items as PopulatedCartItem[]); // Cast cartData.items to PopulatedCartItem[]
-        } catch (error) {
-          console.error("Failed to fetch or sync cart items:", error);
-          toast({ title: "Error", description: "Failed to fetch or sync cart items." });
-        } finally {
-          setIsCartLoading(false);
+          const cartData: Cart = await getCartItems(currentUser.id!, token);
+          setDbCart(cartData.items as PopulatedCartItem[]);
+
+        } else if (!isAuthenticated) {
+          // If not authenticated, load local cart items
+          setDbCart(null);
+          setLocalCartItems(getLocalCartItems());
         }
-      };
-      fetchDbCartAndSyncLocal();
-    } else if (!authLoading && !isAuthenticated) {
-      // If not authenticated, ensure DB cart is null and local cart is loaded (handled by initialData fetch)
-      setDbCart(null);
-      setIsCartLoading(false); // Stop cart loading if not authenticated
-    }
-  }, [isAuthenticated, authLoading, currentUser?.id, localCartItems.length, toast, router]); // Dependency on localCartItems.length to trigger sync
+      } catch (error) {
+        console.error("Failed to fetch or sync cart items:", error);
+        toast({ title: "Error", description: "Failed to fetch or sync cart items." });
+      } finally {
+        setIsCartLoading(false);
+      }
+    };
+    fetchCartData();
+  }, [isAuthenticated, authLoading, currentUser?.id, initialDataLoaded, toast, router]);
 
   const handleEditPersonDetails = useCallback((itemId: string, details: PersonDetails[] | undefined, quantityToEdit: number) => {
     setCurrentEditingCartItemId(itemId);

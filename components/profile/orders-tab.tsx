@@ -18,7 +18,7 @@ interface OrdersTabProps {
   tabLoading: boolean;
   loading: boolean;
   handleCancelOrder: (orderId: string) => void;
-  isCancellingOrder: boolean;
+  isCancellingOrderId: string | null;
   router: any;
 }
 
@@ -93,12 +93,12 @@ function EmptyOrders({ router }: { router: any }) {
 function OrderItem({
   order,
   handleCancelOrder,
-  isCancellingOrder,
+  isCancellingOrderId,
   router,
 }: {
   order: Order;
   handleCancelOrder: (orderId: string) => void;
-  isCancellingOrder: boolean;
+  isCancellingOrderId: string | null;
   router: any;
 }) {
   return (
@@ -145,6 +145,13 @@ function OrderItem({
               })}
             </div>
           )}
+
+          {order.status === "cancelled" && (
+            <p className="text-sm text-red-600 mt-4 flex items-center gap-2" role="alert">
+              <AlertCircle className="w-4 h-4" />
+              A ticket has been raised. Our contact team will reach out to you shortly for further processing.
+            </p>
+          )}
         </section>
 
         <section className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto items-center justify-end">
@@ -161,15 +168,15 @@ function OrderItem({
           {(order.status === "pending" || order.status === "confirmed") && (
             <CancelConfirmationModal
               onConfirm={() => order._id && handleCancelOrder(order._id)}
-              isCancellingOrder={isCancellingOrder}
+              isCancellingOrder={isCancellingOrderId === order._id}
             >
               <button
                 className="px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-lg w-full sm:w-auto text-sm transition bg-red-50 hover:bg-red-100 text-red-600"
-                disabled={isCancellingOrder}
-                aria-disabled={isCancellingOrder}
-                aria-busy={isCancellingOrder}
+                disabled={isCancellingOrderId === order._id}
+                aria-disabled={isCancellingOrderId === order._id}
+                aria-busy={isCancellingOrderId === order._id}
               >
-                {isCancellingOrder ? (
+                {isCancellingOrderId === order._id ? (
                   <Spinner className="w-5 h-5 text-red-600 mx-auto" />
                 ) : (
                   "Cancel Order"
@@ -188,7 +195,7 @@ export function OrdersTab({
   tabLoading,
   loading,
   handleCancelOrder,
-  isCancellingOrder,
+  isCancellingOrderId,
   router,
 }: OrdersTabProps) {
   if (tabLoading) {
@@ -214,7 +221,7 @@ export function OrdersTab({
           key={order._id}
           order={order}
           handleCancelOrder={handleCancelOrder}
-          isCancellingOrder={isCancellingOrder}
+          isCancellingOrderId={isCancellingOrderId}
           router={router}
         />
       ))}

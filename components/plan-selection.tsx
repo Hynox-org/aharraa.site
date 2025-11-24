@@ -9,9 +9,11 @@ interface PlanSelectionProps {
   selectedPlan: Plan | null;
   plans: Plan[];
   onPlanSelect: (plan: Plan) => void;
+  selectedMealTimes: string[]; // New prop
+  quantity: number; // New prop
 }
 
-export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect }: PlanSelectionProps) {
+export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect, selectedMealTimes, quantity }: PlanSelectionProps) {
   const popularPlanIndex = Math.floor(plans.length / 2);
 
   return (
@@ -31,8 +33,20 @@ export function PlanSelection({ selectedMenu, selectedPlan, plans, onPlanSelect 
         {plans.map((plan, index) => {
           const isSelected = selectedPlan?._id === plan._id;
           const isPopular = index === popularPlanIndex;
-          const totalPrice = (selectedMenu.perDayPrice * plan.durationDays).toFixed(0);
-          const dailyPrice = selectedMenu.perDayPrice.toFixed(0);
+
+          let mealTimePricesSum = 0;
+          if (selectedMenu && selectedMealTimes && selectedMealTimes.length > 0 && selectedMenu.price) {
+            selectedMealTimes.forEach(mealTime => {
+              if (selectedMenu.price[mealTime.toLowerCase()]) {
+                mealTimePricesSum += selectedMenu.price[mealTime.toLowerCase()]!;
+              }
+            });
+          } else if (selectedMenu) {
+            mealTimePricesSum = selectedMenu.perDayPrice;
+          }
+
+          const totalPrice = selectedMenu && plan ? (mealTimePricesSum * plan.durationDays * quantity).toFixed(0) : "0";
+          const dailyPrice = selectedMenu ? (parseFloat(totalPrice) / (plan.durationDays * quantity)).toFixed(0) : "0"; // Recalculate daily price based on new total
           const savingsPercent = plan.durationDays >= 30 ? Math.round((plan.durationDays / 30) * 5) : 0;
 
           return (
