@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/auth-context";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { toast } from "sonner";
-import { getOrderDetails, updateOrder } from "@/lib/api";
+import { getOrderDetails, updateOrder, verifyPayment } from "@/lib/api";
 import { Order, PopulatedOrder, DeliveryAddress } from "@/lib/types";
 import LottieAnimation from "@/components/lottie-animation";
 import ItayCheffAnimation from "@/public/lottie/ItayCheff.json";
@@ -146,9 +146,13 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const fetchOrderDetails = async (token: string, id: string) => {
     setLoading(true);
     try {
-      const data = await getOrderDetails(id, token);
-      console.log("Fetched order details:", data);
-      setOrder(data);
+     const verificationResponse = await verifyPayment(id, token)
+      if (verificationResponse) {
+        toast.success(verificationResponse.message)
+      }
+      const orderDetails = await getOrderDetails(id, token)
+      setOrder(orderDetails)
+      toast.success("Order details fetched successfully!")
     } catch (error: any) {
       toast.error(`Failed to fetch order details: ${error.message}`);
       router.push("/profile");

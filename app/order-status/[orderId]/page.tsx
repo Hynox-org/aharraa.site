@@ -23,30 +23,35 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const POLLING_INTERVAL = 30000; // Poll every 30 seconds
 
-  const fetchOrder = async (currentOrderId: string) => {
+  const fetchOrder = async (currentOrderId: string, showToast = false) => {
     try {
+      if (isRefreshing) return; // Prevent multiple simultaneous refreshes
       setPageLoading(true)
+      setIsRefreshing(true); // Indicate refresh in progress
       const token = localStorage.getItem("aharraa-u-token")
       if (!token) {
         toast.error("Authentication token not found. Please log in again.")
         router.push("/auth?returnUrl=/order-status/" + currentOrderId)
         return
       }
+      const verificationResponse = await verifyPayment(currentOrderId, token)
+      if (verificationResponse) {
+        toast.success(verificationResponse.message)
+      }
       const orderDetails = await getOrderDetails(currentOrderId, token)
       setOrder(orderDetails)
-
-      const verificationResponse = await verifyPayment(currentOrderId, token)
-      if (verificationResponse && verificationResponse.order) {
-        // setOrder(verificationResponse.order)
-      }
-
     } catch (err: any) {
       console.error("Error fetching order details or verifying payment:", err)
       setError(err.message || "Failed to fetch order details or verify payment.")
       toast.error(err.message || "Failed to fetch order details or verify payment.")
     } finally {
       setPageLoading(false)
+      setIsRefreshing(false); // Reset refresh state
+      if (showToast) {
+        toast.success("Order status refreshed automatically!")
+      }
     }
   }
 
@@ -83,6 +88,23 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
     }
     resolveParams()
   }, [isAuthenticated, loading, user, params, router])
+
+  // Polling mechanism
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isAuthenticated && user && orderId) {
+      interval = setInterval(() => {
+        console.log("Polling for order status...");
+        fetchOrder(orderId, true); // Fetch and show toast for automatic refresh
+      }, POLLING_INTERVAL);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isAuthenticated, user, orderId, isRefreshing]); // Re-run if auth, user, orderId, or refresh status changes
 
   if (loading || pageLoading) {
     return (

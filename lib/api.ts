@@ -191,8 +191,8 @@ export async function updateProfileDetails(
 export async function verifyPayment(
   orderId: string,
   token: string
-): Promise<{ order: Order; cashfreeDetails?: any; message?: string }> {
-  return apiRequest<{ order: Order; cashfreeDetails?: any; message?: string }>(
+): Promise<{ message?: string }> {
+  return apiRequest<{ message?: string }>(
     `/api/orders/verify-payment/${orderId}`,
     "GET",
     null,

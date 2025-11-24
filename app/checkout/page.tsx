@@ -349,11 +349,11 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
   }
 
   const handleProceedToPayment = async () => {
+    setCartLoading(true)
     if (!user?.id || !user?.email) {
       toast.error("User not authenticated or user email not found.")
       return
     }
-
     const allMealCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"];
     for (const category of allMealCategories) {
       const address = deliveryAddresses[category];
@@ -448,7 +448,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       const cashfree = await initializeSDK()
       const checkoutOptions = {
         paymentSessionId: response.paymentSessionId,
-        redirectTarget: "_self",
+        redirectTarget: "_modal",
       }
       cashfree.checkout(checkoutOptions).then(async (result: any) => {
         if (result.error) {
@@ -456,6 +456,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           toast.error("Payment failed. Please try again.")
         } else if (result.paymentDetails) {
           console.log("Payment completed:", result.paymentDetails)
+          router.push(`/order-status/${response.order._id}`)
           toast.success(`Order created successfully!`)
         }
       })
@@ -464,6 +465,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     toast.error(`Failed to complete checkout: ${error.message || "Unknown error"}`)
   } finally {
     setIsProcessingPayment(false)
+    setCartLoading(false)
   }
 }
 
