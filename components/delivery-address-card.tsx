@@ -98,7 +98,7 @@ export function DeliveryAddressCard({
       {/* Action Buttons */}
       <div className="flex flex-col xs:flex-row gap-2 md:gap-3 mb-3 md:mb-6">
         {/* Geolocation Button */}
-        <button
+        {/* <button
           onClick={async () => {
             setIsGeolocationLoading(true);
             await onGeolocation(category);
@@ -113,7 +113,7 @@ export function DeliveryAddressCard({
             <IoNavigate className="w-3.5 h-3.5 md:w-4.5 md:h-4.5" />
           )}
           <span>Get Location</span>
-        </button>
+        </button> */}
 
         {/* Copy Address Button */}
         {showCopyOptions && onCopyAddress && availableCopyTargets.length > 0 && (

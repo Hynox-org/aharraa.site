@@ -189,7 +189,7 @@ export function OrderSummarySidebar({
                   {/* Action Buttons */}
                   <div className="space-y-2 md:space-y-3">
                     {/* Direct Checkout Button */}
-                    <button
+                    {/* <button
                       onClick={onDirectCheckout}
                       disabled={!isComplete || isDirectCheckingOut || isAddingToCart}
                       className="w-full py-2.5 md:py-3 lg:py-3.5 rounded-lg md:rounded-xl font-bold text-xs md:text-sm lg:text-base
@@ -206,16 +206,16 @@ export function OrderSummarySidebar({
                           <span>Checkout Now</span>
                         </>
                       )}
-                    </button>
+                    </button> */}
 
                     {/* Add to Cart Button */}
                     <button
                       onClick={onAddToCart}
                       disabled={!isComplete || isAddingToCart || isDirectCheckingOut}
-                      className="w-full py-2.5 md:py-3 lg:py-3.5 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm lg:text-base
-                               bg-white text-gray-700 border-2 border-gray-200
-                               hover:bg-gray-50 hover:border-gray-300
-                               disabled:opacity-40 disabled:cursor-not-allowed
+                      className="w-full py-2.5 md:py-3 lg:py-3.5 rounded-lg md:rounded-xl font-bold text-xs md:text-sm lg:text-base
+                               bg-[#3CB371] hover:bg-[#2FA05E] text-white
+                               shadow-lg hover:shadow-xl
+                               disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
                                transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2"
                     >
                       {isAddingToCart ? (

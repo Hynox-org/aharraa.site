@@ -266,7 +266,7 @@ function AuthPageContent() {
                 </button>
 
                 {/* Divider */}
-                <div className="relative my-5 sm:my-6">
+                {/* <div className="relative my-5 sm:my-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full h-px bg-gray-200" />
                   </div>
@@ -275,9 +275,9 @@ function AuthPageContent() {
                       Or continue with
                     </span>
                   </div>
-                </div>
+                </div> */}
 
-                {/* Google Button */}
+                {/* Google Button
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isGoogleLoading}
@@ -310,7 +310,7 @@ function AuthPageContent() {
                       Sign in with Google
                     </>
                   )}
-                </button>
+                </button> */}
               </div>
             </div>
           )}
@@ -410,7 +410,7 @@ function AuthPageContent() {
                 </button>
 
                 {/* Divider */}
-                <div className="relative my-5 sm:my-6">
+                {/* <div className="relative my-5 sm:my-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full h-px bg-gray-200" />
                   </div>
@@ -419,10 +419,10 @@ function AuthPageContent() {
                       Or continue with
                     </span>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Google Button */}
-                <button
+                {/* <button
                   onClick={handleGoogleLogin}
                   disabled={isGoogleLoading}
                   className="w-full h-11 sm:h-12 rounded-lg font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2 border-2 border-gray-300 bg-white text-black hover:bg-gray-50"
@@ -454,7 +454,7 @@ function AuthPageContent() {
                       Sign up with Google
                     </>
                   )}
-                </button>
+                </button> */}
               </div>
             </div>
           )}

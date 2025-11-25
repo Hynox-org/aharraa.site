@@ -4,6 +4,7 @@ import Image from "next/image"
 import { format } from "date-fns"
 import { IoRemoveCircle, IoAddCircle, IoTrash, IoPencil, IoCalendar, IoCall } from "react-icons/io5"
 import { CartItem, PopulatedCartItem, PersonDetails } from "@/lib/types"
+import { Spinner } from "@/components/ui/spinner"
 
 interface CartItemCardProps {
   item: PopulatedCartItem
@@ -117,7 +118,7 @@ export function CartItemCard({
             disabled={isRemovingItem}
             className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all bg-red-50 hover:bg-red-100 text-red-600 disabled:opacity-50"
           >
-            <IoTrash className="w-4 h-4 md:w-5 md:h-5" />
+            {isRemovingItem ? <Spinner className="w-4 h-4 md:w-5 md:h-5" /> : <IoTrash className="w-4 h-4 md:w-5 md:h-5" />}
           </button>
         </div>
       </div>
@@ -154,7 +155,7 @@ export function CartItemCard({
             disabled={isRemovingItem}
             className="w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-50 hover:bg-red-100 text-red-600 ml-1"
           >
-            <IoTrash className="w-4 h-4" />
+            {isRemovingItem ? <Spinner className="w-4 h-4" /> : <IoTrash className="w-4 h-4" />}
           </button>
         </div>
       </div>
