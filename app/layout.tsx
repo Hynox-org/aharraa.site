@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./context/auth-context";
 import { Toaster } from "@/components/ui/sonner";
-
+import { Analytics } from "@vercel/analytics/next";
 const geistSans = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
 
@@ -72,6 +72,7 @@ export default function RootLayout({
           <div className="bg-background text-foreground">{children}</div>
           <Toaster />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
