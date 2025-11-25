@@ -38,7 +38,7 @@ export function Footer() {
               Fresh, home-cooked meals delivered to your door with love and care.
             </p>
             {/* Social Media */}
-            <div className="flex items-center gap-3 pt-2">
+            {/* <div className="flex items-center gap-3 pt-2">
               <a 
                 href="#" 
                 className="w-10 h-10 bg-gray-800 hover:bg-[#3CB371] rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-6 group"
@@ -67,7 +67,7 @@ export function Footer() {
               >
                 <FaLinkedinIn className="w-4 h-4 text-white" />
               </a>
-            </div>
+            </div> */}
           </div>
 
           {/* Quick Links */}
@@ -79,8 +79,8 @@ export function Footer() {
             <ul className="space-y-3">
               {[
                 { label: "About Us", href: "/about" },
-                { label: "Plans & Pricing", href: "/#pricing" },
-                { label: "Menu", href: "/#menu" },
+                { label: "Plans & Pricing", href: "/pricing" },
+                { label: "Profile", href: "/profile" },
                 { label: "Contact", href: "/contact" },
               ].map((link) => (
                 <li key={link.href}>

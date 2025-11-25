@@ -38,7 +38,7 @@ export default function ContactPage() {
     {
       icon: IoCall,
       title: "Telephone No",
-      details: "9952213571",
+      details: "8807001442",
       description: "Available 9 AM - 9 PM, 7 days a week",
     },
     {
@@ -50,13 +50,13 @@ export default function ContactPage() {
     {
       icon: IoLocation,
       title: "Registered Address",
-      details: "8/1765,PONNAMMAL NAGAR MAIN ROAD,PANDIAN NAGAR, TIRUPPUR, TAMIL NADU, PIN: 641602",
+      details: "Vivekananda street, PN pudhur post, Coimbatore-641041.",
       description: "Merchant Legal entity name: THE BLACK CREST",
     },
     {
       icon: IoLocation,
       title: "Operational Address",
-      details: "8/1765,PONNAMMAL NAGAR MAIN ROAD,PANDIAN NAGAR, TIRUPPUR, TAMIL NADU, PIN: 641602",
+      details: "Vivekananda street, PN pudhur post, Coimbatore-641041.",
       description: "Visit our kitchen and meet the team",
     },
   ]
