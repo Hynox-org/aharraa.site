@@ -447,7 +447,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       const cashfree = await initializeSDK()
       const checkoutOptions = {
         paymentSessionId: response.paymentSessionId,
-        redirectTarget: "_modal",
+        redirectTarget: "_self",
       }
       
       cashfree.checkout(checkoutOptions).then(async (result: any) => {
