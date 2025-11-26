@@ -41,6 +41,7 @@ export interface UserProfile {
 export interface AuthApiResponse {
   accessToken?: string;
   message?: string;
+  requiresEmailConfirmation?: boolean;
 }
 
 export interface AuthContextType {

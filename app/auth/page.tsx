@@ -23,6 +23,7 @@ function AuthPageContent() {
   const [signInPassword, setSignInPassword] = useState("")
   const [showSignInPassword, setShowSignInPassword] = useState(false)
   const [signUpEmail, setSignUpEmail] = useState("")
+  const [signUpUsername, setSignUpUsername] = useState("")
   const [signUpPassword, setSignUpPassword] = useState("")
   const [showSignUpPassword, setShowSignUpPassword] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -69,29 +70,36 @@ function AuthPageContent() {
   }
 
   const handleSignup = async () => {
-    if (!termsAccepted) {
-      toast.error("Please accept the terms and conditions")
-      return
-    }
-    
-    setIsSignUpLoading(true)
-    try {
-      const data = await apiRequest<AuthApiResponse>("/auth/signup", "POST", {
-        email: signUpEmail,
-        password: signUpPassword,
-      })
-
-      if (data.accessToken) {
-        await login(data.accessToken, storedReturnUrl ?? undefined)
-      }
-
-      toast.success("Signup successful!")
-    } catch (error: any) {
-      toast.error(error.message || "An error occurred during sign up.")
-    } finally {
-      setIsSignUpLoading(false)
-    }
+  if (!termsAccepted) {
+    toast.error("Please accept the terms and conditions")
+    return
   }
+  
+  setIsSignUpLoading(true)
+  try {
+    const data = await apiRequest<AuthApiResponse>("/auth/signup", "POST", {
+      name: signUpUsername,
+      email: signUpEmail,
+      password: signUpPassword,
+    })
+
+    // Check if email confirmation is required
+    if (data.requiresEmailConfirmation) {
+      // Store email for resend functionality
+      localStorage.setItem('pending-confirmation-email', signUpEmail)
+      toast.success("Signup successful! Please check your email to confirm your account.")
+      router.push('/auth/check-email')
+    } else if (data.accessToken) {
+      // Fallback for if confirmation is disabled
+      await login(data.accessToken, storedReturnUrl ?? undefined)
+      toast.success("Signup successful!")
+    }
+  } catch (error: any) {
+    toast.error(error.message || "An error occurred during sign up.")
+  } finally {
+    setIsSignUpLoading(false)
+  }
+}
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true)
@@ -328,6 +336,22 @@ function AuthPageContent() {
               </div>
 
               <div className="space-y-4 sm:space-y-5">
+                               {/* Username */}
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-black">
+                    Username
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Choose a username"
+                      value={signUpUsername}
+                      onChange={(e) => setSignUpUsername(e.target.value)}
+                      className="w-full h-11 sm:h-12 pl-4 pr-4 rounded-lg text-sm sm:text-base transition-all border-2 border-gray-300 text-black bg-white focus:border-[#3CB371] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-black">
