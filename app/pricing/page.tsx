@@ -401,11 +401,33 @@ export default function PricingPage() {
               )}
 
               {currentStep === 4 && selectedPlan && (
-                <QuantitySelection
-                  quantity={quantity}
-                  selectedPlan={selectedPlan}
-                  onQuantityChange={setQuantity}
-                />
+                <>
+                  <QuantitySelection
+                    quantity={quantity}
+                    selectedPlan={selectedPlan}
+                    onQuantityChange={setQuantity}
+                  />
+                  
+                  {/* Add Delivery Charge Info */}
+<div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 md:p-5">
+  <div className="flex items-start gap-3">
+    <div className="flex-shrink-0 w-10 h-10 bg-[#3CB371] rounded-full flex items-center justify-center">
+      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    <div className="flex-1">
+      <h3 className="font-bold text-gray-900 text-lg mb-1">
+        Save on Delivery!
+      </h3>
+      <p className="text-gray-700 text-sm leading-relaxed">
+        <span className="font-semibold text-[#3CB371]">Single delivery charge</span> applies for up to <span className="font-bold">4 persons</span> ordering the same menu and meal timings. Perfect for families and groups!
+      </p>
+    </div>
+  </div>
+</div>
+
+                </>
               )}
 
               {currentStep === 5 && selectedPlan && quantity >= 1 && (

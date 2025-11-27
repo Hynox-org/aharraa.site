@@ -16,6 +16,7 @@ export function QuantitySelection({
 }: QuantitySelectionProps) {
   const totalMeals = quantity * selectedPlan.durationDays;
   const isMinQuantity = quantity <= 1;
+  const isMaxQuantity = quantity >= 4;
 
   return (
     <div className="px-4 py-4 md:py-6 max-w-md mx-auto">
@@ -70,14 +71,18 @@ export function QuantitySelection({
         {/* Increase Button */}
         <button
           onClick={() => onQuantityChange(quantity + 1)}
+          disabled={isMaxQuantity}
           aria-label="Increase quantity"
-          className="
+          className={`
             w-12 h-12 md:w-14 md:h-14 rounded-full
-            bg-gradient-to-br from-emerald-500 to-teal-600 text-white
             flex items-center justify-center
             transition-all duration-300 filter
-            drop-shadow-xl hover:drop-shadow-2xl hover:scale-105
-          "
+            ${
+              isMaxQuantity
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed drop-shadow-md"
+                : "bg-gradient-to-br from-emerald-500 to-teal-600 text-white drop-shadow-xl hover:drop-shadow-2xl hover:scale-105"
+            }
+          `}
         >
           <Plus className="w-5 h-5 md:w-6 md:h-6 stroke-[3]" />
         </button>
@@ -131,7 +136,7 @@ export function QuantitySelection({
 
       {/* Minimal Helper Text */}
       <p className="text-center text-[10px] md:text-xs text-gray-400">
-        Need more? Just increase the quantity
+        Need more? Just increase the quantity. If you need to add more than 4 members, please add another cart item.
       </p>
     </div>
   );
