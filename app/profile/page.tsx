@@ -220,7 +220,7 @@ export default function ProfilePage() {
     (o) => o.status === "pending" || o.status === "confirmed"
   ).length;
   const totalSpent = orders
-    .filter((o) => o.status === "delivered")
+    .filter((o) => o.status === "confirmed" || o.status === "delivered")
     .reduce((sum, order) => sum + order.totalAmount, 0);
 
   return (
