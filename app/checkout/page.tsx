@@ -610,6 +610,8 @@ const handleAddressChangeWithSync = (
                 gstCost={gstCost}
                 grandTotal={grandTotal}
                 itemCount={userCartItems.length}
+                cartItems={userCartItems} // Pass cartItems
+                deliveryCostPerMealPerDay={deliveryCostPerMealPerDay} // Pass deliveryCostPerMealPerDay
                 onProceedToPayment={handleProceedToPayment}
                 isProcessingPayment={isProcessingPayment}
               />

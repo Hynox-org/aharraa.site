@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { IoCart, IoArrowForward, IoCheckmarkCircle, IoChevronDown, IoChevronUp } from "react-icons/io5"
 import { Spinner } from "./ui/spinner"
+import { PopulatedCartItem, MealCategory } from "@/lib/types" // Import necessary types
 
 interface CheckoutOrderSummaryProps {
   totalPrice: number
@@ -11,6 +12,8 @@ interface CheckoutOrderSummaryProps {
   gstCost: number
   grandTotal: number
   itemCount: number
+  cartItems: PopulatedCartItem[] // Add cartItems
+  deliveryCostPerMealPerDay: number // Add deliveryCostPerMealPerDay
   onProceedToPayment: () => void
   isProcessingPayment: boolean
 }
@@ -22,10 +25,26 @@ export function CheckoutOrderSummary({
   gstCost,
   grandTotal,
   itemCount,
+  cartItems, // Destructure cartItems
+  deliveryCostPerMealPerDay, // Destructure deliveryCostPerMealPerDay
   onProceedToPayment,
   isProcessingPayment,
 }: CheckoutOrderSummaryProps) {
   const [open, setOpen] = useState(false)
+
+  // Helper function to calculate delivery cost for a single item for display purposes
+  const calculateItemDeliveryCost = (item: PopulatedCartItem, costPerMealPerDay: number): number => {
+    if (item.plan && item.menu) {
+      const planDays = item.plan.durationDays
+      const numberOfSelectedMealTimes = item.selectedMealTimes ? item.selectedMealTimes.length : 0
+      const quantity = item.quantity
+
+      if (numberOfSelectedMealTimes > 0) {
+        return planDays * numberOfSelectedMealTimes * costPerMealPerDay
+      }
+    }
+    return 0
+  }
   
   return (
     <div className="bg-white rounded-xl md:rounded-2xl lg:rounded-3xl p-3 md:p-5 lg:p-6 shadow-lg border border-gray-100">
@@ -85,6 +104,32 @@ export function CheckoutOrderSummary({
               ₹{deliveryCost.toFixed(0)}
             </span>
           </div>
+
+          {cartItems.map((item, index) => {
+            const itemDeliveryCost = calculateItemDeliveryCost(item, deliveryCostPerMealPerDay)
+            const planDays = item.plan?.durationDays || 0
+            const numberOfSelectedMealTimes = item.selectedMealTimes ? item.selectedMealTimes.length : 0
+            const quantity = item.quantity
+            
+            if (itemDeliveryCost > 0) {
+              return (
+                <div key={item._id || index} className="flex flex-col text-xs md:text-sm lg:text-base pl-4 border-l-2 border-gray-200 ml-2">
+                  <div className="flex justify-between items-start mb-0.5">
+                    <span className="flex-1 pr-2 text-gray-700 font-medium">
+                      {item.menu.name} ({quantity} {quantity > 1 ? 'items' : 'item'})
+                    </span>
+                    <span className="font-semibold flex-shrink-0 text-black">
+                      ₹{itemDeliveryCost.toFixed(0)}
+                    </span>
+                  </div>
+                  <p className="text-[10px] md:text-xs text-gray-500 italic">
+                    {planDays} days * {numberOfSelectedMealTimes} meal times * ₹{deliveryCostPerMealPerDay}/meal/day
+                  </p>
+                </div>
+              )
+            }
+            return null
+          })}
 
           <div className="flex justify-between items-center text-xs md:text-sm lg:text-base">
             <span className="text-gray-600">Platform Cost (10%)</span>
