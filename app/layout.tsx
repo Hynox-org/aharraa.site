@@ -5,6 +5,7 @@ import "./globals.css";
 import { AuthProvider } from "./context/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/next";
+import MaintenancePage from "./maintenance/page";
 const geistSans = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
 
@@ -64,14 +65,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
   return (
     <html lang="en" className={`${geistSans.className}`}>
       <body suppressHydrationWarning>
         <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-        <AuthProvider>
-          <div className="bg-background text-foreground">{children}</div>
-          <Toaster />
-        </AuthProvider>
+        {isMaintenanceMode ? (
+          <MaintenancePage />
+        ) : (
+          <AuthProvider>
+            <div className="bg-background text-foreground">{children}</div>
+            <Toaster />
+          </AuthProvider>
+        )}
         <Analytics />
       </body>
     </html>
