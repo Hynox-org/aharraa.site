@@ -2,26 +2,62 @@
 
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
-import { ReviewsSection } from "@/components/reviews-section";
-import { FaqSection } from "@/components/faq-section";
-import { FoodShowcase } from "@/components/food-showcase";
 import { Footer } from "@/components/footer";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/auth-context";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { HiSparkles, HiClock, HiShieldCheck, HiHeart } from "react-icons/hi";
-import { IoRestaurant, IoArrowForward } from "react-icons/io5";
-import { MdDeliveryDining } from "react-icons/md";
+import { HiSparkles, HiArrowRight } from "react-icons/hi";
+import { IoRestaurant, IoFastFood, IoNutrition } from "react-icons/io5";
 import { Spinner } from "@/components/ui/spinner";
 import { useStore } from "@/lib/store";
 import LottieAnimation from "@/components/lottie-animation";
 import ItayCheffAnimation from "../public/lottie/ItayCheff.json";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { FoodShowcase } from "@/components/food-showcase";
+import { ReviewsSection } from "@/components/reviews-section";
+import { FaqSection } from "@/components/faq-section";
 
 export default function Home() {
   const router = useRouter();
   const { login, loading: authLoading } = useAuth();
   const [isLoadingHashToken, setIsLoadingHashToken] = useState(true);
+
+  const [cards, setCards] = useState<{ id: number; image: string; title: string; desc: string; instanceId?: number }[]>([
+    {
+      id: 1,
+      image: "https://qlgusdrybvqzckgizmco.supabase.co/storage/v1/object/public/Assets/Monday/Monday%20lunch.jpeg",
+      title: "Veg Briyani",
+      desc: "Veg briyani with curd raita & one egg"
+    },
+    {
+      id: 2,
+      image: "https://qlgusdrybvqzckgizmco.supabase.co/storage/v1/object/public/Assets/Menu%202/Tuesday/Tuesday%20Dinner.png",
+      title: "Chapati",
+      desc: "Chapati with gravy"
+    },
+    {
+      id: 3,
+      image: "https://qlgusdrybvqzckgizmco.supabase.co/storage/v1/object/public/Assets/Monday/Monday%20Breakfast.jpeg",
+      title: "Mini Idly",
+      desc: "mini idly with coconut chutney & kalla chutney"
+    }
+  ]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCards((prev) => {
+        const newCards = [...prev];
+        const first = newCards.shift();
+        if (first) {
+          newCards.push({ ...first, instanceId: Date.now() });
+        }
+        return newCards;
+      });
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const { returnUrl: storedReturnUrl, setReturnUrl } = useStore();
 
@@ -62,161 +98,167 @@ export default function Home() {
     <main className="min-h-screen bg-white">
       <Header />
 
-      {/* Hero Section - Modern Minimal */}
-      <section className="relative py-16 md:py-24 overflow-hidden">
-        {/* Subtle Background Elements */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-10 w-96 h-96 bg-[#3CB371] rounded-full filter blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#3CB371] rounded-full filter blur-3xl animate-pulse delay-700"></div>
+      <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden bg-[#fafafa]">
+        {/* Background Decorative Blobs */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#3CB371]/20 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-yellow-400/20 rounded-full blur-[100px]" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left Content */}
-            <div className="space-y-8 animate-fade-in-up">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 shadow-sm">
-                <HiSparkles className="w-5 h-5 text-[#3CB371]" />
-                <span className="text-sm font-semibold text-black">Premium Home-Cooked Experience</span>
+        {/* Large "Behind" Typography */}
+        <h1 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[12vw] md:text-[15vw] font-black text-gray-200/60 select-none pointer-events-none tracking-tighter z-0 leading-none text-center">
+          TASTE<br />MAGIC
+        </h1>
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center h-full">
+
+          {/* Left Content - Floating Glass Panel */}
+          <div className="order-2 lg:order-1 relative text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+
+              className="space-y-8 max-w-xl mx-auto lg:mx-0 relative z-20"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Badge variant="secondary" className="bg-[#3CB371]/10 text-right text-[#3CB371] hover:bg-[#3CB371]/20 px-4 py-1.5 text-sm font-semibold border-none">
+                  <HiSparkles className="mr-2 h-4 w-4" /> #1 Home Cooked Meals
+                </Badge>
               </div>
 
-              {/* Main Heading */}
-              <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-4 leading-tight">
-                  Fresh, Home-Cooked
-                  <span className="block text-[#3CB371]">
-                    Meals Delivered
-                  </span>
-                </h1>
-                <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-xl">
-                  Experience the warmth of home-style cooking with meals prepared by talented chefs using locally-sourced ingredients. Delivered fresh to your doorstep.
-                </p>
+              <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight">
+                Not Just Food,<br />
+                It's an <span className="text-[#3CB371] inline-block relative">
+                  Emotion.
+                  <svg className="absolute w-full h-3 -bottom-1 left-0 text-[#3CB371]/30" viewBox="0 0 100 10" preserveAspectRatio="none">
+                    <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="3" fill="none" />
+                  </svg>
+                </span>
+              </h1>
+
+              <p className="text-lg md:text-xl text-gray-600 leading-relaxed font-medium">
+                Experience the nostalgia of pure, home-cooked flavors delivered right to your doorstep. No preservatives, just love.
+              </p>
+
+              <div className="flex flex-col justify-center sm:flex-row gap-4 pt-2">
+                <Button onClick={() => router.push('/pricing')} size="lg" className="bg-[#3CB371] hover:bg-[#2e8b57] text-white rounded-full px-8 h-12 text-lg shadow-lg hover:shadow-[#3CB371]/30 transition-all">
+                  Order Now <HiArrowRight className="ml-2" />
+                </Button>
+                <Button onClick={() => router.push('/contact')} size="lg" variant="ghost" className="rounded-full px-8 h-12 text-lg hover:bg-white/50">
+                  Contact Us
+                </Button>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/pricing" passHref>
-                  <Button 
-                    size="lg" 
-                    className="bg-[#3CB371] hover:bg-[#2FA05E] text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0"
+              <div className="flex items-center justify-center gap-6 py-6">
+                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-white/60 flex items-center gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-2xl font-bold text-gray-900">500+</span>
+                    <span className="text-xs text-gray-500 uppercase tracking-wide font-bold">Daily Orders</span>
+                  </div>
+                  <div className="w-px h-8 bg-gray-200" />
+                  <div className="flex flex-col">
+                    <span className="text-2xl font-bold text-gray-900">4.9</span>
+                    <span className="text-xs text-gray-500 uppercase tracking-wide font-bold">Rating</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right - Interactive Card Stack */}
+          <div className="order-1 lg:order-2 flex justify-center items-center relative h-[500px] lg:h-[600px]">
+            <div className="relative w-72 h-[420px] md:w-80 md:h-[480px] perspective-1000">
+              <AnimatePresence mode="popLayout">
+                {cards.map((card, index) => (
+                  <motion.div
+                    key={card.instanceId || card.id}
+                    layout // Enable layout animations for smooth position changes
+                    initial={{ scale: 0.8, y: 150, opacity: 0 }}
+                    animate={{
+                      zIndex: cards.length - index,
+                      scale: index === 0 ? 1 : index === 1 ? 0.95 : 0.9,
+                      y: index === 0 ? 0 : index === 1 ? -25 : -50,
+                      x: index === 0 ? 0 : index === 1 ? 20 : 40,
+                      rotate: index === 0 ? 0 : index === 1 ? 5 : 10,
+                      opacity: index > 2 ? 0 : 1,
+                      filter: index === 0 ? "blur(0px)" : "blur(2px)",
+                    }}
+                    exit={{
+                      x: 400,
+                      y: -300,
+                      rotate: 45,
+                      opacity: 0,
+                      scale: 0.5,
+                      transition: { duration: 0.5, ease: "easeIn" }
+                    }}
+                    transition={{ type: "spring", stiffness: 180, damping: 20 }}
+                    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl overflow-hidden border-4 border-white"
+                    style={{
+                      transformOrigin: "center center",
+                      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                    }}
                   >
-                    <IoRestaurant className="w-5 h-5 mr-2" />
-                    Explore Our Meals
-                  </Button>
-                </Link>
-                <Link href="/about" passHref>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="border-2 border-gray-300 text-black hover:bg-gray-50 hover:border-gray-400 font-semibold transform hover:scale-105 transition-all duration-300"
-                  >
-                    Learn More
-                    <IoArrowForward className="w-5 h-5 ml-2" />
-                  </Button>
-                </Link>
-              </div>
+                    <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
 
-              {/* Stats Row */}
-              <div className="flex flex-wrap gap-8 pt-6">
-                <div className="space-y-1">
-                  <p className="text-3xl md:text-4xl font-black text-black">500+</p>
-                  <p className="text-sm text-gray-500">Happy Customers</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-3xl md:text-4xl font-black text-black">50+</p>
-                  <p className="text-sm text-gray-500">Menu Items</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-3xl md:text-4xl font-black text-black">4.9★</p>
-                  <p className="text-sm text-gray-500">Average Rating</p>
-                </div>
-              </div>
+                    {/* Glassmorphism Overlay on Card */}
+                    <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-20">
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <h3 className="text-white text-2xl font-bold tracking-tight">{card.title}</h3>
+                        <p className="text-white/90 text-sm font-medium mt-1 flex items-center gap-2">
+                          <IoRestaurant className="text-[#3CB371]" /> {card.desc}
+                        </p>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
 
-            {/* Right Content - Image Card */}
-            <div className="relative animate-slide-in-right">
-              <div className="relative group">
-                {/* Glow Effect */}
-                <div className="absolute inset-0 bg-[#3CB371] rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
-                
-                {/* Main Card */}
-                <div className="relative w-full h-96 md:h-[28rem] rounded-3xl overflow-hidden shadow-2xl transform group-hover:scale-105 transition-all duration-500 bg-white">
-                  {/* Image */}
-                  <div className="absolute inset-0">
-                    <img 
-                      src="/home_page_cover.png" 
-                      alt="Delicious home-cooked meal" 
-                      className="w-full h-full object-contain rounded-3xl"
-                    />
-                  </div>
-
-                  {/* Floating Feature Cards */}
-                  <div className="absolute top-6 right-6 bg-white rounded-2xl p-3 md:p-4 shadow-xl border border-gray-100 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-[#3CB371] flex items-center justify-center">
-                        <HiClock className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-sm font-bold text-black">30 Min Delivery</span>
-                    </div>
-                  </div>
-
-                  <div className="absolute bottom-6 left-6 bg-white rounded-2xl p-3 md:p-4 shadow-xl border border-gray-100 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-[#3CB371] flex items-center justify-center">
-                        <HiShieldCheck className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-sm font-bold text-black">100% Fresh</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Visual orbit element behind cards */}
+            <div className="absolute md:-right-20 -z-10 animate-spin-slow">
+              <svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-100">
+                <circle cx="300" cy="300" r="299.5" stroke="#3CB371" strokeOpacity="0.6" strokeWidth="2" strokeDasharray="10 10" />
+                <circle cx="300" cy="300" r="239.5" stroke="#FBBF24" strokeOpacity="0.8" strokeWidth="3" strokeDasharray="20 20" />
+              </svg>
             </div>
           </div>
+
         </div>
       </section>
 
-      {/* Features Section - Floating Cards */}
-      <section className="py-16 md:py-20 bg-gray-50">
+      {/* Features Section - Cleaned Up */}
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {/* Feature 1 */}
-            <div className="group bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-14 h-14 md:w-16 md:h-16 bg-[#3CB371] rounded-2xl flex items-center justify-center mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                <IoRestaurant className="w-7 h-7 md:w-8 md:h-8 text-white" />
-              </div>
-              <h3 className="text-xl md:text-2xl font-bold text-black mb-3">Fresh Ingredients</h3>
-              <p className="text-gray-600 leading-relaxed">
-                We use only the freshest, locally-sourced ingredients to ensure every meal is packed with flavor and nutrition.
-              </p>
-            </div>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Aharraa?</h2>
+            <p className="text-gray-600 text-lg">We bring the best of both worlds: Health and Taste.</p>
+          </div>
 
-            {/* Feature 2 */}
-            <div className="group bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-14 h-14 md:w-16 md:h-16 bg-[#3CB371] rounded-2xl flex items-center justify-center mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                <MdDeliveryDining className="w-7 h-7 md:w-8 md:h-8 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            {[
+              { icon: IoNutrition, title: "Healthy Eating", desc: "Balanced macros in every meal." },
+              { icon: IoFastFood, title: "Super Tasty", desc: "No compromise on flavors." },
+              { icon: IoRestaurant, title: "Chef Special", desc: "Curated by top home chefs." }
+            ].map((feature, i) => (
+              <div key={i} className="flex flex-col items-center text-center group">
+                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="w-10 h-10 text-[#3CB371]" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-gray-600">{feature.desc}</p>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-black mb-3">Fast Delivery</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Hot meals delivered to your door within 30 minutes. Enjoy restaurant-quality food in the comfort of your home.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="group bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-14 h-14 md:w-16 md:h-16 bg-[#3CB371] rounded-2xl flex items-center justify-center mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                <HiHeart className="w-7 h-7 md:w-8 md:h-8 text-white" />
-              </div>
-              <h3 className="text-xl md:text-2xl font-bold text-black mb-3">Made with Love</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Every dish is prepared by skilled home chefs who pour their heart into creating delicious, home-style meals.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Main Content Sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      {/* Re-integrate other sections */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <FoodShowcase />
         <FaqSection />
       </div>
@@ -225,23 +267,29 @@ export default function Home() {
 
       {/* Custom Animation Styles */}
       <style jsx global>{`
-        @keyframes bounce-slow {
-          0%, 100% {
-            transform: translateY(0);
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
           }
-          50% {
-            transform: translateY(-20px);
+          to {
+            transform: rotate(360deg);
           }
         }
-
-        .animate-bounce-slow {
-          animation: bounce-slow 3s ease-in-out infinite;
-        }
-
-        .delay-700 {
-          animation-delay: 700ms;
+        .animate-spin-slow {
+          animation: spin-slow 20s linear infinite;
         }
       `}</style>
+      <div className="fixed bottom-6 left-0 right-0 px-6 z-50 md:hidden pb-safe">
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1, duration: 0.5 }}
+        >
+          <Button onClick={() => router.push('/pricing')} size="lg" className="w-full bg-black hover:bg-[#2e8b57] text-white rounded-full h-14 text-xl shadow-2xl shadow-[#3CB371]/40 transition-transform active:scale-95">
+            Order Now <HiArrowRight className="ml-2" />
+          </Button>
+        </motion.div>
+      </div>
     </main>
   );
 }

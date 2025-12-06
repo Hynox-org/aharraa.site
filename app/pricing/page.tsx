@@ -324,7 +324,7 @@ export default function PricingPage() {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Progress Steps */}
-         <div className="mb-6 sm:mb-8 md:mb-12 overflow-x-auto pb-2">
+         <div className="mb-6 sm:mb-8 md:mb-12 overflow-x-auto py-2">
           <div className="flex items-center justify-between min-w-[600px] sm:min-w-0 max-w-4xl mx-auto px-2">
             {STEPS.map((step, index) => (
               <div key={step.id} className="flex items-center flex-1 min-w-0">

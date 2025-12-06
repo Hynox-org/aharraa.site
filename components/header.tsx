@@ -46,19 +46,19 @@ export function Header() {
             <div className="relative">
               <div className="absolute inset-0 rounded-lg sm:rounded-xl blur-md opacity-40 group-hover:opacity-60 transition-opacity bg-[#3CB371]" />
               <div className="relative rounded-lg sm:rounded-xl shadow-lg transform group-hover:scale-105 transition-transform duration-300 bg-[#3CB371]">
-                <Image 
-                  src="/logo.png" 
-                  alt="Aharraa" 
+                <Image
+                  src="/logo.png"
+                  alt="Aharraa"
                   width={40}
                   height={40}
-                  className="rounded-lg sm:w-[50px] sm:h-[50px]" 
-                  unoptimized 
+                  className="rounded-lg sm:w-[50px] sm:h-[50px]"
+                  unoptimized
                 />
               </div>
             </div>
-            <div className="hidden xs:block">
-              <span className="text-lg sm:text-2xl font-bold text-black">
-                Aharraa
+            <div className="flex flex-col">
+              <span className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tighter text-black leading-tight">
+                AHARRAA
               </span>
               <p className="text-[10px] sm:text-xs font-medium tracking-wide hidden sm:block text-[#3CB371]">
                 Fresh Home-Cooked Meals
@@ -81,7 +81,7 @@ export function Header() {
                 </Link>
               )
             })}
-            
+
             {isAuthenticated ? (
               <>
                 <div className="flex items-center gap-2 ml-2">
@@ -166,9 +166,8 @@ export function Header() {
 
       {/* Mobile/Tablet Navigation Menu */}
       <div
-        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
       >
         <div className="shadow-inner bg-white border-t-2 border-gray-200">
           <nav className="flex flex-col gap-1 px-3 sm:px-4 py-3 sm:py-4">
@@ -187,7 +186,7 @@ export function Header() {
               )
             })}
             <div className="h-px my-2 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-            
+
             {isAuthenticated ? (
               <>
                 <Link
