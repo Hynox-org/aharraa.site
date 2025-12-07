@@ -17,7 +17,7 @@ const MEAL_CATEGORIES: MealCategory[] = ["Breakfast", "Lunch", "Dinner"];
 export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
   const getMealsByDay = (menu: MenuWithPopulatedMeals) => {
     const mealsByDay: Record<DayOfWeek, Record<MealCategory, MenuItemWithPopulatedMeal | null>> = {} as any;
-    
+
     DAYS_ORDER.forEach(day => {
       mealsByDay[day] = { Breakfast: null, Lunch: null, Dinner: null };
     });
@@ -37,7 +37,7 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
   };
 
   const getMealIcon = (category: MealCategory) => {
-    switch(category) {
+    switch (category) {
       case "Breakfast": return IoSunnyOutline;
       case "Lunch": return IoPartlySunnyOutline;
       case "Dinner": return IoMoonOutline;
@@ -81,7 +81,7 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
           {menus.map((menu) => {
             const isSelected = selectedMenu?._id === menu._id;
             const totalDays = getTotalDays(menu);
-            
+
             return (
               <Dialog key={menu._id}>
                 <div
@@ -108,10 +108,9 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                               object-contain rounded-full
                               transition-all duration-700 ease-out
                               filter
-                              ${
-                                isSelected 
-                                  ? 'drop-shadow-xl md:drop-shadow-2xl scale-105 md:scale-110 rotate-3 md:rotate-6' 
-                                  : 'drop-shadow-lg md:drop-shadow-xl group-hover:drop-shadow-xl md:group-hover:drop-shadow-2xl group-hover:scale-105 group-hover:-rotate-2 md:group-hover:-rotate-3'
+                              ${isSelected
+                                ? 'drop-shadow-xl md:drop-shadow-2xl scale-105 md:scale-110 rotate-3 md:rotate-6'
+                                : 'drop-shadow-lg md:drop-shadow-xl group-hover:drop-shadow-xl md:group-hover:drop-shadow-2xl group-hover:scale-105 group-hover:-rotate-2 md:group-hover:-rotate-3'
                               }
                             `}
                           />
@@ -142,10 +141,9 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                         className={`
                           font-bold text-xs sm:text-sm md:text-xl lg:text-2xl
                           transition-all duration-300
-                          ${
-                            isSelected
-                              ? 'text-[#3CB371]'
-                              : 'text-gray-800 group-hover:text-black'
+                          ${isSelected
+                            ? 'text-[#3CB371]'
+                            : 'text-gray-800 group-hover:text-black'
                           }
                         `}
                       >
@@ -159,22 +157,21 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                       </div>
 
                       <div className="pt-1 md:pt-3 flex flex-col gap-1 md:gap-2 justify-center">
-                       <button
+                        <button
                           onClick={() => onMenuSelect(menu)}
                           className={`
                             px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold
                             transition-all duration-300
-                            ${
-                              isSelected
-                                ? 'bg-[#3CB371] text-white shadow-md md:shadow-lg'
-                                : 'bg-transparent border-2 border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                            ${isSelected
+                              ? 'bg-[#3CB371] text-white shadow-md md:shadow-lg'
+                              : 'bg-transparent border-2 border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                             }
                           `}
                         >
                           {isSelected ? 'Selected' : 'Select'}
                         </button>
                         <DialogTrigger asChild>
-                          <button 
+                          <button
                             onClick={(e) => e.stopPropagation()}
                             className="px-2 sm:px-3 md:px-6 py-1 md:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-semibold bg-gray-100 text-black hover:bg-gray-200 transition-all border border-transparent hover:border-gray-300 md:border-2"
                           >
@@ -212,9 +209,9 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
                     </DialogHeader>
                   </div>
 
-                  <WeeklyCalendarView 
-                    menu={menu} 
-                    mealsByDay={getMealsByDay(menu)} 
+                  <WeeklyCalendarView
+                    menu={menu}
+                    mealsByDay={getMealsByDay(menu)}
                     getMealIcon={getMealIcon}
                     getMealName={getMealName}
                     getMealDescription={getMealDescription}
@@ -230,14 +227,14 @@ export function MenuGrid({ menus, selectedMenu, onMenuSelect }: MenuGridProps) {
   );
 }
 
-function WeeklyCalendarView({ 
-  menu, 
-  mealsByDay, 
+function WeeklyCalendarView({
+  menu,
+  mealsByDay,
   getMealIcon,
   getMealName,
   getMealDescription,
   getMealImage
-}: { 
+}: {
   menu: MenuWithPopulatedMeals;
   mealsByDay: Record<DayOfWeek, Record<MealCategory, MenuItemWithPopulatedMeal | null>>;
   getMealIcon: (category: MealCategory) => React.ComponentType<any>;
@@ -245,7 +242,7 @@ function WeeklyCalendarView({
   getMealDescription: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string | undefined;
   getMealImage: (meal: MenuItemWithPopulatedMeal['meal'] | string) => string;
 }) {
-  const activeDays = DAYS_ORDER.filter(day => 
+  const activeDays = DAYS_ORDER.filter(day =>
     Object.values(mealsByDay[day]).some(meal => meal !== null)
   );
 
@@ -255,7 +252,7 @@ function WeeklyCalendarView({
         {activeDays.map((day) => {
           const dayMeals = mealsByDay[day];
           const hasMeals = Object.values(dayMeals).some(meal => meal !== null);
-          
+
           if (!hasMeals) return null;
 
           return (
@@ -273,14 +270,14 @@ function WeeklyCalendarView({
               </div>
 
               {/* Meals Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 p-3 md:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4 p-3 md:p-6">
                 {MEAL_CATEGORIES.map((category) => {
                   const mealItem = dayMeals[category];
                   const mealName = mealItem ? getMealName(mealItem.meal) : null;
                   const mealDesc = mealItem ? getMealDescription(mealItem.meal) : null;
                   const mealImage = mealItem ? getMealImage(mealItem.meal) : null;
                   const MealIconComponent = getMealIcon(category);
-                  
+
                   return (
                     <div key={category} className="relative group">
                       {mealItem ? (
