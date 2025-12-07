@@ -26,19 +26,19 @@ export default function Home() {
   const [cards, setCards] = useState<{ id: number; image: string; title: string; desc: string; instanceId?: number }[]>([
     {
       id: 1,
-      image: "https://qlgusdrybvqzckgizmco.supabase.co/storage/v1/object/public/Assets/Monday/Monday%20lunch.jpeg",
+      image: "/defaults/hero1.jpeg",
       title: "Veg Briyani",
       desc: "Veg briyani with curd raita & one egg"
     },
     {
       id: 2,
-      image: "https://qlgusdrybvqzckgizmco.supabase.co/storage/v1/object/public/Assets/Menu%202/Tuesday/Tuesday%20Dinner.png",
+      image: "/defaults/hero2.png",
       title: "Chapati",
       desc: "Chapati with gravy"
     },
     {
       id: 3,
-      image: "https://qlgusdrybvqzckgizmco.supabase.co/storage/v1/object/public/Assets/Monday/Monday%20Breakfast.jpeg",
+      image: "/defaults/hero3.jpeg",
       title: "Mini Idly",
       desc: "mini idly with coconut chutney & kalla chutney"
     }
