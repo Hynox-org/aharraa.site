@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { HiShoppingCart, HiMenu, HiX, HiUser, HiLogout, HiHome, HiInformationCircle, HiMail } from "react-icons/hi"
+import { HiShoppingCart, HiMenu, HiX, HiUser, HiLogout, HiHome, HiInformationCircle, HiMail, HiTag } from "react-icons/hi"
 import { useState, useEffect } from "react"
 import { useAuth } from "@/app/context/auth-context"
 import { getCartTotalQuantity } from "@/lib/api"
@@ -33,7 +33,7 @@ export function Header() {
   const navLinks = [
     { href: "/", label: "Home", icon: HiHome },
     { href: "/about", label: "About Us", icon: HiInformationCircle },
-    { href: "/pricing", label: "Pricing", icon: HiInformationCircle },
+    { href: "/pricing", label: "Pricing", icon: HiTag },
     { href: "/contact", label: "Contact", icon: HiMail },
   ]
 

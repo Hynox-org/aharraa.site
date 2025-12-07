@@ -113,7 +113,7 @@ export default function Home() {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center h-full">
 
           {/* Left Content - Floating Glass Panel */}
-          <div className="order-2 lg:order-1 relative text-center">
+          <div className="order-1 lg:order-1 relative text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -121,9 +121,10 @@ export default function Home() {
 
               className="space-y-8 max-w-xl mx-auto lg:mx-0 relative z-20"
             >
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 py-2">
                 <Badge variant="secondary" className="bg-[#3CB371]/10 text-right text-[#3CB371] hover:bg-[#3CB371]/20 px-4 py-1.5 text-sm font-semibold border-none">
-                  <HiSparkles className="mr-2 h-4 w-4" /> #1 Home Cooked Meals
+                  {/* <HiSparkles className="mr-2 h-4 w-4" /> #1 Home Cooked Meals */}
+                  <HiSparkles className="mr-2 h-4 w-4" /> Home Cooked Meals
                 </Badge>
               </div>
 
@@ -137,20 +138,20 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-gray-600 leading-relaxed font-medium">
+              <p className="text-lg md:text-xl text-gray-600 font-medium">
                 Experience the nostalgia of pure, home-cooked flavors delivered right to your doorstep. No preservatives, just love.
               </p>
 
-              <div className="flex flex-col justify-center sm:flex-row gap-4 pt-2">
-                <Button onClick={() => router.push('/pricing')} size="lg" className="bg-[#3CB371] hover:bg-[#2e8b57] text-white rounded-full px-8 h-12 text-lg shadow-lg hover:shadow-[#3CB371]/30 transition-all">
+              <div className="flex flex-col justify-center sm:flex-row gap-4 py-5">
+                <Button onClick={() => router.push('/pricing')} size="lg" className="hidden md:flex bg-[#3CB371] hover:bg-[#2e8b57] text-white rounded-full px-8 h-12 text-lg shadow-lg hover:shadow-[#3CB371]/30 transition-all">
                   Order Now <HiArrowRight className="ml-2" />
                 </Button>
-                <Button onClick={() => router.push('/contact')} size="lg" variant="ghost" className="rounded-full px-8 h-12 text-lg hover:bg-white/50">
+                <Button onClick={() => router.push('/contact')} size="lg" variant="ghost" className="rounded-full px-8 h-12 text-lg bg-white/80 border border-gray-200 shadow-sm md:bg-transparent md:border-transparent md:shadow-none hover:bg-white/90 md:hover:bg-white/50">
                   Contact Us
                 </Button>
               </div>
 
-              <div className="flex items-center justify-center gap-6 py-6">
+              {/* <div className="flex items-center justify-center gap-6 py-6">
                 <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-white/60 flex items-center gap-4">
                   <div className="flex flex-col">
                     <span className="text-2xl font-bold text-gray-900">500+</span>
@@ -162,12 +163,12 @@ export default function Home() {
                     <span className="text-xs text-gray-500 uppercase tracking-wide font-bold">Rating</span>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </motion.div>
           </div>
 
           {/* Right - Interactive Card Stack */}
-          <div className="order-1 lg:order-2 flex justify-center items-center relative h-[500px] lg:h-[600px]">
+          <div className="order-2 lg:order-2 flex justify-center items-center relative h-[500px] lg:h-[600px]">
             <div className="relative w-72 h-[420px] md:w-80 md:h-[480px] perspective-1000">
               <AnimatePresence mode="popLayout">
                 {cards.map((card, index) => (
@@ -220,7 +221,7 @@ export default function Home() {
             </div>
 
             {/* Visual orbit element behind cards */}
-            <div className="absolute md:-right-20 -z-10 animate-spin-slow">
+            <div className="absolute md:-right-00 -z-10 animate-spin-slow">
               <svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-100">
                 <circle cx="300" cy="300" r="299.5" stroke="#3CB371" strokeOpacity="0.6" strokeWidth="2" strokeDasharray="10 10" />
                 <circle cx="300" cy="300" r="239.5" stroke="#FBBF24" strokeOpacity="0.8" strokeWidth="3" strokeDasharray="20 20" />
