@@ -146,7 +146,7 @@ export default function Home() {
                 <Button onClick={() => router.push('/pricing')} size="lg" className="hidden md:flex bg-[#3CB371] hover:bg-[#2e8b57] text-white rounded-full px-8 h-12 text-lg shadow-lg hover:shadow-[#3CB371]/30 transition-all">
                   Order Now <HiArrowRight className="ml-2" />
                 </Button>
-                <Button onClick={() => router.push('/contact')} size="lg" variant="ghost" className="rounded-full px-8 h-12 text-lg bg-white/80 border border-gray-200 shadow-sm md:bg-transparent md:border-transparent md:shadow-none hover:bg-white/90 md:hover:bg-white/50">
+                <Button onClick={() => router.push('/contact')} size="lg" variant="ghost" className="hidden md:flex rounded-full px-8 h-12 text-lg bg-white/80 border border-gray-200 shadow-sm md:bg-transparent md:border-transparent md:shadow-none hover:bg-white/90 md:hover:bg-white/50">
                   Contact Us
                 </Button>
               </div>
