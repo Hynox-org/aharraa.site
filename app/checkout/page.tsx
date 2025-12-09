@@ -18,6 +18,7 @@ import {
   Menu,
   Plan,
   CheckoutItemView,
+  TimeSlot,
 } from "@/lib/types"
 import { createOrder, updateProfileDetails, getProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
@@ -80,6 +81,23 @@ export default function CheckoutPage() {
     }
   }, [isAuthenticated, loading, user?.id])
   
+  const TIME_SLOTS: Record<MealCategory, TimeSlot[]> = {
+    Breakfast: [
+      { label: "7:00 AM - 8:00 AM", value: "7:00 AM - 8:00 AM" },
+      { label: "8:00 AM - 9:00 AM", value: "8:00 AM - 9:00 AM" },
+      { label: "9:00 AM - 10:00 AM", value: "9:00 AM - 10:00 AM" },
+    ],
+    Lunch: [
+      { label: "12:00 PM - 1:00 PM", value: "12:00 PM - 1:00 PM" },
+      { label: "1:00 PM - 2:00 PM", value: "1:00 PM - 2:00 PM" },
+      { label: "2:00 PM - 3:00 PM", value: "2:00 PM - 3:00 PM" },
+    ],
+    Dinner: [
+      { label: "7:00 PM - 8:00 PM", value: "7:00 PM - 8:00 PM" },
+      { label: "8:00 PM - 9:00 PM", value: "8:00 PM - 9:00 PM" },
+      { label: "9:00 PM - 10:00 PM", value: "9:00 PM - 10:00 PM" },
+    ],
+  }
   const initializeSDK = async () => {
     const cashfree = await load({
       mode: `${process.env.NEXT_PUBLIC_CASHFREE_ENVIRONMENT}`,
@@ -250,6 +268,15 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       } as DeliveryAddress,
     }))
   }
+  const handleTimeSlotChange = (category: MealCategory, timeSlot: string) => {
+    setDeliveryAddresses((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        selectedTimeSlot: prev[category]?.selectedTimeSlot === timeSlot ? undefined : timeSlot,
+      } as DeliveryAddress,
+    }))
+  }
 
   const handleGeolocation = (category: MealCategory) => {
     if (navigator.geolocation) {
@@ -390,6 +417,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           pincode: deliveryAddresses.Breakfast.zip,
           lat: deliveryAddresses.Breakfast.lat,
           lon: deliveryAddresses.Breakfast.lon,
+          selectedTimeSlot: deliveryAddresses.Breakfast.selectedTimeSlot,
         }
       }
       if (deliveryAddresses.Lunch) {
@@ -399,6 +427,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           pincode: deliveryAddresses.Lunch.zip,
           lat: deliveryAddresses.Lunch.lat,
           lon: deliveryAddresses.Lunch.lon,
+          selectedTimeSlot: deliveryAddresses.Lunch.selectedTimeSlot,
         }
       }
       if (deliveryAddresses.Dinner) {
@@ -408,6 +437,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           pincode: deliveryAddresses.Dinner.zip,
           lat: deliveryAddresses.Dinner.lat,
           lon: deliveryAddresses.Dinner.lon,
+          selectedTimeSlot: deliveryAddresses.Dinner.selectedTimeSlot,
         }
       }
 
@@ -473,9 +503,13 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
 const handleCopyAddress = (fromCategory: MealCategory, toCategory: MealCategory) => {
   const sourceAddress = deliveryAddresses[fromCategory]
   if (sourceAddress) {
+    const { selectedTimeSlot, ...addressWithoutTimeSlot } = sourceAddress
     setDeliveryAddresses((prev) => ({
       ...prev,
-      [toCategory]: { ...sourceAddress },
+      [toCategory]: {
+        ...prev[toCategory], // Keep existing time slot
+        ...addressWithoutTimeSlot, // Copy other fields
+      },
     }))
     toast.success(`Address copied from ${fromCategory} to ${toCategory}`)
   }
@@ -493,7 +527,11 @@ const handleUseDefaultForAll = (checked: boolean, category: MealCategory) => {
       
       allCategories.forEach((cat) => {
         if (cat !== category) {
-          newAddresses[cat] = { ...sourceAddress }
+          const { selectedTimeSlot, ...addressWithoutTimeSlot } = sourceAddress
+          newAddresses[cat] = {
+            ...newAddresses[cat], // Keep existing time slot if any
+            ...addressWithoutTimeSlot, // Copy all other fields
+          }        
         }
       })
       
@@ -510,7 +548,7 @@ const handleAddressChangeWithSync = (
 ) => {
   handleAddressChange(category, field, value)
   
-  if (useDefaultForAll && category === primaryAddress) {
+  if (useDefaultForAll && category === primaryAddress  && field !== 'selectedTimeSlot') {
     const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
     allCategories.forEach((cat) => {
       if (cat !== category) {
@@ -594,6 +632,8 @@ const handleAddressChangeWithSync = (
                 isDisabled={useDefaultForAll && category !== primaryAddress}
                 allCategories={["Breakfast", "Lunch", "Dinner"]}
                 showCopyOptions={!useDefaultForAll}
+                timeSlots={TIME_SLOTS[category as MealCategory]}
+                onTimeSlotChange={handleTimeSlotChange}
               />
             ))}
 

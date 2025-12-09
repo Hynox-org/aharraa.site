@@ -215,8 +215,13 @@ export interface DeliveryAddress {
   zip: string;
   lat?: number;
   lon?: number;
+  deliveryAddressId?: string;
+  selectedTimeSlot?: string; // Add this field
 }
-
+export type TimeSlot = {
+  label: string;
+  value: string;
+};
 // For storage/display purposes
 export interface DeliveryAddressDocument {
   _id: string;
