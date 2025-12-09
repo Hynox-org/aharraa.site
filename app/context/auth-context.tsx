@@ -8,7 +8,7 @@ import React, {
   ReactNode,
 } from "react";
 import { useRouter, usePathname } from "next/navigation"; // Import useRouter and usePathname
-import { validateToken } from "@/lib/api";
+import { validateToken, pingServer } from "@/lib/api";
 import { AuthContextType, User } from "@/lib/types";
 
 
@@ -26,6 +26,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      try {
+        await pingServer();
+        console.log("Server pinged successfully");
+      } catch (error) {
+        console.error("Server ping failed:", error);
+      }
+
       const storedToken = localStorage.getItem("aharraa-u-token");
       if (storedToken) {
         setToken(storedToken); // Set token state

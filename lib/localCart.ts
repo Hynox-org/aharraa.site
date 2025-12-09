@@ -19,6 +19,7 @@ export interface LocalCartItem {
 }
 
 const LOCAL_CART_KEY = "aharraa-local-cart";
+let memoryCart: LocalCartItem[] = [];
 
 /**
  * Retrieves all items from the local cart.
@@ -28,8 +29,18 @@ export const getLocalCartItems = (): LocalCartItem[] => {
   if (typeof window === "undefined") {
     return [];
   }
-  const cartJson = localStorage.getItem(LOCAL_CART_KEY);
-  return cartJson ? JSON.parse(cartJson) : [];
+  try {
+    const cartJson = localStorage.getItem(LOCAL_CART_KEY);
+    if (cartJson) {
+      const parsed = JSON.parse(cartJson);
+      memoryCart = parsed; // Sync memory cart
+      return parsed;
+    }
+    return memoryCart; // Return memoryCart if localStorage is empty (or we are falling back)
+  } catch (error) {
+    console.warn("Failed to retrieve local cart items, using memory fallback:", error);
+    return memoryCart;
+  }
 };
 
 /**
@@ -37,10 +48,15 @@ export const getLocalCartItems = (): LocalCartItem[] => {
  * @param items An array of LocalCartItem to save.
  */
 export const saveLocalCartItems = (items: LocalCartItem[]) => {
+  memoryCart = items; // Always update memory cart
   if (typeof window === "undefined") {
     return;
   }
-  localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(items));
+  try {
+    localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.warn("Failed to save local cart items, using memory fallback:", error);
+  }
 };
 
 /**
@@ -50,7 +66,7 @@ export const saveLocalCartItems = (items: LocalCartItem[]) => {
  */
 export const addLocalCartItem = (newItem: Omit<LocalCartItem, '_id' | 'endDate' | 'itemTotalPrice' | 'addedDate' | 'menu' | 'plan' | 'menu' | 'plan'>, menu: MenuWithPopulatedMeals, plan: Plan): LocalCartItem[] => {
   const currentItems = getLocalCartItems();
-  
+
   const startDate = parseISO(newItem.startDate);
   const endDate = format(addDays(startDate, plan.durationDays - 1), "yyyy-MM-dd");
   // Updated itemTotalPrice calculation
@@ -63,8 +79,8 @@ export const addLocalCartItem = (newItem: Omit<LocalCartItem, '_id' | 'endDate' 
     itemTotalPrice,
     addedDate: new Date().toISOString(),
     // vendorId: menu._id, // Removed vendorId as it's not needed in LocalCartItem directly.
-    menu, 
-    plan, 
+    menu,
+    plan,
   };
 
   const updatedItems = [...currentItems, itemToAdd];
@@ -99,7 +115,7 @@ export const updateLocalCartItem = (itemId: string, updates: Partial<LocalCartIt
           updatedItem.endDate = format(addDays(newStartDate, plan.durationDays - 1), "yyyy-MM-dd");
           // Updated itemTotalPrice calculation
           updatedItem.itemTotalPrice = calculateItemTotalPrice(
-            menu, 
+            menu,
             plan,
             updatedItem.quantity,
             updatedItem.selectedMealTimes
@@ -130,10 +146,15 @@ export const removeLocalCartItem = (itemId: string): LocalCartItem[] => {
  * Clears all items from the local cart.
  */
 export const clearLocalCart = () => {
+  memoryCart = []; // Clear memory cart
   if (typeof window === "undefined") {
     return;
   }
-  localStorage.removeItem(LOCAL_CART_KEY);
+  try {
+    localStorage.removeItem(LOCAL_CART_KEY);
+  } catch (error) {
+    console.warn("Failed to clear local cart:", error);
+  }
 };
 
 /**

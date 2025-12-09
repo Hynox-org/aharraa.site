@@ -81,6 +81,10 @@ export async function apiRequest<T>(
   }
 }
 
+export async function pingServer(): Promise<{ ok: boolean; message: string }> {
+  return apiRequest<{ ok: boolean; message: string }>("/", "GET");
+}
+
 export async function validateToken(
   token: string
 ): Promise<ValidateTokenResponse> {
@@ -103,12 +107,12 @@ export async function forgotPassword(email: string): Promise<{ message: string }
 }
 
 export async function resetPassword(
-  newPassword: string, 
+  newPassword: string,
   token: string
 ): Promise<{ message: string }> {
   return apiRequest<{ message: string }>(
-    "/auth/reset-password", 
-    "POST", 
+    "/auth/reset-password",
+    "POST",
     { newPassword },  // ✅ Only newPassword in body
     token             // ✅ Token as 4th parameter (becomes Authorization header)
   );
@@ -170,7 +174,7 @@ export async function getProfileDetails(
     null,
     token
   );
-  console.log({response})
+  console.log({ response })
   return response as UserProfile;
 }
 
@@ -286,14 +290,14 @@ export async function clearCart(userId: string, token: string) {
 }
 export async function removeFromCart(userId: string, cartItemId: string, token: string) {
   return apiRequest(`/api/cart/${userId}/remove/${cartItemId}`, "DELETE", null, token);
-} 
+}
 export async function updateCartItemQuantity(
   userId: string,
   cartItemId: string,
   quantity: number,
   token: string
 ): Promise<Cart> {
-    return apiRequest<Cart>(`/api/cart/${userId}/update-quantity/${cartItemId}`,"PUT",{ quantity }, token);
+  return apiRequest<Cart>(`/api/cart/${userId}/update-quantity/${cartItemId}`, "PUT", { quantity }, token);
 }
 export async function updateCartItemPersonDetails(
   userId: string,
@@ -301,7 +305,7 @@ export async function updateCartItemPersonDetails(
   personDetails: PersonDetails[],
   token: string
 ): Promise<Cart> {
-    return apiRequest<Cart>(`/api/cart/${userId}/update-person-details/${cartItemId}`,"PUT",{ personDetails },token);
+  return apiRequest<Cart>(`/api/cart/${userId}/update-person-details/${cartItemId}`, "PUT", { personDetails }, token);
 }
 
 export async function getCartTotalQuantity(
