@@ -352,7 +352,7 @@ export default function PricingPage() {
                   <span className={`mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] md:text-xs font-semibold text-center whitespace-nowrap ${
                     currentStep >= step.id ? 'text-black' : 'text-gray-400'
                   }`}>
-                    <span className="hidden sm:inline">{step.name}</span>
+                    <span className="sm:inline">{step.name}</span>
                   </span>
                 </div>
                 
