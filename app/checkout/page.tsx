@@ -35,7 +35,7 @@ import {
   calculatePlatformCost,
   calculateGstCost,
 } from "@/lib/checkout-helpers"
-import { getCartItems , clearCart} from "@/lib/api"; 
+import { getCartItems, clearCart } from "@/lib/api";
 import { Button } from "@/components/ui/button"
 
 export default function CheckoutPage() {
@@ -80,7 +80,7 @@ export default function CheckoutPage() {
       fetchCart()
     }
   }, [isAuthenticated, loading, user?.id])
-  
+
   const TIME_SLOTS: Record<MealCategory, TimeSlot[]> = {
     Breakfast: [
       { label: "7:00 AM - 7:45 AM", value: "7:00 AM - 7:45 AM" },
@@ -119,9 +119,9 @@ export default function CheckoutPage() {
       ) || [],
     [cartData?.items, user?.id]
   );
-console.log("userCartItems:", userCartItems);
+  console.log("userCartItems:", userCartItems);
 
-const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
+  const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItem | null => {
         if (typeof cartItem.menu === 'string' || !cartItem.menu) {
@@ -148,14 +148,14 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       })
       .filter((item): item is CheckoutItem => item !== null)
   }, [userCartItems])
-  
+
   const relevantMealCategories = useMemo(() => {
-    const categories = userCartItems.flatMap((item) => 
+    const categories = userCartItems.flatMap((item) =>
       item.selectedMealTimes || []
     );
     return Array.from(new Set(categories)) as MealCategory[];
   }, [userCartItems]);
-  
+
   const displayCheckoutItemsView: CheckoutItemView[] = useMemo(() => {
     return userCartItems
       .map((cartItem): CheckoutItemView | null => {
@@ -167,7 +167,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
             name: cartItem.menu.name,
             coverImage: cartItem.menu.coverImage || "/defaults/default-meal.jpg",
           },
-          plan: { id: cartItem.plan._id, name: cartItem.plan.name , durationDays: cartItem.plan.durationDays },
+          plan: { id: cartItem.plan._id, name: cartItem.plan.name, durationDays: cartItem.plan.durationDays },
           quantity: cartItem.quantity,
           personDetails: cartItem.personDetails,
           startDate: cartItem.startDate,
@@ -182,8 +182,8 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       })
       .filter((item): item is CheckoutItemView => item !== null)
   }, [userCartItems])
-  
-   const totalPrice = useMemo(
+
+  const totalPrice = useMemo(
     () => userCartItems.reduce((sum, item) => sum + item.itemTotalPrice, 0),
     [userCartItems]
   )
@@ -264,7 +264,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
   if (!isAuthenticated || !user) {
     return null
   }
-  
+
   const handleAddressChange = (
     category: MealCategory,
     field: keyof DeliveryAddress,
@@ -380,7 +380,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       }
     } catch (error) {
       console.error("Error fetching profile addresses:", error)
-        toast.error("Failed to fetch addresses from profile.")
+      toast.error("Failed to fetch addresses from profile.")
     } finally {
       setIsFetchingAddresses(false)
     }
@@ -391,8 +391,9 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       toast.error("User not authenticated or user email not found.")
       return
     }
-    const allMealCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"];
-    for (const category of allMealCategories) {
+
+    // Validate only relevant meal categories
+    for (const category of relevantMealCategories) {
       const address = deliveryAddresses[category];
       if (
         !address ||
@@ -421,7 +422,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
         email: user.email,
       }
 
-      if (deliveryAddresses.Breakfast) {
+      if (relevantMealCategories.includes('Breakfast') && deliveryAddresses.Breakfast) {
         profileUpdatePayload.breakfastDeliveryLocation = {
           street: deliveryAddresses.Breakfast.street,
           state: "Tamil Nadu",
@@ -431,7 +432,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           selectedTimeSlot: deliveryAddresses.Breakfast.selectedTimeSlot,
         }
       }
-      if (deliveryAddresses.Lunch) {
+      if (relevantMealCategories.includes('Lunch') && deliveryAddresses.Lunch) {
         profileUpdatePayload.lunchDeliveryLocation = {
           street: deliveryAddresses.Lunch.street,
           state: "Tamil Nadu",
@@ -441,7 +442,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           selectedTimeSlot: deliveryAddresses.Lunch.selectedTimeSlot,
         }
       }
-      if (deliveryAddresses.Dinner) {
+      if (relevantMealCategories.includes('Dinner') && deliveryAddresses.Dinner) {
         profileUpdatePayload.dinnerDeliveryLocation = {
           street: deliveryAddresses.Dinner.street,
           state: "Tamil Nadu",
@@ -455,16 +456,21 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       console.log("Updating user profile with delivery addresses:", profileUpdatePayload)
       await updateProfileDetails(profileUpdatePayload, token)
       toast.success("Delivery addresses saved to your profile!")
-      console.log("initialCheckoutItems:",displayCheckoutItems )
-      
+      console.log("initialCheckoutItems:", displayCheckoutItems)
+
+      // Filter delivery addresses to include only relevant categories
+      const filteredDeliveryAddresses = relevantMealCategories.reduce((acc, category) => {
+        if (deliveryAddresses[category]) {
+          acc[category] = deliveryAddresses[category]!;
+        }
+        return acc;
+      }, {} as Record<MealCategory, DeliveryAddress>);
+
       const finalizedCheckoutData: CheckoutData = {
         id: `checkout-${Date.now()}-${user.id}`,
         userId: user.id,
         items: displayCheckoutItems,
-        deliveryAddresses: deliveryAddresses as Record<
-          MealCategory,
-          DeliveryAddress
-        >,
+        deliveryAddresses: filteredDeliveryAddresses,
         totalPrice: grandTotal,
         checkoutDate: new Date().toISOString(),
       }
@@ -490,7 +496,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
         paymentSessionId: response.paymentSessionId,
         redirectTarget: "_self",
       }
-      
+
       cashfree.checkout(checkoutOptions).then(async (result: any) => {
         if (result.error) {
           console.error("Payment error:", result.error)
@@ -502,78 +508,78 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           toast.success(`Order created successfully!`)
         }
       })
-  } catch (error: any) {
-    console.error("Error during checkout process:", error)
-    toast.error(`Failed to complete checkout: ${error.message || "Unknown error"}`)
-  } finally {
-    setIsProcessingPayment(false)
-    setCartLoading(false)
-  }
-}
-
-const handleCopyAddress = (fromCategory: MealCategory, toCategory: MealCategory) => {
-  const sourceAddress = deliveryAddresses[fromCategory]
-  if (sourceAddress) {
-    const { selectedTimeSlot, ...addressWithoutTimeSlot } = sourceAddress
-    setDeliveryAddresses((prev) => ({
-      ...prev,
-      [toCategory]: {
-        ...prev[toCategory], // Keep existing time slot
-        ...addressWithoutTimeSlot, // Copy other fields
-      },
-    }))
-    toast.success(`Address copied from ${fromCategory} to ${toCategory}`)
-  }
-}
-
-const handleUseDefaultForAll = (checked: boolean, category: MealCategory) => {
-  setUseDefaultForAll(checked)
-  setPrimaryAddress(category)
-  
-  if (checked) {
-    const sourceAddress = deliveryAddresses[category]
-    if (sourceAddress) {
-      const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
-      const newAddresses = { ...deliveryAddresses }
-      
-      allCategories.forEach((cat) => {
-        if (cat !== category) {
-          const { selectedTimeSlot, ...addressWithoutTimeSlot } = sourceAddress
-          newAddresses[cat] = {
-            ...newAddresses[cat], // Keep existing time slot if any
-            ...addressWithoutTimeSlot, // Copy all other fields
-          }        
-        }
-      })
-      
-      setDeliveryAddresses(newAddresses)
-      toast.success(`Using ${category} address for all deliveries`)
+    } catch (error: any) {
+      console.error("Error during checkout process:", error)
+      toast.error(`Failed to complete checkout: ${error.message || "Unknown error"}`)
+    } finally {
+      setIsProcessingPayment(false)
+      setCartLoading(false)
     }
   }
-}
 
-const handleAddressChangeWithSync = (
-  category: MealCategory,
-  field: keyof DeliveryAddress,
-  value: string
-) => {
-  handleAddressChange(category, field, value)
-  
-  if (useDefaultForAll && category === primaryAddress  && field !== 'selectedTimeSlot') {
-    const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
-    allCategories.forEach((cat) => {
-      if (cat !== category) {
-        setDeliveryAddresses((prev) => ({
-          ...prev,
-          [cat]: {
-            ...prev[cat],
-            [field]: value,
-          } as DeliveryAddress,
-        }))
-      }
-    })
+  const handleCopyAddress = (fromCategory: MealCategory, toCategory: MealCategory) => {
+    const sourceAddress = deliveryAddresses[fromCategory]
+    if (sourceAddress) {
+      const { selectedTimeSlot, ...addressWithoutTimeSlot } = sourceAddress
+      setDeliveryAddresses((prev) => ({
+        ...prev,
+        [toCategory]: {
+          ...prev[toCategory], // Keep existing time slot
+          ...addressWithoutTimeSlot, // Copy other fields
+        },
+      }))
+      toast.success(`Address copied from ${fromCategory} to ${toCategory}`)
+    }
   }
-}
+
+  const handleUseDefaultForAll = (checked: boolean, category: MealCategory) => {
+    setUseDefaultForAll(checked)
+    setPrimaryAddress(category)
+
+    if (checked) {
+      const sourceAddress = deliveryAddresses[category]
+      if (sourceAddress) {
+        const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
+        const newAddresses = { ...deliveryAddresses }
+
+        allCategories.forEach((cat) => {
+          if (cat !== category) {
+            const { selectedTimeSlot, ...addressWithoutTimeSlot } = sourceAddress
+            newAddresses[cat] = {
+              ...newAddresses[cat], // Keep existing time slot if any
+              ...addressWithoutTimeSlot, // Copy all other fields
+            }
+          }
+        })
+
+        setDeliveryAddresses(newAddresses)
+        toast.success(`Using ${category} address for all deliveries`)
+      }
+    }
+  }
+
+  const handleAddressChangeWithSync = (
+    category: MealCategory,
+    field: keyof DeliveryAddress,
+    value: string
+  ) => {
+    handleAddressChange(category, field, value)
+
+    if (useDefaultForAll && category === primaryAddress && field !== 'selectedTimeSlot') {
+      const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
+      allCategories.forEach((cat) => {
+        if (cat !== category) {
+          setDeliveryAddresses((prev) => ({
+            ...prev,
+            [cat]: {
+              ...prev[cat],
+              [field]: value,
+            } as DeliveryAddress,
+          }))
+        }
+      })
+    }
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -605,7 +611,7 @@ const handleAddressChangeWithSync = (
                 {isFetchingAddresses ? "Fetching..." : "Fetch Addresses"}
               </Button>
             </div>
-            
+
             {/* Global "Use Same Address for All" Option */}
             <div className="rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 shadow-sm bg-white border border-gray-100">
               <div className="flex items-start gap-2 sm:gap-3">
@@ -639,21 +645,21 @@ const handleAddressChangeWithSync = (
                 // Otherwise maintain original order
                 return relevantMealCategories.indexOf(a) - relevantMealCategories.indexOf(b);
               }).map((category) => (
-              <DeliveryAddressCard
-                key={category as MealCategory}
-                category={category as MealCategory}
-                address={deliveryAddresses[category as MealCategory]}
-                onAddressChange={handleAddressChangeWithSync}
-                onGeolocation={handleGeolocation}
-                onCopyAddress={handleCopyAddress}
-                isPrimary={useDefaultForAll && category === primaryAddress}
-                isDisabled={useDefaultForAll && category !== primaryAddress}
-                allCategories={relevantMealCategories}
-                showCopyOptions={!useDefaultForAll}
-                timeSlots={TIME_SLOTS[category as MealCategory]}
-                onTimeSlotChange={handleTimeSlotChange}
-              />
-            ))}
+                <DeliveryAddressCard
+                  key={category as MealCategory}
+                  category={category as MealCategory}
+                  address={deliveryAddresses[category as MealCategory]}
+                  onAddressChange={handleAddressChangeWithSync}
+                  onGeolocation={handleGeolocation}
+                  onCopyAddress={handleCopyAddress}
+                  isPrimary={useDefaultForAll && category === primaryAddress}
+                  isDisabled={useDefaultForAll && category !== primaryAddress}
+                  allCategories={relevantMealCategories}
+                  showCopyOptions={!useDefaultForAll}
+                  timeSlots={TIME_SLOTS[category as MealCategory]}
+                  onTimeSlotChange={handleTimeSlotChange}
+                />
+              ))}
 
             <CheckoutItemCard items={displayCheckoutItemsView} />
           </div>
