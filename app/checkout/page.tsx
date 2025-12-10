@@ -83,19 +83,22 @@ export default function CheckoutPage() {
   
   const TIME_SLOTS: Record<MealCategory, TimeSlot[]> = {
     Breakfast: [
-      { label: "7:00 AM - 8:00 AM", value: "7:00 AM - 8:00 AM" },
-      { label: "8:00 AM - 9:00 AM", value: "8:00 AM - 9:00 AM" },
-      { label: "9:00 AM - 10:00 AM", value: "9:00 AM - 10:00 AM" },
+      { label: "7:00 AM - 7:45 AM", value: "7:00 AM - 7:45 AM" },
+      { label: "7:55 AM - 8:40 AM", value: "7:55 AM - 8:40 AM" },
+      { label: "8:50 AM - 9:35 AM", value: "8:50 AM - 9:35 AM" },
+      { label: "9:45 AM - 10:30 AM", value: "9:45 AM - 10:30 AM" },
     ],
     Lunch: [
-      { label: "12:00 PM - 1:00 PM", value: "12:00 PM - 1:00 PM" },
-      { label: "1:00 PM - 2:00 PM", value: "1:00 PM - 2:00 PM" },
-      { label: "2:00 PM - 3:00 PM", value: "2:00 PM - 3:00 PM" },
+      { label: "12:00 PM - 12:45 PM", value: "12:00 PM - 12:45 PM" },
+      { label: "12:55 PM - 1:40 PM", value: "12:55 PM - 1:40 PM" },
+      { label: "1:50 PM - 2:35 PM", value: "1:50 PM - 2:35 PM" },
+      { label: "2:45 PM - 3:30 PM", value: "2:45 PM - 3:30 PM" },
     ],
     Dinner: [
-      { label: "7:00 PM - 8:00 PM", value: "7:00 PM - 8:00 PM" },
-      { label: "8:00 PM - 9:00 PM", value: "8:00 PM - 9:00 PM" },
-      { label: "9:00 PM - 10:00 PM", value: "9:00 PM - 10:00 PM" },
+      { label: "7:00 PM - 7:45 PM", value: "7:00 PM - 7:45 PM" },
+      { label: "7:55 PM - 8:40 PM", value: "7:55 PM - 8:40 PM" },
+      { label: "8:50 PM - 9:35 PM", value: "8:50 PM - 9:35 PM" },
+      { label: "9:45 PM - 10:30 PM", value: "9:45 PM - 10:30 PM" },
     ],
   }
   const initializeSDK = async () => {
@@ -145,6 +148,13 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       })
       .filter((item): item is CheckoutItem => item !== null)
   }, [userCartItems])
+  
+  const relevantMealCategories = useMemo(() => {
+    const categories = userCartItems.flatMap((item) => 
+      item.selectedMealTimes || []
+    );
+    return Array.from(new Set(categories)) as MealCategory[];
+  }, [userCartItems]);
   
   const displayCheckoutItemsView: CheckoutItemView[] = useMemo(() => {
     return userCartItems
@@ -337,6 +347,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
             zip: location.pincode || "",
             lat: location.lat,
             lon: location.lon,
+            selectedTimeSlot: location.selectedTimeSlot || "",
           }
         }
 
@@ -620,7 +631,14 @@ const handleAddressChangeWithSync = (
             </div>
 
             {/* Address Cards */}
-            {["Breakfast", "Lunch", "Dinner"].map((category, index) => (
+            {relevantMealCategories
+              .sort((a, b) => {
+                // Primary address comes first
+                if (useDefaultForAll && a === primaryAddress) return -1;
+                if (useDefaultForAll && b === primaryAddress) return 1;
+                // Otherwise maintain original order
+                return relevantMealCategories.indexOf(a) - relevantMealCategories.indexOf(b);
+              }).map((category) => (
               <DeliveryAddressCard
                 key={category as MealCategory}
                 category={category as MealCategory}
@@ -630,7 +648,7 @@ const handleAddressChangeWithSync = (
                 onCopyAddress={handleCopyAddress}
                 isPrimary={useDefaultForAll && category === primaryAddress}
                 isDisabled={useDefaultForAll && category !== primaryAddress}
-                allCategories={["Breakfast", "Lunch", "Dinner"]}
+                allCategories={relevantMealCategories}
                 showCopyOptions={!useDefaultForAll}
                 timeSlots={TIME_SLOTS[category as MealCategory]}
                 onTimeSlotChange={handleTimeSlotChange}

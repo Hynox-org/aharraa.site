@@ -22,6 +22,7 @@ export interface DeliveryLocation {
   pincode: string;
   lat: number;
   lon: number;
+  selectedTimeSlot?: string;
 }
 
 export interface UserProfile {

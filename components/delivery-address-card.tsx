@@ -51,9 +51,7 @@ export function DeliveryAddressCard({
 
   return (
     <div 
-      className={`bg-white rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm border border-gray-100 relative overflow-hidden transition-all duration-300 ${
-        isDisabled ? 'opacity-60' : 'hover:shadow-md'
-      }`}
+      className={`bg-white rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm border border-gray-100 relative overflow-hidden transition-all duration-300 `}
       // style={{ pointerEvents: isDisabled ? "none" : "auto" }}
     >
       {/* Completion Badge */}

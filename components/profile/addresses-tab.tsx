@@ -37,7 +37,7 @@ export function AddressesTab({
   const [fetchingLocation, setFetchingLocation] = useState(false);
 
   const handleLocationChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     locationType:
       | "breakfastDeliveryLocation"
       | "lunchDeliveryLocation"
@@ -52,7 +52,29 @@ export function AddressesTab({
       },
     }));
   };
-
+const getTimeSlotsForMeal = (mealId: string) => {
+    const timeSlotOptions = {
+      breakfast: [
+        { label: "7:00 AM - 7:45 AM", value: "7:00 AM - 7:45 AM" },
+        { label: "7:55 AM - 8:40 AM", value: "7:55 AM - 8:40 AM" },
+        { label: "8:50 AM - 9:35 AM", value: "8:50 AM - 9:35 AM" },
+        { label: "9:45 AM - 10:30 AM", value: "9:45 AM - 10:30 AM" },
+      ],
+      lunch: [
+        { label: "12:00 PM - 12:45 PM", value: "12:00 PM - 12:45 PM" },
+        { label: "12:55 PM - 1:40 PM", value: "12:55 PM - 1:40 PM" },
+        { label: "1:50 PM - 2:35 PM", value: "1:50 PM - 2:35 PM" },
+        { label: "2:45 PM - 3:30 PM", value: "2:45 PM - 3:30 PM" },
+      ],
+      dinner: [
+        { label: "7:00 PM - 7:45 PM", value: "7:00 PM - 7:45 PM" },
+        { label: "7:55 PM - 8:40 PM", value: "7:55 PM - 8:40 PM" },
+        { label: "8:50 PM - 9:35 PM", value: "8:50 PM - 9:35 PM" },
+        { label: "9:45 PM - 10:30 PM", value: "9:45 PM - 10:30 PM" },
+      ],
+    };
+    return timeSlotOptions[mealId as keyof typeof timeSlotOptions] || [];
+  };
   const handleFetchGPSLocation = async (
     locationType:
       | "breakfastDeliveryLocation"
@@ -104,6 +126,7 @@ export function AddressesTab({
       gradient: "from-amber-400 via-orange-400 to-amber-500",
       iconBg: "bg-amber-100",
       iconColor: "text-amber-600",
+      // timeSlots: profile.breakfastDeliveryLocation?.selectedTimeSlot,
     },
     {
       id: "lunch",
@@ -114,6 +137,7 @@ export function AddressesTab({
       gradient: "from-orange-400 via-red-400 to-pink-500",
       iconBg: "bg-orange-100",
       iconColor: "text-orange-600",
+      // timeSlots: profile.lunchDeliveryLocation?.selectedTimeSlot,
     },
     {
       id: "dinner",
@@ -124,6 +148,7 @@ export function AddressesTab({
       gradient: "from-indigo-500 via-purple-500 to-indigo-600",
       iconBg: "bg-indigo-100",
       iconColor: "text-indigo-600",
+      // timeSlots: profile.dinnerDeliveryLocation?.selectedTimeSlot,
     },
   ];
 
@@ -258,6 +283,24 @@ export function AddressesTab({
                           className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
                         />
                       </div>
+                      <div>
+                      <label className="block text-xs font-semibold mb-1.5 sm:mb-2 text-gray-700">
+                        Preferred Time Slot
+                      </label>
+                      <select
+                        name="selectedTimeSlot"
+                        value={formData[item.formKey]?.selectedTimeSlot || ""}
+                        onChange={(e) => handleLocationChange(e, item.formKey)}
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3CB371] border-2 border-gray-300 text-black bg-white"
+                      >
+                        <option value="">Select a time slot</option>
+                        {getTimeSlotsForMeal(item.id).map((slot) => (
+                          <option key={slot.value} value={slot.value}>
+                            {slot.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     </div>
 
                     <button
@@ -305,7 +348,31 @@ export function AddressesTab({
                             </p>
                           </div>
                         )}
-
+{item.location?.selectedTimeSlot && (
+                          <div>
+                            <p className="text-[10px] sm:text-xs font-semibold mb-1 text-gray-400">
+                              DELIVERY TIME
+                            </p>
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+                              <svg
+                                className="w-4 h-4 text-green-600"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              <p className="text-xs sm:text-sm font-bold text-green-700">
+                                {item.location.selectedTimeSlot}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                         {item.location?.lat !== 0 && item.location?.lat !== undefined && (
                           <div>
                             <p
@@ -362,6 +429,7 @@ export function AddressesTab({
                   pincode: "",
                   lat: 0,
                   lon: 0,
+                  selectedTimeSlot: "",
                 },
                 lunchDeliveryLocation: profile?.lunchDeliveryLocation || {
                   street: "",
@@ -369,6 +437,7 @@ export function AddressesTab({
                   pincode: "",
                   lat: 0,
                   lon: 0,
+                  selectedTimeSlot: "",
                 },
                 dinnerDeliveryLocation: profile?.dinnerDeliveryLocation || {
                   street: "",
@@ -376,6 +445,7 @@ export function AddressesTab({
                   pincode: "",
                   lat: 0,
                   lon: 0,
+                  selectedTimeSlot: "",
                 },
               });
             }}

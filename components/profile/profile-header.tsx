@@ -28,9 +28,10 @@ export function ProfileHeader({
               <div
                 className="w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-2xl sm:rounded-3xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl font-bold shadow-xl sm:shadow-2xl transform transition-transform group-hover:scale-105 bg-[#3CB371] text-white"
               >
-                {profile.fullName
-                  ? profile.fullName.charAt(0).toUpperCase()
-                  : profile.email.charAt(0).toUpperCase()}
+                <div className="...">
+                  {(profile.fullName?.charAt(0) || profile.email?.charAt(0) || 'U').toUpperCase()}
+                </div>
+
               </div>
               <div
                 className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md sm:shadow-lg bg-[#3CB371]"
