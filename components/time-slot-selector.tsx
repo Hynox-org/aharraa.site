@@ -22,9 +22,9 @@ export function TimeSlotSelector({
 }: TimeSlotSelectorProps) {
   return (
     <div className="space-y-3">
-      <label className="text-sm sm:text-base mb-1.5 font-semibold text-black">
+      <p className="text-sm sm:text-base mb-1.5 font-semibold text-black py-2">
         Select {category} Delivery Time *
-      </label>
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
         {timeSlots.map((slot) => (
           <button
