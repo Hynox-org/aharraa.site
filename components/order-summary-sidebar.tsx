@@ -189,7 +189,7 @@ export function OrderSummarySidebar({
                   {/* Action Buttons */}
                   <div className="space-y-2 md:space-y-3">
                     {/* Direct Checkout Button */}
-                    {/* <button
+                    <button
                       onClick={onDirectCheckout}
                       disabled={!isComplete || isDirectCheckingOut || isAddingToCart}
                       className="w-full py-2.5 md:py-3 lg:py-3.5 rounded-lg md:rounded-xl font-bold text-xs md:text-sm lg:text-base
@@ -206,8 +206,7 @@ export function OrderSummarySidebar({
                           <span>Checkout Now</span>
                         </>
                       )}
-                    </button> */}
-
+                    </button>
                     {/* Add to Cart Button */}
                     <button
                       onClick={onAddToCart}

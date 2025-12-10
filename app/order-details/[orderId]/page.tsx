@@ -7,7 +7,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { toast } from "sonner";
 import { getOrderDetails, updateOrder, verifyPayment } from "@/lib/api";
-import { Order, PopulatedOrder, DeliveryAddress } from "@/lib/types";
+import { Order, PopulatedOrder, DeliveryAddress ,MealCategory  } from "@/lib/types";
 import LottieAnimation from "@/components/lottie-animation";
 import ItayCheffAnimation from "@/public/lottie/ItayCheff.json";
 import {
@@ -26,6 +26,9 @@ import {
   Timer,
   FastForward,
   Download,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
 
 interface OrderDetailsPageProps {
@@ -41,7 +44,29 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const [order, setOrder] = useState<PopulatedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+  const [editedAddresses, setEditedAddresses] = useState<Record<string, DeliveryAddress>>({});
+  const TIME_SLOTS: Record<MealCategory, { label: string; value: string }[]> = {
+    Breakfast: [
+      { label: "7:00 AM - 7:45 AM", value: "7:00 AM - 7:45 AM" },
+      { label: "7:55 AM - 8:40 AM", value: "7:55 AM - 8:40 AM" },
+      { label: "8:50 AM - 9:35 AM", value: "8:50 AM - 9:35 AM" },
+      { label: "9:45 AM - 10:30 AM", value: "9:45 AM - 10:30 AM" },
+    ],
+    Lunch: [
+      { label: "12:00 PM - 12:45 PM", value: "12:00 PM - 12:45 PM" },
+      { label: "12:55 PM - 1:40 PM", value: "12:55 PM - 1:40 PM" },
+      { label: "1:50 PM - 2:35 PM", value: "1:50 PM - 2:35 PM" },
+      { label: "2:45 PM - 3:30 PM", value: "2:45 PM - 3:30 PM" },
+    ],
+    Dinner: [
+      { label: "7:00 PM - 7:45 PM", value: "7:00 PM - 7:45 PM" },
+      { label: "7:55 PM - 8:40 PM", value: "7:55 PM - 8:40 PM" },
+      { label: "8:50 PM - 9:35 PM", value: "8:50 PM - 9:35 PM" },
+      { label: "9:45 PM - 10:30 PM", value: "9:45 PM - 10:30 PM" },
+    ],
+  }
   const getTomorrowDate = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -69,6 +94,78 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
       fetchOrderDetails(token, id as string);
     }
   }, [user, token, authLoading, router, orderId]);
+  const handleEditAddress = () => {
+    setIsEditingAddress(true);
+    if (order?.deliveryAddresses) {
+      setEditedAddresses({ ...order.deliveryAddresses });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingAddress(false);
+    if (order?.deliveryAddresses) {
+      setEditedAddresses({ ...order.deliveryAddresses });
+    }
+  };
+
+  const handleAddressChange = (
+    category: string,
+    field: keyof DeliveryAddress,
+    value: string
+  ) => {
+    setEditedAddresses((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [field]: value,
+      },
+    }));
+  };
+
+ const handleSaveAddresses = async () => {
+  if (!order || !token) {
+    toast.error("Order details or token not available.");
+    return;
+  }
+
+  // Validate addresses
+  for (const [category, address] of Object.entries(editedAddresses)) {
+    if (!address.street?.trim()) {
+      toast.error(`Street address is required for ${category}`);
+      return;
+    }
+    if (!address.zip?.trim()) {
+      toast.error(`Zip code is required for ${category}`);
+      return;
+    }
+    if (address.city === 'Coimbatore' && !address.zip.match(/^641\d{3}$/)) {
+      toast.error(`Invalid zip code for ${category}. Must start with 641`);
+      return;
+    }
+  }
+
+  setIsSavingAddress(true);
+  try {
+    const orderIdToUse = order._id!;
+    const updatePayload = {
+      deliveryAddresses: editedAddresses,
+    };
+
+    await updateOrder(orderIdToUse, updatePayload, token);
+    
+    // Refetch the order to get populated data
+    const id = Array.isArray(orderId) ? orderId[0] : orderId;
+    await fetchOrderDetails(token, id as string);
+    
+    setIsEditingAddress(false);
+    toast.success("Delivery addresses updated successfully!");
+  } catch (error: any) {
+    console.error("Error updating delivery addresses:", error);
+    toast.error(error.message || "Failed to update delivery addresses.");
+  } finally {
+    setIsSavingAddress(false);
+  }
+};
 
   const handleSkipTomorrow = async (itemId: string) => {
     if (!order || !token) {
@@ -151,7 +248,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
         toast.success(verificationResponse.message)
       }
       const orderDetails = await getOrderDetails(id, token)
-      setOrder(orderDetails)
+      setOrder(orderDetails);
+      if (orderDetails.deliveryAddresses) {
+        setEditedAddresses(orderDetails.deliveryAddresses);
+      }
       toast.success("Order details fetched successfully!")
     } catch (error: any) {
       toast.error(`Failed to fetch order details: ${error.message}`);
@@ -210,7 +310,8 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
       </main>
     );
   }
-
+// Check if order can be edited
+  const canEditAddress = ['pending', 'confirmed', 'readyForDelivery'].includes(order.status);
   return (
     <main className="min-h-screen bg-white">
       <Header />
@@ -366,38 +467,131 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
           </div>
 
           {/* Delivery Addresses - Mobile Optimized */}
-          <div
-            className="pt-4 sm:pt-6 border-t border-gray-200"
-          >
-            <h3
-              className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 text-black"
-            >
-              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
-              <span>Delivery Information</span>
-            </h3>
+          <div className="pt-4 sm:pt-6 border-t border-gray-200">
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2 text-black">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+                <span>Delivery Information</span>
+              </h3>
+    
+              {canEditAddress && !isEditingAddress && (
+                <button
+                  onClick={handleEditAddress}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </button>
+              )}
+    
+              {isEditingAddress && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCancelEdit}
+                    disabled={isSavingAddress}
+                    className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-gray-600 hover:bg-gray-700 text-white disabled:opacity-50"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveAddresses}
+                    disabled={isSavingAddress}
+                    className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-[#3CB371] hover:bg-[#2FA05E] text-white disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    {isSavingAddress ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="space-y-3 sm:space-y-4">
-              {Object.entries(order.deliveryAddresses).map(
+              {/* Use editedAddresses instead of order.deliveryAddresses */}
+              {Object.entries(isEditingAddress ? editedAddresses : order.deliveryAddresses).map(
                 ([menuType, address], index) => (
                   <div
                     key={index}
                     className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50 border border-gray-200"
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <Utensils
-                        className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-600"
-                      />
-                      <p
-                        className="text-base sm:text-lg font-semibold capitalize text-black"
-                      >
+                      <Utensils className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-600" />
+                      <p className="text-base sm:text-lg font-semibold capitalize text-black">
                         {menuType} Delivery
                       </p>
                     </div>
-                    <p
-                      className="text-xs sm:text-sm break-words text-gray-600"
-                    >
-                      <span className="font-medium">Address:</span>{" "}
-                      {address.street}, {address.city} - {address.zip}
-                    </p>
+                    {isEditingAddress ? (
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-xs font-semibold text-gray-700 block mb-1">
+                            Street Address
+                          </label>
+                          <input
+                            type="text"
+                            value={editedAddresses[menuType]?.street || ""}
+                            onChange={(e) => handleAddressChange(menuType, "street", e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371] text-black"
+                            placeholder="Enter street address"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs font-semibold text-gray-700 block mb-1">
+                              City
+                            </label>
+                            <input
+                              type="text"
+                              value={editedAddresses[menuType]?.city || "Coimbatore"}
+                              onChange={(e) => handleAddressChange(menuType, "city", e.target.value)}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371] text-black"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold text-gray-700 block mb-1">
+                              Zip Code
+                            </label>
+                            <input
+                              type="text"
+                              value={editedAddresses[menuType]?.zip || ""}
+                              onChange={(e) => handleAddressChange(menuType, "zip", e.target.value)}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371] text-black"
+                              placeholder="641001"
+                              maxLength={6}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-xs font-semibold text-gray-700 block mb-1">
+                            Delivery Time Slot
+                          </label>
+                          <select
+                            value={editedAddresses[menuType]?.selectedTimeSlot || ""}
+                            onChange={(e) => handleAddressChange(menuType, "selectedTimeSlot", e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371] text-black"
+                          >
+                            <option value="">Select a time slot</option>
+                            {TIME_SLOTS[menuType as MealCategory]?.map((slot) => (
+                              <option key={slot.value} value={slot.value}>
+                                {slot.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className="text-xs sm:text-sm break-words text-gray-600">
+                          <span className="font-medium">Address:</span>{" "}
+                          {address.street}, {address.city} - {address.zip}
+                        </p>
+                        {address.selectedTimeSlot && (
+                          <p className="text-xs sm:text-sm text-gray-600 flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-[#3CB371]" />
+                            <span className="font-medium">Time Slot:</span> {address.selectedTimeSlot}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               )}

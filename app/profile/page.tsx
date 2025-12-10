@@ -165,9 +165,12 @@ export default function ProfilePage() {
       }
 
       const updatedData = await updateProfileDetails(formData as UserProfile, token);
+      console.log("updatedData",updatedData);
       setProfile(updatedData);
       toast.success("Profile updated successfully!");
       setIsEditing(false);
+      fetchOrders(token);
+      fetchUserProfile(token);
     } catch (error: any) {
       toast.error(`Failed to update profile: ${error.message}`);
       if (error.message.includes("session expired")) {

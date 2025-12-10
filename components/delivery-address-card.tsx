@@ -2,6 +2,7 @@
 
 import { IoLocation, IoCopy, IoCheckmarkCircle, IoNavigate, IoAlertCircle } from "react-icons/io5"
 import { DeliveryAddress, MealCategory } from "@/lib/types"
+import { TimeSlotSelector } from "./time-slot-selector"
 import { useState } from "react"
 import { Spinner } from "./ui/spinner"
 
@@ -15,8 +16,13 @@ interface DeliveryAddressCardProps {
   isDisabled?: boolean
   allCategories?: MealCategory[]
   showCopyOptions?: boolean
+  timeSlots: TimeSlot[]
+  onTimeSlotChange: (category: MealCategory, slot: string) => void
 }
-
+interface TimeSlot {
+  label: string
+  value: string
+}
 export function DeliveryAddressCard({ 
   category, 
   address, 
@@ -26,7 +32,9 @@ export function DeliveryAddressCard({
   isPrimary = false,
   isDisabled = false,
   allCategories = [],
-  showCopyOptions = true
+  showCopyOptions = true,
+  timeSlots,
+  onTimeSlotChange,
 }: DeliveryAddressCardProps) {
   const [showCopyMenu, setShowCopyMenu] = useState(false)
   const [isGeolocationLoading, setIsGeolocationLoading] = useState(false)
@@ -43,10 +51,8 @@ export function DeliveryAddressCard({
 
   return (
     <div 
-      className={`bg-white rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm border border-gray-100 relative overflow-hidden transition-all duration-300 ${
-        isDisabled ? 'opacity-60' : 'hover:shadow-md'
-      }`}
-      style={{ pointerEvents: isDisabled ? "none" : "auto" }}
+      className={`bg-white rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm border border-gray-100 relative overflow-hidden transition-all duration-300 `}
+      // style={{ pointerEvents: isDisabled ? "none" : "auto" }}
     >
       {/* Completion Badge */}
       {isComplete && !isDisabled && (
@@ -121,7 +127,7 @@ export function DeliveryAddressCard({
             <button
               onClick={() => setShowCopyMenu(!showCopyMenu)}
               disabled={isDisabled || isCopyingAddress}
-              className="w-full h-9 md:h-11 px-3 md:px-4 rounded-lg md:rounded-xl flex items-center justify-center gap-1.5 md:gap-2 text-[11px] md:text-sm font-semibold transition-all bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-9 md:h-11 px-3 md:px-4 rounded-lg md:rounded-xl flex items-center justify-center gap-1.5 md:gap-2 text-[11px] md:text-sm font-semibold transition-all bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 disabled:opacity-50"
             >
               {isCopyingAddress ? (
                 <Spinner className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-700" />
@@ -266,7 +272,16 @@ export function DeliveryAddressCard({
             )}
           </div>
         </div>
-
+            {/* Time Slot Selector */}
+        <div className="pt-2 border-t border-gray-200">
+          <TimeSlotSelector
+            category={category}
+            timeSlots={timeSlots}
+            selectedSlot={address?.selectedTimeSlot}
+            onSelectSlot={onTimeSlotChange}
+            isDisabled={false}
+          />
+        </div>
         {/* Info Box */}
         <div className="p-2.5 md:p-4 rounded-lg md:rounded-xl bg-gray-50 border border-gray-200">
           <p className="text-[10px] md:text-sm text-gray-700 leading-relaxed">

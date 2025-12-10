@@ -18,6 +18,7 @@ import {
   Menu,
   Plan,
   CheckoutItemView,
+  TimeSlot,
 } from "@/lib/types"
 import { createOrder, updateProfileDetails, getProfileDetails } from "@/lib/api"
 import { load } from "@cashfreepayments/cashfree-js"
@@ -80,6 +81,26 @@ export default function CheckoutPage() {
     }
   }, [isAuthenticated, loading, user?.id])
   
+  const TIME_SLOTS: Record<MealCategory, TimeSlot[]> = {
+    Breakfast: [
+      { label: "7:00 AM - 7:45 AM", value: "7:00 AM - 7:45 AM" },
+      { label: "7:55 AM - 8:40 AM", value: "7:55 AM - 8:40 AM" },
+      { label: "8:50 AM - 9:35 AM", value: "8:50 AM - 9:35 AM" },
+      { label: "9:45 AM - 10:30 AM", value: "9:45 AM - 10:30 AM" },
+    ],
+    Lunch: [
+      { label: "12:00 PM - 12:45 PM", value: "12:00 PM - 12:45 PM" },
+      { label: "12:55 PM - 1:40 PM", value: "12:55 PM - 1:40 PM" },
+      { label: "1:50 PM - 2:35 PM", value: "1:50 PM - 2:35 PM" },
+      { label: "2:45 PM - 3:30 PM", value: "2:45 PM - 3:30 PM" },
+    ],
+    Dinner: [
+      { label: "7:00 PM - 7:45 PM", value: "7:00 PM - 7:45 PM" },
+      { label: "7:55 PM - 8:40 PM", value: "7:55 PM - 8:40 PM" },
+      { label: "8:50 PM - 9:35 PM", value: "8:50 PM - 9:35 PM" },
+      { label: "9:45 PM - 10:30 PM", value: "9:45 PM - 10:30 PM" },
+    ],
+  }
   const initializeSDK = async () => {
     const cashfree = await load({
       mode: `${process.env.NEXT_PUBLIC_CASHFREE_ENVIRONMENT}`,
@@ -127,6 +148,13 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       })
       .filter((item): item is CheckoutItem => item !== null)
   }, [userCartItems])
+  
+  const relevantMealCategories = useMemo(() => {
+    const categories = userCartItems.flatMap((item) => 
+      item.selectedMealTimes || []
+    );
+    return Array.from(new Set(categories)) as MealCategory[];
+  }, [userCartItems]);
   
   const displayCheckoutItemsView: CheckoutItemView[] = useMemo(() => {
     return userCartItems
@@ -250,6 +278,15 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
       } as DeliveryAddress,
     }))
   }
+  const handleTimeSlotChange = (category: MealCategory, timeSlot: string) => {
+    setDeliveryAddresses((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        selectedTimeSlot: prev[category]?.selectedTimeSlot === timeSlot ? undefined : timeSlot,
+      } as DeliveryAddress,
+    }))
+  }
 
   const handleGeolocation = (category: MealCategory) => {
     if (navigator.geolocation) {
@@ -310,6 +347,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
             zip: location.pincode || "",
             lat: location.lat,
             lon: location.lon,
+            selectedTimeSlot: location.selectedTimeSlot || "",
           }
         }
 
@@ -390,6 +428,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           pincode: deliveryAddresses.Breakfast.zip,
           lat: deliveryAddresses.Breakfast.lat,
           lon: deliveryAddresses.Breakfast.lon,
+          selectedTimeSlot: deliveryAddresses.Breakfast.selectedTimeSlot,
         }
       }
       if (deliveryAddresses.Lunch) {
@@ -399,6 +438,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           pincode: deliveryAddresses.Lunch.zip,
           lat: deliveryAddresses.Lunch.lat,
           lon: deliveryAddresses.Lunch.lon,
+          selectedTimeSlot: deliveryAddresses.Lunch.selectedTimeSlot,
         }
       }
       if (deliveryAddresses.Dinner) {
@@ -408,6 +448,7 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
           pincode: deliveryAddresses.Dinner.zip,
           lat: deliveryAddresses.Dinner.lat,
           lon: deliveryAddresses.Dinner.lon,
+          selectedTimeSlot: deliveryAddresses.Dinner.selectedTimeSlot,
         }
       }
 
@@ -473,9 +514,13 @@ const displayCheckoutItems: CheckoutItem[] = useMemo(() => {
 const handleCopyAddress = (fromCategory: MealCategory, toCategory: MealCategory) => {
   const sourceAddress = deliveryAddresses[fromCategory]
   if (sourceAddress) {
+    const { selectedTimeSlot, ...addressWithoutTimeSlot } = sourceAddress
     setDeliveryAddresses((prev) => ({
       ...prev,
-      [toCategory]: { ...sourceAddress },
+      [toCategory]: {
+        ...prev[toCategory], // Keep existing time slot
+        ...addressWithoutTimeSlot, // Copy other fields
+      },
     }))
     toast.success(`Address copied from ${fromCategory} to ${toCategory}`)
   }
@@ -493,7 +538,11 @@ const handleUseDefaultForAll = (checked: boolean, category: MealCategory) => {
       
       allCategories.forEach((cat) => {
         if (cat !== category) {
-          newAddresses[cat] = { ...sourceAddress }
+          const { selectedTimeSlot, ...addressWithoutTimeSlot } = sourceAddress
+          newAddresses[cat] = {
+            ...newAddresses[cat], // Keep existing time slot if any
+            ...addressWithoutTimeSlot, // Copy all other fields
+          }        
         }
       })
       
@@ -510,7 +559,7 @@ const handleAddressChangeWithSync = (
 ) => {
   handleAddressChange(category, field, value)
   
-  if (useDefaultForAll && category === primaryAddress) {
+  if (useDefaultForAll && category === primaryAddress  && field !== 'selectedTimeSlot') {
     const allCategories: MealCategory[] = ["Breakfast", "Lunch", "Dinner"]
     allCategories.forEach((cat) => {
       if (cat !== category) {
@@ -582,7 +631,14 @@ const handleAddressChangeWithSync = (
             </div>
 
             {/* Address Cards */}
-            {["Breakfast", "Lunch", "Dinner"].map((category, index) => (
+            {relevantMealCategories
+              .sort((a, b) => {
+                // Primary address comes first
+                if (useDefaultForAll && a === primaryAddress) return -1;
+                if (useDefaultForAll && b === primaryAddress) return 1;
+                // Otherwise maintain original order
+                return relevantMealCategories.indexOf(a) - relevantMealCategories.indexOf(b);
+              }).map((category) => (
               <DeliveryAddressCard
                 key={category as MealCategory}
                 category={category as MealCategory}
@@ -592,8 +648,10 @@ const handleAddressChangeWithSync = (
                 onCopyAddress={handleCopyAddress}
                 isPrimary={useDefaultForAll && category === primaryAddress}
                 isDisabled={useDefaultForAll && category !== primaryAddress}
-                allCategories={["Breakfast", "Lunch", "Dinner"]}
+                allCategories={relevantMealCategories}
                 showCopyOptions={!useDefaultForAll}
+                timeSlots={TIME_SLOTS[category as MealCategory]}
+                onTimeSlotChange={handleTimeSlotChange}
               />
             ))}
 
