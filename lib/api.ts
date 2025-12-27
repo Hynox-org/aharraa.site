@@ -53,12 +53,17 @@ export async function apiRequest<T>(
     if (!res.ok) {
       console.error("❌ API Error:", res?.status, data);
       if (res.status === 401) {
-        // Redirect to auth page on 401 Unauthorized
-        if (typeof window !== "undefined") {
-          // Ensure this runs only in the browser
-          window.location.href = "/auth";
+        // Redirect to auth page on 401 Unauthorized, but ONLY if not already on an auth page
+        const isAuthPage = typeof window !== "undefined" && window.location.pathname.startsWith("/auth");
+
+        if (!isAuthPage) {
+          if (typeof window !== "undefined") {
+            // Ensure this runs only in the browser
+            window.location.href = "/auth";
+          }
+          throw new Error("Unauthorized: Redirecting to login.");
         }
-        throw new Error("Unauthorized: Redirecting to login.");
+        // If on auth page, fall through to standard error handling to show specific message
       }
       const cleanMessage =
         data?.message ||
